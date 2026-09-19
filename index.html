@@ -61,8 +61,14 @@
     .tab-item {
       flex: 1; text-align: center; color: var(--muted); font-size: 11px; cursor: pointer;
       display: flex; flex-direction: column; align-items: center; gap: 2px;
+      opacity: 0.5; /* Mặc định nhạt màu cho tab không chọn */
+      transition: opacity 0.2s ease, color 0.2s ease;
     }
-    .tab-item.active { color: var(--primary); font-weight: 600; }
+    .tab-item.active { 
+      color: var(--primary); 
+      font-weight: 600; 
+      opacity: 1; /* Hiển thị rõ nét khi đang chọn */
+    }
     .tab-item .icon { font-size: 20px; }
 
     .container {
@@ -661,17 +667,22 @@
         else catTotals["Khác"] += e.amount;
       });
 
-      document.getElementById(breakdownElId).innerHTML = CATEGORIES.map((cat, idx) => {
-        const amt = catTotals[cat];
-        if (amt === 0) return '';
-        const pct = total > 0 ? ((amt / total) * 100).toFixed(1) : 0;
-        return `
-          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-            <span><span style="color:${CAT_COLORS[idx]}; font-weight:bold;">●</span> ${cat} (${pct}%)</span>
-            <b>${formatNum(amt)} VND</b>
-          </div>
-        `;
-      }).join('');
+      // Tạo mảng danh mục chứa dữ liệu và sắp xếp % từ cao xuống thấp
+      const breakdownList = CATEGORIES.map((cat, idx) => ({
+        cat,
+        color: CAT_COLORS[idx],
+        amt: catTotals[cat],
+        pct: total > 0 ? ((catTotals[cat] / total) * 100) : 0
+      }))
+      .filter(item => item.amt > 0)
+      .sort((a, b) => b.pct - a.pct); // Sắp xếp % giảm dần
+
+      document.getElementById(breakdownElId).innerHTML = breakdownList.map(item => `
+        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+          <span><span style="color:${item.color}; font-weight:bold;">●</span> ${item.cat} (${item.pct.toFixed(1)}%)</span>
+          <b>${formatNum(item.amt)} VND</b>
+        </div>
+      `).join('');
 
       drawPieChart(chartCanvasId, Object.values(catTotals), total);
     }
