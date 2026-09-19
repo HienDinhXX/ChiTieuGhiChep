@@ -1,764 +1,82 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Quản lý Chi tiêu</title>
-
-  <style>
-    :root {
-      --bg: #f2f2f7;
-      --card: #ffffff;
-      --text: #1c1c1e;
-      --muted: #8e8e93;
-      --primary: #007aff;
-      --danger: #ff3b30;
-      --success: #34c759;
-      --shadow: 0 4px 16px rgba(0,0,0,0.06);
-      --radius: 14px;
-      --pad: 16px;
-      --gap: 12px;
-      --container-max: 600px;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; }
-    input, button, select, textarea, canvas { max-width: 100%; display: block; }
-    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-    * { -webkit-tap-highlight-color: transparent; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding-bottom: 80px;
-    }
-
-    @supports(padding: env(safe-area-inset-top)){
-      body {
-        padding-left: max(0px, env(safe-area-inset-left));
-        padding-right: max(0px, env(safe-area-inset-right));
-      }
-    }
-
-    .container {
-      max-width: var(--container-max);
-      margin: 16px auto;
-      padding: 0 16px;
-    }
-
-    h1 { font-size: 22px; text-align: center; margin: 12px 0 20px; }
-    h2 { font-size: 16px; margin: 0 0 12px; }
-
-    .card {
-      background: var(--card);
-      padding: var(--pad);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: var(--gap);
-      overflow: hidden;
-    }
-
-    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
-
-    input, select, button {
-      width: 100%;
-      min-height: 44px;
-      font-size: 15px;
-      border-radius: 10px;
-    }
-
-    input, select {
-      padding: 10px 12px;
-      margin-bottom: 12px;
-      border: 1px solid #e3e3e8;
-      background: #fafafa;
-      outline: none;
-    }
-
-    input:focus, select:focus {
-      border-color: var(--primary);
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
-    }
-
-    button {
-      padding: 10px 12px;
-      border: none;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform .05s ease, filter .15s ease;
-    }
-    button:active { transform: translateY(1px); }
-
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-success { background: var(--success); color: #fff; }
-
-    /* Floating Action Button (+) */
-    .fab {
-      position: fixed;
-      right: 20px;
-      bottom: 80px;
-      width: 56px;
-      height: 56px;
-      border-radius: 28px;
-      background: var(--primary);
-      color: #fff;
-      font-size: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 16px rgba(0,122,255,0.35);
-      cursor: pointer;
-      z-index: 90;
-      user-select: none;
-    }
-
-    /* Modal dạng Pop-up */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .modal-overlay.active { display: flex; }
-
-    .modal-card {
-      background: var(--card);
-      width: 100%;
-      max-width: var(--container-max);
-      padding: 20px;
-      border-radius: 20px 20px 0 0;
-      box-shadow: var(--shadow);
-      animation: slideUp 0.2s ease-out;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    /* Danh sách khoản chi */
-    .expense-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #efeff4;
-      position: relative;
-    }
-    .expense-item:last-child { border-bottom: none; }
-    .expense-info .title { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
-    
-    /* Ghi chú chữ nghiêng nhỏ, không in đậm */
-    .expense-info .note {
-      font-size: 13px;
-      font-style: italic;
-      font-weight: normal;
-      color: #555;
-      margin-bottom: 2px;
-    }
-
-    .expense-info .sub { font-size: 11px; color: var(--muted); }
-    .expense-amount { font-weight: 700; color: var(--danger); font-size: 15px; text-align: right; }
-
-    /* Nút 3 chấm & Menu tùy chọn */
-    .more-btn {
-      background: none; border: none; color: var(--muted);
-      width: 32px; height: 32px; min-height: unset;
-      font-size: 18px; cursor: pointer; padding: 0;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 50%;
-    }
-    .more-btn:hover { background: #e5e5ea; }
-
-    .dropdown-menu {
-      position: absolute;
-      right: 0; top: 40px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      display: none;
-      flex-direction: column;
-      z-index: 100;
-      overflow: hidden;
-      min-width: 110px;
-    }
-    .dropdown-menu.active { display: flex; }
-    .dropdown-item {
-      padding: 10px 14px;
-      font-size: 13px;
-      color: var(--text);
-      cursor: pointer;
-      background: none; border: none; text-align: left;
-      border-bottom: 1px solid #f2f2f7;
-      min-height: unset;
-      font-weight: normal;
-    }
-    .dropdown-item:last-child { border-bottom: none; }
-    .dropdown-item.danger { color: var(--danger); }
-    .dropdown-item:hover { background: #f2f2f7; }
-
-    /* Khung chứa biểu đồ có hỗ trợ cuộn ngang cho ngày */
-    .chart-scroll-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    /* Tab Bar */
-    .tab-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      height: 60px;
-      background: #ffffffd0;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid #e3e3e8;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 99;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    .tab-item {
-      flex: 1; text-align: center; color: var(--muted); font-size: 11px; cursor: pointer;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-    }
-    .tab-item.active { color: var(--primary); font-weight: 600; }
-    .tab-item .icon { font-size: 20px; }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    
-    .summary-num {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--danger);
-      margin: 4px 0 12px;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <!-- Cấu hình viewport ngăn chặn tự động zoom trên iPhone -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ứng Dụng Quản Lý Chi Tiêu</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Thư viện vẽ biểu đồ Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <div class="app-container">
+    
+    <!-- 1. Menu Ghi Chép & Báo Cáo được chuyển lên đầu -->
+    <header class="top-nav">
+      <button class="nav-btn active" onclick="switchTab('tab1')">Ghi chép</button>
+      <button class="nav-btn" onclick="switchTab('tab2')">Báo cáo</button>
+    </header>
 
-  <div class="container">
-    <h1>💸 Quản Lý Chi Tiêu</h1>
+    <!-- MÀN HÌNH TAB 1: GHI CHÉP -->
+    <main id="tab1" class="tab-content active">
+      <section class="form-section">
+        <h2>Thêm Ghi Chép Mới</h2>
+        <form id="record-form">
+          <div class="form-group">
+            <label for="amount">Số tiền:</label>
+            <input type="number" id="amount" placeholder="Nhập số tiền..." required>
+          </div>
+          
+          <div class="form-group">
+            <label for="note">Ghi chú / Nội dung:</label>
+            <input type="text" id="note" placeholder="Nhập ghi chú..." required>
+          </div>
 
-    <!-- TAB 1: GHI CHÉP -->
-    <div id="tab-record" class="tab-content active">
-      <div class="card">
-        <h2>Danh sách chi tiêu gần đây</h2>
-        <div id="recentExpenseList"></div>
-      </div>
+          <div class="form-group">
+            <label for="category">Danh mục:</label>
+            <select id="category">
+              <option value="Ăn uống">Ăn uống</option>
+              <option value="Mua sắm">Mua sắm</option>
+              <option value="Di chuyển">Di chuyển</option>
+              <option value="Khác">Khác</option>
+            </select>
+          </div>
 
-      <!-- Nút + Nổi -->
-      <div class="fab" onclick="openModal()">+</div>
-    </div>
+          <button type="submit" class="btn-submit">Lưu ghi chép</button>
+        </form>
+      </section>
 
-    <!-- TAB 2: BÁO CÁO (LIỆT KÊ TẤT CẢ 3 PHẦN KHI KÉO XUỐNG) -->
-    <div id="tab-report" class="tab-content">
-      
-      <!-- PHẦN 1: TUẦN NÀY -->
-      <div class="card">
-        <h2>📊 1. Tuần này (Biểu đồ tròn)</h2>
-        <div class="summary-num" id="totalWeek">0 VND</div>
-        <canvas id="pieChartWeek" style="max-height:220px; width:100%;"></canvas>
-        <div id="breakdownWeek" style="margin-top:16px;"></div>
-      </div>
+      <!-- Danh sách lịch sử ghi chép (Gần nhất lên đầu) -->
+      <section class="list-section">
+        <h3>Lịch sử ghi chép</h3>
+        <ul id="record-list" class="record-list">
+          <!-- Danh sách sẽ được render tự động qua JS -->
+        </ul>
+      </section>
+    </main>
 
-      <!-- PHẦN 2: THÁNG NÀY -->
-      <div class="card">
-        <h2>📈 2. Tháng này (Biểu đồ cột từng ngày)</h2>
-        <div class="summary-num" id="totalMonth">0 VND</div>
-        <div class="chart-scroll-wrapper">
-          <canvas id="barChartMonth" style="height:220px;"></canvas>
+    <!-- MÀN HÌNH TAB 2: BÁO CÁO -->
+    <main id="tab2" class="tab-content">
+      <!-- Biểu đồ Tuần (Biểu đồ tròn) -->
+      <section class="chart-section">
+        <h3>Biểu đồ tuần</h3>
+        <div class="chart-container">
+          <canvas id="weeklyChart"></canvas>
         </div>
-      </div>
+      </section>
 
-      <!-- PHẦN 3: NĂM NAY -->
-      <div class="card">
-        <h2>📅 3. Năm nay (Biểu đồ cột 12 tháng)</h2>
-        <div class="summary-num" id="totalYear">0 VND</div>
-        <div class="chart-scroll-wrapper">
-          <canvas id="barChartYear" style="height:220px;"></canvas>
+      <!-- Biểu đồ Tháng (Đã chuyển sang biểu đồ tròn giống tuần, bỏ nhãn tên loại biểu đồ) -->
+      <section class="chart-section">
+        <h3>Biểu đồ tháng</h3>
+        <div class="chart-container">
+          <canvas id="monthlyChart"></canvas>
         </div>
-      </div>
+      </section>
+    </main>
 
-      <!-- SAO LƯU & PHỤC HỒI -->
-      <div class="card">
-        <h2>🗂️ Sao lưu & Phục hồi</h2>
-        <button class="btn-primary" onclick="exportData()" style="margin-bottom:10px;">📤 Xuất dữ liệu (.json)</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-        <button class="btn-success" onclick="document.getElementById('importFile').click()">📥 Phục hồi dữ liệu</button>
-      </div>
-
-    </div>
   </div>
 
-  <!-- MODAL THÊM / SỬA KHOẢN CHI -->
-  <div class="modal-overlay" id="expenseModal" onclick="closeModalOnOverlay(event)">
-    <div class="modal-card">
-      <h2 id="modalTitle" style="margin-bottom:16px;">Thêm khoản chi mới</h2>
-      <input type="hidden" id="editId">
-      
-      <label for="expAmount">Số tiền (VND)</label>
-      <input type="text" id="expAmount" inputmode="numeric" placeholder="0">
-
-      <label for="expCategory">Danh mục cố định</label>
-      <select id="expCategory">
-        <option value="Đổ xăng">⛽ Đổ xăng</option>
-        <option value="Điện Nước">💡 Điện Nước</option>
-        <option value="Tiền Học">📚 Tiền Học</option>
-        <option value="Ăn Uống">🍜 Ăn Uống</option>
-        <option value="Du lịch">🧳 Du lịch</option>
-        <option value="Mua Sắm">🛍️ Mua Sắm</option>
-        <option value="Sửa xe">🔧 Sửa xe</option>
-        <option value="Khác">📌 Khác</option>
-      </select>
-
-      <label for="expNote">Ghi chú thêm (chữ nghiêng nhỏ)</label>
-      <input type="text" id="expNote" placeholder="Ví dụ: Cà phê, Xăng xe máy...">
-
-      <label for="expDateTime">Ngày & Giờ (24 tiếng)</label>
-      <input type="datetime-local" id="expDateTime">
-
-      <div class="grid-2" style="margin-top:8px;">
-        <button type="button" style="background:#e5e5ea; color:#333;" onclick="closeModal()">Hủy</button>
-        <button type="button" class="btn-primary" onclick="saveExpense()">Lưu khoản chi</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB BAR PHÍA DƯỚI -->
-  <div class="tab-bar">
-    <div class="tab-item active" onclick="switchTab('record', this)">
-      <span class="icon">📝</span>
-      <span>Ghi chép</span>
-    </div>
-    <div class="tab-item" onclick="switchTab('report', this)">
-      <span class="icon">📊</span>
-      <span>Báo cáo</span>
-    </div>
-  </div>
-
-  <script>
-    /* ===== DANH MỤC CỐ ĐỊNH & MÀU SẮC ===== */
-    const CATEGORIES = ["Đổ xăng", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Khác"];
-    const CAT_COLORS = ['#ff9500', '#007aff', '#af52de', '#ff2d55', '#5856d6', '#34c759', '#ff9500', '#8e8e93'];
-
-    let expenses = [];
-
-    /* ===== UTILS ===== */
-    // Trả về thời gian hiện tại định dạng ISO cho input datetime-local (YYYY-MM-THH:mm)
-    function getNowForInput() {
-      const now = new Date();
-      const yr = now.getFullYear();
-      const mo = String(now.getMonth() + 1).padStart(2, '0');
-      const da = String(now.getDate()).padStart(2, '0');
-      const hr = String(now.getHours()).padStart(2, '0');
-      const mi = String(now.getMinutes()).padStart(2, '0');
-      return `${yr}-${mo}-${da}T${hr}:${mi}`;
-    }
-
-    // Định dạng chuỗi ngày giờ hiển thị 24h: DD/MM/YYYY HH:mm
-    function formatDisplayDateTime(dtStr) {
-      if (!dtStr) return '';
-      const d = new Date(dtStr);
-      if (isNaN(d.getTime())) return dtStr;
-      const da = String(d.getDate()).padStart(2, '0');
-      const mo = String(d.getMonth() + 1).padStart(2, '0');
-      const yr = d.getFullYear();
-      const hr = String(d.getHours()).padStart(2, '0');
-      const mi = String(d.getMinutes()).padStart(2, '0');
-      return `${da}/${mo}/${yr} ${hr}:${mi}`;
-    }
-
-    function formatNum(n) {
-      return (Number(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
-    function parseNum(str) {
-      return Number((str || "").toString().replace(/\./g, "")) || 0;
-    }
-
-    /* Định dạng nhập số tiền */
-    const expAmountInput = document.getElementById('expAmount');
-    expAmountInput.addEventListener('input', () => {
-      let v = expAmountInput.value.replace(/\D/g, "");
-      expAmountInput.value = v ? formatNum(v) : "";
-    });
-
-    /* ===== LOCAL STORAGE ===== */
-    function saveData() {
-      localStorage.setItem("expenses_data_v4", JSON.stringify(expenses));
-    }
-
-    function loadData() {
-      expenses = JSON.parse(localStorage.getItem("expenses_data_v4")) || [];
-    }
-
-    /* ===== CHUYỂN TAB ===== */
-    function switchTab(tabName, el) {
-      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-      document.querySelectorAll('.tab-item').forEach(ti => ti.classList.remove('active'));
-
-      document.getElementById('tab-' + tabName).classList.add('active');
-      el.classList.add('active');
-
-      if (tabName === 'report') renderReport();
-      else renderRecords();
-    }
-
-    /* ===== MODAL THÊM / SỬA ===== */
-    function openModal(id = null) {
-      closeAllDropdowns();
-      if (id) {
-        const item = expenses.find(e => e.id === id);
-        if (!item) return;
-        document.getElementById('modalTitle').innerText = "Sửa khoản chi";
-        document.getElementById('editId').value = item.id;
-        document.getElementById('expAmount').value = formatNum(item.amount);
-        document.getElementById('expCategory').value = item.category;
-        document.getElementById('expNote').value = item.note || "";
-        document.getElementById('expDateTime').value = item.datetime || getNowForInput();
-      } else {
-        document.getElementById('modalTitle').innerText = "Thêm khoản chi mới";
-        document.getElementById('editId').value = "";
-        document.getElementById('expAmount').value = "";
-        document.getElementById('expNote').value = "";
-        document.getElementById('expDateTime').value = getNowForInput();
-      }
-
-      document.getElementById('expenseModal').classList.add('active');
-      setTimeout(() => document.getElementById('expAmount').focus(), 100);
-    }
-
-    function closeModal() {
-      document.getElementById('expenseModal').classList.remove('active');
-    }
-
-    function closeModalOnOverlay(e) {
-      if (e.target.classList.contains('modal-overlay')) closeModal();
-    }
-
-    /* ===== CẬP NHẬT DỮ LIỆU ===== */
-    function saveExpense() {
-      const editId = document.getElementById('editId').value;
-      const amount = parseNum(document.getElementById('expAmount').value);
-      const category = document.getElementById('expCategory').value;
-      const note = document.getElementById('expNote').value.trim();
-      const datetime = document.getElementById('expDateTime').value || getNowForInput();
-
-      if (amount <= 0) {
-        alert("Vui lòng nhập số tiền hợp lệ!");
-        return;
-      }
-
-      if (editId) {
-        // Cập nhật
-        const idx = expenses.findIndex(e => e.id == editId);
-        if (idx !== -1) {
-          expenses[idx] = { ...expenses[idx], amount, category, note, datetime };
-        }
-      } else {
-        // Thêm mới
-        expenses.unshift({ id: Date.now(), amount, category, note, datetime });
-      }
-
-      saveData();
-      closeModal();
-      renderRecords();
-    }
-
-    function deleteExpense(id) {
-      closeAllDropdowns();
-      if (confirm("Xóa khoản chi này?")) {
-        expenses = expenses.filter(e => e.id !== id);
-        saveData();
-        renderRecords();
-      }
-    }
-
-    /* ===== MENU 3 CHẤM ===== */
-    function toggleDropdown(e, id) {
-      e.stopPropagation();
-      const currentMenu = document.getElementById(`dropdown-${id}`);
-      const isVisible = currentMenu.classList.contains('active');
-      closeAllDropdowns();
-      if (!isVisible) {
-        currentMenu.classList.add('active');
-      }
-    }
-
-    function closeAllDropdowns() {
-      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('active'));
-    }
-
-    document.addEventListener('click', closeAllDropdowns);
-
-    /* ===== TAB 1: RENDER GHI CHÉP ===== */
-    function renderRecords() {
-      const recentListEl = document.getElementById('recentExpenseList');
-      
-      if (!expenses.length) {
-        recentListEl.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;">Chưa có khoản chi nào. Bấm nút + để thêm mới.</p>';
-        return;
-      }
-
-      recentListEl.innerHTML = expenses.map(item => `
-        <div class="expense-item">
-          <div class="expense-info">
-            <div class="title">${item.category}</div>
-            ${item.note ? `<div class="note">${item.note}</div>` : ''}
-            <div class="sub">${formatDisplayDateTime(item.datetime)}</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <div class="expense-amount">-${formatNum(item.amount)} đ</div>
-            <button class="more-btn" onclick="toggleDropdown(event, ${item.id})">⋮</button>
-            <div class="dropdown-menu" id="dropdown-${item.id}">
-              <button class="dropdown-item" onclick="openModal(${item.id})">✏️ Sửa</button>
-              <button class="dropdown-item danger" onclick="deleteExpense(${item.id})">🗑️ Xóa</button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    /* ===== TAB 2: RENDER BÁO CÁO (TẤT CẢ 3 PHẦN) ===== */
-    function renderReport() {
-      const now = new Date();
-
-      /* --- 1. BÁO CÁO TUẦN NÀY (TRÒN) --- */
-      const startOfWeek = new Date(now);
-      const day = now.getDay() || 7;
-      startOfWeek.setDate(now.getDate() - day + 1);
-      startOfWeek.setHours(0,0,0,0);
-
-      const weekExpenses = expenses.filter(e => {
-        const d = new Date(e.datetime);
-        return d >= startOfWeek && d <= now;
-      });
-
-      const totalWeek = weekExpenses.reduce((sum, e) => sum + e.amount, 0);
-      document.getElementById('totalWeek').innerText = `${formatNum(totalWeek)} VND`;
-
-      const catTotalsWeek = {};
-      CATEGORIES.forEach(c => catTotalsWeek[c] = 0);
-      weekExpenses.forEach(e => {
-        if (catTotalsWeek[e.category] !== undefined) catTotalsWeek[e.category] += e.amount;
-        else catTotalsWeek["Khác"] += e.amount;
-      });
-
-      document.getElementById('breakdownWeek').innerHTML = CATEGORIES.map((cat, idx) => {
-        const amt = catTotalsWeek[cat];
-        if (amt === 0) return '';
-        const pct = totalWeek > 0 ? ((amt / totalWeek) * 100).toFixed(1) : 0;
-        return `
-          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-            <span><span style="color:${CAT_COLORS[idx]}; font-weight:bold;">●</span> ${cat} (${pct}%)</span>
-            <b>${formatNum(amt)} VND</b>
-          </div>
-        `;
-      }).join('');
-
-      drawPieChart('pieChartWeek', Object.values(catTotalsWeek), totalWeek);
-
-
-      /* --- 2. BÁO CÁO THÁNG NÀY (CỘT NGÀY) --- */
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth();
-      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-      const dailyTotals = {};
-      for (let i = 1; i <= daysInMonth; i++) dailyTotals[i] = 0;
-
-      expenses.forEach(e => {
-        const d = new Date(e.datetime);
-        if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
-          const dayNum = d.getDate();
-          dailyTotals[dayNum] = (dailyTotals[dayNum] || 0) + e.amount;
-        }
-      });
-
-      const totalMonth = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
-      document.getElementById('totalMonth').innerText = `${formatNum(totalMonth)} VND`;
-
-      const monthLabels = Array.from({length: daysInMonth}, (_, i) => `N${i+1}`);
-      const monthValues = Object.values(dailyTotals);
-
-      drawBarChart('barChartMonth', monthLabels, monthValues, 32);
-
-
-      /* --- 3. BÁO CÁO NĂM NAY (CỘT 12 THÁNG) --- */
-      const monthlyTotals = Array(12).fill(0);
-
-      expenses.forEach(e => {
-        const d = new Date(e.datetime);
-        if (d.getFullYear() === currentYear) {
-          monthlyTotals[d.getMonth()] += e.amount;
-        }
-      });
-
-      const totalYear = monthlyTotals.reduce((a, b) => a + b, 0);
-      document.getElementById('totalYear').innerText = `${formatNum(totalYear)} VND`;
-
-      const yearLabels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
-      drawBarChart('barChartYear', yearLabels, monthlyTotals, 42);
-    }
-
-    /* ===== VẼ BIỂU ĐỒ TRÒN ===== */
-    function drawPieChart(canvasId, dataArr, total) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      const dpr = window.devicePixelRatio || 1;
-
-      const w = canvas.parentElement.clientWidth || 300;
-      const h = 220;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.height = h + "px";
-
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
-
-      const cx = w / 2;
-      const cy = h / 2;
-      const radius = Math.min(w, h) / 2 - 16;
-
-      if (total <= 0) {
-        ctx.fillStyle = '#8e8e93';
-        ctx.font = '14px -apple-system, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Chưa có chi tiêu trong tuần này', cx, cy);
-        return;
-      }
-
-      let startAngle = -Math.PI / 2;
-      dataArr.forEach((val, i) => {
-        if (val <= 0) return;
-        const sliceAngle = (val / total) * 2 * Math.PI;
-        const endAngle = startAngle + sliceAngle;
-
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = CAT_COLORS[i];
-        ctx.fill();
-
-        startAngle = endAngle;
-      });
-
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius * 0.55, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
-      ctx.fill();
-    }
-
-    /* ===== VẼ BIỂU ĐỒ CỘT ===== */
-    function drawBarChart(canvasId, labels, values, columnStepWidth = 40) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      const dpr = window.devicePixelRatio || 1;
-
-      const parentWidth = canvas.parentElement.clientWidth || 300;
-      const minChartWidth = labels.length * columnStepWidth;
-      const w = Math.max(parentWidth, minChartWidth);
-      const h = 220;
-
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = w + "px";
-      canvas.style.height = h + "px";
-
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
-
-      const maxVal = Math.max(...values, 1);
-      const paddingLeft = 15;
-      const paddingRight = 15;
-      const paddingBottom = 30;
-      const chartWidth = w - paddingLeft - paddingRight;
-      const chartHeight = h - paddingBottom - 25;
-
-      const barWidth = Math.min(24, (chartWidth / labels.length) * 0.6);
-
-      labels.forEach((lbl, i) => {
-        const val = values[i];
-        const barH = (val / maxVal) * chartHeight;
-        const slotWidth = chartWidth / labels.length;
-        const x = paddingLeft + (i * slotWidth) + (slotWidth - barWidth) / 2;
-        const y = h - paddingBottom - barH;
-
-        ctx.fillStyle = val > 0 ? '#007aff' : '#e5e5ea';
-        const renderH = val > 0 ? Math.max(barH, 4) : 2;
-        const renderY = val > 0 ? y : h - paddingBottom - 2;
-
-        ctx.beginPath();
-        if (typeof ctx.roundRect === 'function') {
-          ctx.roundRect(x, renderY, barWidth, renderH, [4, 4, 0, 0]);
-        } else {
-          ctx.rect(x, renderY, barWidth, renderH);
-        }
-        ctx.fill();
-
-        ctx.fillStyle = '#1c1c1e';
-        ctx.font = '11px -apple-system, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(lbl, x + barWidth / 2, h - 8);
-
-        if (val > 0) {
-          ctx.fillStyle = '#8e8e93';
-          ctx.font = '9px -apple-system, sans-serif';
-          let displayVal = val >= 1e6 ? (val/1e6).toFixed(1) + 'M' : (val/1e3).toFixed(0) + 'k';
-          ctx.fillText(displayVal, x + barWidth / 2, renderY - 5);
-        }
-      });
-    }
-
-    /* ===== BACKUP & RESTORE ===== */
-    function exportData() {
-      const blob = new Blob([JSON.stringify(expenses, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `ChiTieu_Backup.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function importData(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const data = JSON.parse(evt.target.result);
-          if (Array.isArray(data) && confirm("Dữ liệu hiện tại sẽ bị ghi đè. Bạn chắc chắn chứ?")) {
-            expenses = data;
-            saveData();
-            renderRecords();
-            renderReport();
-            alert("Phục hồi dữ liệu thành công!");
-          }
-        } catch (err) {
-          alert("File không hợp lệ!");
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    /* ===== KHỞI TẠO ===== */
-    window.onload = function() {
-      loadData();
-      renderRecords();
-    };
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
