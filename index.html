@@ -6,7 +6,6 @@
   <title>Quản lý Chi tiêu</title>
   <link rel="apple-touch-icon" href="IMG_1651.png">
 
-
   <style>
     :root {
       --bg: #f2f2f7;
@@ -33,8 +32,8 @@
       background: var(--bg);
       color: var(--text);
       margin: 0;
-      padding-top: 60px; /* Độ cao của Tab bar */
-      padding-bottom: 80px;
+      padding-top: 60px; /* Độ cao của Top Tab bar */
+      padding-bottom: 80px; /* Độ cao cho Bottom Tab bar */
     }
 
     @supports(padding: env(safe-area-inset-top)){
@@ -44,7 +43,7 @@
       }
     }
 
-    /* Tab Bar Cố Định Ở Đầu */
+    /* Tab Bar Cố Định Phía Trên */
     .tab-bar {
       position: fixed; top: 0; left: 0; right: 0;
       height: 60px;
@@ -57,6 +56,21 @@
       align-items: center;
       z-index: 99;
       padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    /* Tab Bar Cố Định Phía Dưới */
+    .tab-bar-bottom {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background: #ffffffd0;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid #e3e3e8;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 99;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     .tab-item {
@@ -72,7 +86,7 @@
       padding: 0 16px;
     }
 
-    /* Đóng băng tiêu đề "Chi tiêu gần đây" khi cuộn */
+    /* Đóng băng tiêu đề "Chi tiêu" khi cuộn */
     .sticky-header {
       position: sticky;
       top: 60px;
@@ -89,6 +103,15 @@
       padding: 12px 16px;
       border-radius: var(--radius);
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sticky-header .header-date {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: normal;
     }
 
     h2 { font-size: 16px; margin: 0 0 12px; }
@@ -104,7 +127,6 @@
 
     label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
 
-    /* Font size 16px chống iOS auto-zoom khi focus */
     input, select, button {
       width: 100%;
       min-height: 44px;
@@ -143,7 +165,7 @@
     .fab {
       position: fixed;
       right: 20px;
-      bottom: 30px;
+      bottom: 80px; /* Đẩy lên trên Bottom Tab Bar */
       width: 56px;
       height: 56px;
       border-radius: 28px;
@@ -205,7 +227,6 @@
       margin-bottom: 2px;
     }
 
-    /* Màu gian hiển thị hôm nay vs trước đó */
     .expense-info .sub-today { font-size: 12px; color: var(--success); font-weight: 600; }
     .expense-info .sub-old { font-size: 12px; color: var(--text); }
 
@@ -234,13 +255,15 @@
       min-width: 110px;
     }
     .dropdown-menu.active { display: flex; }
+    
+    /* Phân tách giữa 2 item trong menu bằng đường kẻ rõ ràng */
     .dropdown-item {
       padding: 10px 14px;
       font-size: 13px;
       color: var(--text);
       cursor: pointer;
       background: none; border: none; text-align: left;
-      border-bottom: 1px solid #f2f2f7;
+      border-bottom: 1px solid #e3e3e8; /* Đường kẻ phân tách */
       min-height: unset;
       font-weight: normal;
     }
@@ -271,11 +294,11 @@
 
   <!-- TAB BAR PHÍA TRÊN -->
   <div class="tab-bar">
-    <div class="tab-item active" onclick="switchTab('record', this)">
+    <div class="tab-item active" data-tab="record" onclick="switchTab('record')">
       <span class="icon">📝</span>
       <span>Ghi chép</span>
     </div>
-    <div class="tab-item" onclick="switchTab('report', this)">
+    <div class="tab-item" data-tab="report" onclick="switchTab('report')">
       <span class="icon">📊</span>
       <span>Báo cáo</span>
     </div>
@@ -285,9 +308,12 @@
 
     <!-- TAB 1: GHI CHÉP -->
     <div id="tab-record" class="tab-content active">
-      <!-- Tiêu đề đóng băng khi cuộn -->
+      <!-- Tiêu đề đóng băng + hiển thị ngày khoản chi đầu tiên -->
       <div class="sticky-header">
-        <h2>📋 Chi tiêu</h2>
+        <h2>
+          <span>📋 Chi tiêu</span>
+          <span class="header-date" id="topHeaderDate">--/--/----</span>
+        </h2>
       </div>
 
       <div class="card" style="margin-top: 4px;">
@@ -334,6 +360,15 @@
         </div>
       </div>
 
+      <!-- PHẦN 5: BÁO CÁO 5 NĂM GẦN ĐÂY -->
+      <div class="card">
+        <h2>🗓️ Báo cáo 5 năm gần đây</h2>
+        <div class="summary-num" id="total5Years">0 VND</div>
+        <div class="chart-scroll-wrapper">
+          <canvas id="barChart5Years" style="height:220px;"></canvas>
+        </div>
+      </div>
+
       <!-- SAO LƯU & PHỤC HỒI -->
       <div class="card">
         <h2>🗂️ Sao lưu & Phục hồi</h2>
@@ -342,6 +377,18 @@
         <button class="btn-success" onclick="document.getElementById('importFile').click()">📥 Phục hồi dữ liệu</button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- TAB BAR PHÍA DƯỚI (MỚI THÊM) -->
+  <div class="tab-bar-bottom">
+    <div class="tab-item active" data-tab="record" onclick="switchTab('record')">
+      <span class="icon">📝</span>
+      <span>Ghi chép</span>
+    </div>
+    <div class="tab-item" data-tab="report" onclick="switchTab('report')">
+      <span class="icon">📊</span>
+      <span>Báo cáo</span>
     </div>
   </div>
 
@@ -397,11 +444,10 @@
       return `${yr}-${mo}-${da}T${hr}:${mi}`;
     }
 
-    /* Định dạng hiển thị thời gian linh hoạt */
     function formatDisplayDateTime(dtStr) {
-      if (!dtStr) return { text: '', isToday: false };
+      if (!dtStr) return { text: '', isToday: false, rawDate: '' };
       const d = new Date(dtStr);
-      if (isNaN(d.getTime())) return { text: dtStr, isToday: false };
+      if (isNaN(d.getTime())) return { text: dtStr, isToday: false, rawDate: '' };
 
       const now = new Date();
       const isToday = d.getFullYear() === now.getFullYear() &&
@@ -410,14 +456,14 @@
 
       const hr = String(d.getHours()).padStart(2, '0');
       const mi = String(d.getMinutes()).padStart(2, '0');
+      const da = String(d.getDate()).padStart(2, '0');
+      const mo = String(d.getMonth() + 1).padStart(2, '0');
+      const yr = d.getFullYear();
 
       if (isToday) {
-        return { text: `Hôm nay ${hr}:${mi}`, isToday: true };
+        return { text: `Hôm nay ${hr}:${mi}`, isToday: true, rawDate: `${da}/${mo}/${yr}` };
       } else {
-        const da = String(d.getDate()).padStart(2, '0');
-        const mo = String(d.getMonth() + 1).padStart(2, '0');
-        const yr = d.getFullYear();
-        return { text: `${da}/${mo}/${yr} ${hr}:${mi}`, isToday: false };
+        return { text: `${da}/${mo}/${yr} ${hr}:${mi}`, isToday: false, rawDate: `${da}/${mo}/${yr}` };
       }
     }
 
@@ -429,7 +475,6 @@
       return Number((str || "").toString().replace(/\./g, "")) || 0;
     }
 
-    /* Định dạng nhập số tiền */
     const expAmountInput = document.getElementById('expAmount');
     expAmountInput.addEventListener('input', () => {
       let v = expAmountInput.value.replace(/\D/g, "");
@@ -445,13 +490,18 @@
       expenses = JSON.parse(localStorage.getItem("expenses_data_v4")) || [];
     }
 
-    /* ===== CHUYỂN TAB ===== */
-    function switchTab(tabName, el) {
+    /* ===== CHUYỂN TAB DÙNG CHUNG CHO CẢ TRÊN VÀ DƯỚI ===== */
+    function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-      document.querySelectorAll('.tab-item').forEach(ti => ti.classList.remove('active'));
+      document.querySelectorAll('.tab-item').forEach(ti => {
+        if (ti.getAttribute('data-tab') === tabName) {
+          ti.classList.add('active');
+        } else {
+          ti.classList.remove('active');
+        }
+      });
 
       document.getElementById('tab-' + tabName).classList.add('active');
-      el.classList.add('active');
 
       if (tabName === 'report') renderReport();
       else renderRecords();
@@ -545,13 +595,14 @@
     /* ===== TAB 1: RENDER GHI CHÉP ===== */
     function renderRecords() {
       const recentListEl = document.getElementById('recentExpenseList');
+      const headerDateEl = document.getElementById('topHeaderDate');
       
       if (!expenses.length) {
         recentListEl.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px 0;">Chưa có khoản chi nào. Bấm nút + để thêm mới.</p>';
+        headerDateEl.innerText = '--/--/----';
         return;
       }
 
-      // Sắp xếp thời gian giảm dần (Gần nhất lên trên)
       const sortedExpenses = [...expenses].sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
 
       recentListEl.innerHTML = sortedExpenses.map(item => {
@@ -559,13 +610,13 @@
         const subClass = dtInfo.isToday ? 'sub-today' : 'sub-old';
 
         return `
-          <div class="expense-item">
+          <div class="expense-item" data-date="${dtInfo.rawDate}">
             <div class="expense-info">
               <div class="title">${item.category}</div>
               ${item.note ? `<div class="note">${item.note}</div>` : ''}
               <div class="${subClass}">${dtInfo.text}</div>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
+            <div style="display:flex; align- items:center; gap:8px;">
               <div class="expense-amount">-${formatNum(item.amount)} đ</div>
               <button class="more-btn" onclick="toggleDropdown(event, ${item.id})">⋮</button>
               <div class="dropdown-menu" id="dropdown-${item.id}">
@@ -576,7 +627,33 @@
           </div>
         `;
       }).join('');
+
+      updateHeaderDateOnScroll();
     }
+
+    /* Lắng nghe cuộn để cập nhật ngày hiển thị trên sticky header */
+    function updateHeaderDateOnScroll() {
+      const items = document.querySelectorAll('.expense-item');
+      if (!items.length) return;
+
+      const headerOffset = 110; 
+      let firstVisibleDate = items[0].getAttribute('data-date');
+
+      for (let item of items) {
+        const rect = item.getBoundingClientRect();
+        if (rect.bottom > headerOffset) {
+          firstVisibleDate = item.getAttribute('data-date');
+          break;
+        }
+      }
+
+      const headerDateEl = document.getElementById('topHeaderDate');
+      if (headerDateEl && firstVisibleDate) {
+        headerDateEl.innerText = firstVisibleDate;
+      }
+    }
+
+    window.addEventListener('scroll', updateHeaderDateOnScroll);
 
     /* ===== TAB 2: RENDER BÁO CÁO ===== */
     function renderReport() {
@@ -648,9 +725,31 @@
 
       const yearLabels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
       drawBarChart('barChartYear', yearLabels, monthlyTotals, 42);
+
+      /* --- 5. BÁO CÁO 5 NĂM GẦN ĐÂY --- */
+      const last5Years = [];
+      for (let i = 4; i >= 0; i--) {
+        last5Years.push(currentYear - i);
+      }
+
+      const yearlyTotals = Array(5).fill(0);
+
+      expenses.forEach(e => {
+        const d = new Date(e.datetime);
+        const y = d.getFullYear();
+        const idx = last5Years.indexOf(y);
+        if (idx !== -1) {
+          yearlyTotals[idx] += e.amount;
+        }
+      });
+
+      const total5Years = yearlyTotals.reduce((a, b) => a + b, 0);
+      document.getElementById('total5Years').innerText = `${formatNum(total5Years)} VND`;
+
+      const 5YearLabels = last5Years.map(y => y.toString());
+      drawBarChart('barChart5Years', 5YearLabels, yearlyTotals, 60);
     }
 
-    /* Hàm phụ tính toán & hiển thị biểu đồ tròn + bảng phân tích */
     function renderPieSection(expenseList, totalElId, breakdownElId, chartCanvasId) {
       const total = expenseList.reduce((sum, e) => sum + e.amount, 0);
       document.getElementById(totalElId).innerText = `${formatNum(total)} VND`;
@@ -752,7 +851,7 @@
       const chartWidth = w - paddingLeft - paddingRight;
       const chartHeight = h - paddingBottom - 25;
 
-      const barWidth = Math.min(24, (chartWidth / labels.length) * 0.6);
+      const barWidth = Math.min(28, (chartWidth / labels.length) * 0.6);
 
       labels.forEach((lbl, i) => {
         const val = values[i];
@@ -783,6 +882,10 @@
           ctx.font = '9px -apple-system, sans-serif';
           let displayVal = val >= 1e6 ? (val/1e6).toFixed(1) + 'M' : (val/1e3).toFixed(0) + 'k';
           ctx.fillText(displayVal, x + barWidth / 2, renderY - 5);
+        } else {
+          ctx.fillStyle = '#c7c7cc';
+          ctx.font = '9px -apple-system, sans-serif';
+          ctx.fillText('0', x + barWidth / 2, renderY - 5);
         }
       });
     }
