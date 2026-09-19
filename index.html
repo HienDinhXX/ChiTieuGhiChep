@@ -1,837 +1,160 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <title>Quản lý Chi tiêu</title>
-  <link rel="apple-touch-icon" href="IMG_1651.png">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giao diện Chi tiêu</title>
   <style>
-    :root {
-      --bg: #f2f2f7;
-      --card: #ffffff;
-      --text: #1c1c1e;
-      --muted: #8e8e93;
-      --primary: #007aff;
-      --danger: #ff3b30;
-      --success: #34c759;
-      --shadow: 0 4px 16px rgba(0,0,0,0.06);
-      --radius: 14px;
-      --pad: 16px;
-      --gap: 12px;
-      --container-max: 600px;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
     }
-
-    *, *::before, *::after { box-sizing: border-box; }
-    input, button, select, textarea, canvas { max-width: 100%; display: block; }
-    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-    * { -webkit-tap-highlight-color: transparent; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding-top: 60px; /* Độ cao Tab bar */
-      padding-bottom: 80px;
+      background-color: #f5f5f5;
+      padding-top: 50px;    /* Chừa khoảng trống cho Top Tab */
+      padding-bottom: 60px; /* Chừa khoảng trống cho Bottom Tab */
     }
 
-    @supports(padding: env(safe-area-inset-top)){
-      body {
-        padding-left: max(0px, env(safe-area-inset-left));
-        padding-right: max(0px, env(safe-area-inset-right));
-      }
-    }
-
-    /* Tab Bar Đưa Lên Đầu */
+    /* --- 1. MENU TAB TREN & DUOI --- */
     .tab-bar {
-      position: fixed; top: 0; left: 0; right: 0;
-      height: 60px;
-      background: #ffffffd0;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid #e3e3e8;
+      position: fixed;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background-color: #007bff;
+      color: white;
       display: flex;
       justify-content: space-around;
       align-items: center;
-      z-index: 99;
-      padding-top: env(safe-area-inset-top, 0px);
+      z-index: 1000;
+      font-weight: bold;
     }
+    .tab-bar.top { top: 0; }
+    .tab-bar.bottom { bottom: 0; height: 60px; background-color: #0056b3; }
+    .tab-item { cursor: pointer; }
 
-    .tab-item {
-      flex: 1; text-align: center; color: var(--muted); font-size: 11px; cursor: pointer;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-    }
-    .tab-item.active { color: var(--primary); font-weight: 600; }
-    .tab-item .icon { font-size: 20px; }
-
-    .container {
-      max-width: var(--container-max);
-      margin: 0 auto;
-      padding: 0 16px;
-    }
-
-    h1 { font-size: 22px; text-align: center; margin: 16px 0; }
-    h2 { font-size: 16px; margin: 0 0 12px; }
-
-    /* Sticky Header đóng băng khi cuộn */
+    /* --- 2. THANH HEADER DONG BANG (STICKY) --- */
     .sticky-header {
       position: sticky;
-      top: 60px;
-      z-index: 80;
-      background: var(--bg);
-      padding: 12px 0 8px 0;
-      margin-bottom: 4px;
-    }
-    .sticky-header h2 {
-      margin: 0;
+      top: 50px; /* Nằm ngay dưới Top Tab Bar */
+      background-color: #ffffff;
+      padding: 12px 16px;
       font-size: 18px;
-      font-weight: 700;
+      font-weight: bold;
+      color: #333;
+      border-bottom: 2px solid #e0e0e0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      z-index: 100;
     }
 
-    .card {
-      background: var(--card);
-      padding: var(--pad);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: var(--gap);
-      overflow: hidden;
+    /* --- 3. DANH SACH CHI TIEU --- */
+    .content-container {
+      padding: 10px 16px;
     }
 
-    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
-
-    input, select, button {
-      width: 100%;
-      min-height: 44px;
-      font-size: 16px;
-      border-radius: 10px;
+    .day-group {
+      margin-bottom: 25px;
     }
 
-    input, select {
-      padding: 10px 12px;
-      margin-bottom: 12px;
-      border: 1px solid #e3e3e8;
-      background: #fafafa;
-      outline: none;
+    .day-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+      font-weight: bold;
+      padding-top: 10px;
     }
 
-    input:focus, select:focus {
-      border-color: var(--primary);
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
-    }
-
-    button {
-      padding: 10px 12px;
-      border: none;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform .05s ease, filter .15s ease;
-    }
-    button:active { transform: translateY(1px); }
-
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-success { background: var(--success); color: #fff; }
-
-    /* Floating Action Button (+) */
-    .fab {
-      position: fixed;
-      right: 20px;
-      bottom: 30px;
-      width: 56px;
-      height: 56px;
-      border-radius: 28px;
-      background: var(--primary);
-      color: #fff;
-      font-size: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 16px rgba(0,122,255,0.35);
-      cursor: pointer;
-      z-index: 90;
-      user-select: none;
-    }
-
-    /* Modal dạng Pop-up */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .modal-overlay.active { display: flex; }
-
-    .modal-card {
-      background: var(--card);
-      width: 100%;
-      max-width: var(--container-max);
-      padding: 20px;
-      border-radius: 20px 20px 0 0;
-      box-shadow: var(--shadow);
-      animation: slideUp 0.2s ease-out;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    /* Danh sách khoản chi */
-    .expense-item {
+    .item-card {
+      background: white;
+      padding: 14px;
+      margin-bottom: 8px;
+      border-radius: 8px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #efeff4;
-      position: relative;
-    }
-    .expense-item:last-child { border-bottom: none; }
-    .expense-info .title { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
-    
-    .expense-info .note {
-      font-size: 13px;
-      font-style: italic;
-      font-weight: normal;
-      color: #555;
-      margin-bottom: 2px;
-    }
-
-    .expense-info .sub { font-size: 12px; }
-    .expense-info .sub.today { color: var(--primary); font-weight: 600; }
-    .expense-info .sub.past { color: #1c1c1e; }
-
-    .expense-amount { font-weight: 700; color: var(--danger); font-size: 15px; text-align: right; }
-
-    /* Nút 3 chấm & Menu tùy chọn */
-    .more-btn {
-      background: none; border: none; color: var(--muted);
-      width: 32px; height: 32px; min-height: unset;
-      font-size: 18px; cursor: pointer; padding: 0;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 50%;
-    }
-    .more-btn:hover { background: #e5e5ea; }
-
-    .dropdown-menu {
-      position: absolute;
-      right: 0; top: 40px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      display: none;
-      flex-direction: column;
-      z-index: 100;
-      overflow: hidden;
-      min-width: 110px;
-    }
-    .dropdown-menu.active { display: flex; }
-    .dropdown-item {
-      padding: 10px 14px;
-      font-size: 13px;
-      color: var(--text);
-      cursor: pointer;
-      background: none; border: none; text-align: left;
-      border-bottom: 1px solid #f2f2f7;
-      min-height: unset;
-      font-weight: normal;
-    }
-    .dropdown-item:last-child { border-bottom: none; }
-    .dropdown-item.danger { color: var(--danger); }
-    .dropdown-item:hover { background: #f2f2f7; }
-
-    .chart-scroll-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    
-    .summary-num {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--danger);
-      margin: 4px 0 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
 
-  <!-- TAB BAR PHÍA TRÊN -->
-  <div class="tab-bar">
-    <div class="tab-item active" onclick="switchTab('record', this)">
-      <span class="icon">📝</span>
-      <span>Ghi chép</span>
-    </div>
-    <div class="tab-item" onclick="switchTab('report', this)">
-      <span class="icon">📊</span>
-      <span>Báo cáo</span>
-    </div>
+  <!-- Menu Tab Phía Trên -->
+  <div class="tab-bar top">
+    <div class="tab-item">Trang chủ</div>
+    <div class="tab-item">Thống kê</div>
+    <div class="tab-item">Cài đặt</div>
   </div>
 
-  <div class="container">
+  <!-- Thanh tiêu đề đóng băng (Thay đổi động theo cuộn) -->
+  <div class="sticky-header" id="stickyHeader">Chi tiêu</div>
 
-    <!-- TAB 1: GHI CHÉP -->
-    <div id="tab-record" class="tab-content active">
-      
-      <!-- Tiêu đề đóng băng khi cuộn -->
-      <div class="sticky-header">
-        <h2>Chi tiêu gần đây</h2>
-      </div>
+  <!-- Nội dung danh sách chi tiêu -->
+  <div class="content-container">
 
-      <div class="card">
-        <div id="recentExpenseList"></div>
-      </div>
-
-      <!-- Nút + Nổi -->
-      <div class="fab" onclick="openModal()">+</div>
+    <!-- Ngày 7/9 -->
+    <div class="day-group" data-date="7/9">
+      <div class="day-label">Ngày 7/9</div>
+      <div class="item-card"><span>Mua sắm tạp hóa</span> <strong>-150.000đ</strong></div>
+      <div class="item-card"><span>Cà phê sáng</span> <strong>-35.000đ</strong></div>
+      <div class="item-card"><span>Ăn trưa</span> <strong>-50.000đ</strong></div>
     </div>
 
-    <!-- TAB 2: BÁO CÁO -->
-    <div id="tab-report" class="tab-content">
-      
-      <h1 style="font-size: 20px; margin: 12px 0 16px;">📊 Báo Cáo Chi Tiêu</h1>
-
-      <!-- PHẦN 1: TUẦN NÀY -->
-      <div class="card">
-        <h2>📊 1. Tuần này <span id="labelWeekRange" style="font-size:13px; font-weight:normal; color:var(--muted);"></span></h2>
-        <div class="summary-num" id="totalWeek">0 VND</div>
-        <canvas id="pieChartWeek" style="max-height:220px; width:100%;"></canvas>
-        <div id="breakdownWeek" style="margin-top:16px;"></div>
-      </div>
-
-      <!-- PHẦN 2: THÁNG NÀY -->
-      <div class="card">
-        <h2>📈 2. Tháng này <span id="labelMonthRange" style="font-size:13px; font-weight:normal; color:var(--muted);"></span></h2>
-        <div class="summary-num" id="totalMonth">0 VND</div>
-        <canvas id="pieChartMonth" style="max-height:220px; width:100%;"></canvas>
-        <div id="breakdownMonth" style="margin-top:16px;"></div>
-      </div>
-
-      <!-- PHẦN 3: THÁNG TRƯỚC -->
-      <div class="card">
-        <h2>📉 3. Tháng trước <span id="labelLastMonthRange" style="font-size:13px; font-weight:normal; color:var(--muted);"></span></h2>
-        <div class="summary-num" id="totalLastMonth">0 VND</div>
-        <canvas id="pieChartLastMonth" style="max-height:220px; width:100%;"></canvas>
-        <div id="breakdownLastMonth" style="margin-top:16px;"></div>
-      </div>
-
-      <!-- PHẦN 4: NĂM NAY -->
-      <div class="card">
-        <h2>📅 4. Năm nay</h2>
-        <div class="summary-num" id="totalYear">0 VND</div>
-        <div class="chart-scroll-wrapper">
-          <canvas id="barChartYear" style="height:220px;"></canvas>
-        </div>
-      </div>
-
-      <!-- SAO LƯU & PHỤC HỒI -->
-      <div class="card">
-        <h2>🗂️ Sao lưu & Phục hồi</h2>
-        <button class="btn-primary" onclick="exportData()" style="margin-bottom:10px;">📤 Xuất dữ liệu (.json)</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-        <button class="btn-success" onclick="document.getElementById('importFile').click()">📥 Phục hồi dữ liệu</button>
-      </div>
-
+    <!-- Ngày 6/9 -->
+    <div class="day-group" data-date="6/9">
+      <div class="day-label">Ngày 6/9</div>
+      <div class="item-card"><span>Đổ xăng</span> <strong>-100.000đ</strong></div>
+      <div class="item-card"><span>Xem phim</span> <strong>-120.000đ</strong></div>
+      <div class="item-card"><span>Ăn tối</span> <strong>-200.000đ</strong></div>
     </div>
+
+    <!-- Ngày 5/9 -->
+    <div class="day-group" data-date="5/9">
+      <div class="day-label">Ngày 5/9</div>
+      <div class="item-card"><span>Siêu thị</span> <strong>-450.000đ</strong></div>
+      <div class="item-card"><span>Trà sữa</span> <strong>-45.000đ</strong></div>
+      <div class="item-card"><span>Nạp điện thoại</span> <strong>-100.000đ</strong></div>
+    </div>
+
+    <!-- Ngày 4/9 -->
+    <div class="day-group" data-date="4/9">
+      <div class="day-label">Ngày 4/9</div>
+      <div class="item-card"><span>Sửa xe</span> <strong>-250.000đ</strong></div>
+      <div class="item-card"><span>Mua sách</span> <strong>-80.000đ</strong></div>
+    </div>
+
   </div>
 
-  <!-- MODAL THÊM / SỬA KHOẢN CHI -->
-  <div class="modal-overlay" id="expenseModal" onclick="closeModalOnOverlay(event)">
-    <div class="modal-card">
-      <h2 id="modalTitle" style="margin-bottom:16px;">Thêm khoản chi mới</h2>
-      <input type="hidden" id="editId">
-      
-      <label for="expAmount">Số tiền (VND)</label>
-      <input type="text" id="expAmount" inputmode="numeric" placeholder="0">
-
-      <label for="expCategory">Danh mục cố định</label>
-      <select id="expCategory">
-        <option value="Đổ xăng">⛽ Đổ xăng</option>
-        <option value="Điện Nước">💡 Điện Nước</option>
-        <option value="Tiền Học">📚 Tiền Học</option>
-        <option value="Ăn Uống">🍜 Ăn Uống</option>
-        <option value="Du lịch">🧳 Du lịch</option>
-        <option value="Mua Sắm">🛍️ Mua Sắm</option>
-        <option value="Sửa xe">🔧 Sửa xe</option>
-        <option value="Khác">📌 Khác</option>
-      </select>
-
-      <label for="expNote">Ghi chú thêm (chữ nghiêng nhỏ)</label>
-      <input type="text" id="expNote" placeholder="Ví dụ: Cà phê, Xăng xe máy...">
-
-      <label for="expDateTime">Ngày & Giờ (24 tiếng)</label>
-      <input type="datetime-local" id="expDateTime">
-
-      <div class="grid-2" style="margin-top:8px;">
-        <button type="button" style="background:#e5e5ea; color:#333;" onclick="closeModal()">Hủy</button>
-        <button type="button" class="btn-primary" onclick="saveExpense()">Lưu khoản chi</button>
-      </div>
-    </div>
+  <!-- Menu Tab Phía Dưới -->
+  <div class="tab-bar bottom">
+    <div class="tab-item">Trang chủ</div>
+    <div class="tab-item">Thống kê</div>
+    <div class="tab-item">Cài đặt</div>
   </div>
 
+  <!-- Javascript phát hiện ngày đang ở hàng trên cùng -->
   <script>
-    /* ===== DANH MỤC CỐ ĐỊNH & MÀU SẮC ===== */
-    const CATEGORIES = ["Đổ xăng", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Khác"];
-    const CAT_COLORS = ['#ff9500', '#007aff', '#af52de', '#ff2d55', '#5856d6', '#34c759', '#ff9500', '#8e8e93'];
+    const stickyHeader = document.getElementById('stickyHeader');
+    const dayGroups = document.querySelectorAll('.day-group');
 
-    let expenses = [];
+    window.addEventListener('scroll', () => {
+      // Vị trí ngay bên dưới Top Tab Bar và Sticky Header
+      const headerOffset = 110; 
 
-    /* ===== UTILS ===== */
-    function getNowForInput() {
-      const now = new Date();
-      const yr = now.getFullYear();
-      const mo = String(now.getMonth() + 1).padStart(2, '0');
-      const da = String(now.getDate()).padStart(2, '0');
-      const hr = String(now.getHours()).padStart(2, '0');
-      const mi = String(now.getMinutes()).padStart(2, '0');
-      return `${yr}-${mo}-${da}T${hr}:${mi}`;
-    }
+      let currentDate = 'Chi tiêu';
 
-    /* Định dạng hiển thị Ngày / Giờ theo yêu cầu mới */
-    function formatDisplayDateTime(dtStr) {
-      if (!dtStr) return { text: '', isToday: false };
-      const d = new Date(dtStr);
-      if (isNaN(d.getTime())) return { text: dtStr, isToday: false };
+      dayGroups.forEach(group => {
+        const rect = group.getBoundingClientRect();
+        // Nếu phần tử ngày đang cắt hoặc nằm dưới đường offset
+        if (rect.top <= headerOffset) {
+          currentDate = group.getAttribute('data-date');
+        }
+      });
 
-      const now = new Date();
-      const isToday = d.getDate() === now.getDate() &&
-                      d.getMonth() === now.getMonth() &&
-                      d.getFullYear() === now.getFullYear();
-
-      const hr = String(d.getHours()).padStart(2, '0');
-      const mi = String(d.getMinutes()).padStart(2, '0');
-
-      if (isToday) {
-        return { text: `Hôm nay - ${hr}:${mi}`, isToday: true };
-      } else {
-        const da = String(d.getDate()).padStart(2, '0');
-        const mo = String(d.getMonth() + 1).padStart(2, '0');
-        const yr = d.getFullYear();
-        return { text: `${da}/${mo}/${yr} ${hr}:${mi}`, isToday: false };
-      }
-    }
-
-    function formatNum(n) {
-      return (Number(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
-    function parseNum(str) {
-      return Number((str || "").toString().replace(/\./g, "")) || 0;
-    }
-
-    /* Định dạng nhập số tiền */
-    const expAmountInput = document.getElementById('expAmount');
-    expAmountInput.addEventListener('input', () => {
-      let v = expAmountInput.value.replace(/\D/g, "");
-      expAmountInput.value = v ? formatNum(v) : "";
+      // Cập nhật nội dung hiển thị chỉ ghi mỗi Ngày
+      stickyHeader.innerText = currentDate;
     });
-
-    /* ===== LOCAL STORAGE ===== */
-    function saveData() {
-      localStorage.setItem("expenses_data_v4", JSON.stringify(expenses));
-    }
-
-    function loadData() {
-      expenses = JSON.parse(localStorage.getItem("expenses_data_v4")) || [];
-    }
-
-    /* ===== CHUYỂN TAB ===== */
-    function switchTab(tabName, el) {
-      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-      document.querySelectorAll('.tab-item').forEach(ti => ti.classList.remove('active'));
-
-      document.getElementById('tab-' + tabName).classList.add('active');
-      el.classList.add('active');
-
-      if (tabName === 'report') renderReport();
-      else renderRecords();
-    }
-
-    /* ===== MODAL THÊM / SỬA ===== */
-    function openModal(id = null) {
-      closeAllDropdowns();
-      if (id) {
-        const item = expenses.find(e => e.id === id);
-        if (!item) return;
-        document.getElementById('modalTitle').innerText = "Sửa khoản chi";
-        document.getElementById('editId').value = item.id;
-        document.getElementById('expAmount').value = formatNum(item.amount);
-        document.getElementById('expCategory').value = item.category;
-        document.getElementById('expNote').value = item.note || "";
-        document.getElementById('expDateTime').value = item.datetime || getNowForInput();
-      } else {
-        document.getElementById('modalTitle').innerText = "Thêm khoản chi mới";
-        document.getElementById('editId').value = "";
-        document.getElementById('expAmount').value = "";
-        document.getElementById('expNote').value = "";
-        document.getElementById('expDateTime').value = getNowForInput();
-      }
-
-      document.getElementById('expenseModal').classList.add('active');
-      setTimeout(() => document.getElementById('expAmount').focus(), 100);
-    }
-
-    function closeModal() {
-      document.getElementById('expenseModal').classList.remove('active');
-    }
-
-    function closeModalOnOverlay(e) {
-      if (e.target.classList.contains('modal-overlay')) closeModal();
-    }
-
-    /* ===== CẬP NHẬT DỮ LIỆU ===== */
-    function saveExpense() {
-      const editId = document.getElementById('editId').value;
-      const amount = parseNum(document.getElementById('expAmount').value);
-      const category = document.getElementById('expCategory').value;
-      const note = document.getElementById('expNote').value.trim();
-      const datetime = document.getElementById('expDateTime').value || getNowForInput();
-
-      if (amount <= 0) {
-        alert("Vui lòng nhập số tiền hợp lệ!");
-        return;
-      }
-
-      if (editId) {
-        // Cập nhật
-        const idx = expenses.findIndex(e => e.id == editId);
-        if (idx !== -1) {
-          expenses[idx] = { ...expenses[idx], amount, category, note, datetime };
-        }
-      } else {
-        // Thêm mới
-        expenses.unshift({ id: Date.now(), amount, category, note, datetime });
-      }
-
-      saveData();
-      closeModal();
-      renderRecords();
-    }
-
-    function deleteExpense(id) {
-      closeAllDropdowns();
-      if (confirm("Xóa khoản chi này?")) {
-        expenses = expenses.filter(e => e.id !== id);
-        saveData();
-        renderRecords();
-      }
-    }
-
-    /* ===== MENU 3 CHẤM ===== */
-    function toggleDropdown(e, id) {
-      e.stopPropagation();
-      const currentMenu = document.getElementById(`dropdown-${id}`);
-      const isVisible = currentMenu.classList.contains('active');
-      closeAllDropdowns();
-      if (!isVisible) {
-        currentMenu.classList.add('active');
-      }
-    }
-
-    function closeAllDropdowns() {
-      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('active'));
-    }
-
-    document.addEventListener('click', closeAllDropdowns);
-
-    /* ===== TAB 1: RENDER GHI CHÉP ===== */
-    function renderRecords() {
-      const recentListEl = document.getElementById('recentExpenseList');
-      
-      if (!expenses.length) {
-        recentListEl.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0;">Chưa có khoản chi nào. Bấm nút + để thêm mới.</p>';
-        return;
-      }
-
-      // Sắp xếp thời gian giảm dần (Gần nhất lên trên)
-      const sortedExpenses = [...expenses].sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
-
-      recentListEl.innerHTML = sortedExpenses.map(item => {
-        const dtInfo = formatDisplayDateTime(item.datetime);
-        const dateClass = dtInfo.isToday ? 'today' : 'past';
-
-        return `
-          <div class="expense-item">
-            <div class="expense-info">
-              <div class="title">${item.category}</div>
-              ${item.note ? `<div class="note">${item.note}</div>` : ''}
-              <div class="sub ${dateClass}">${dtInfo.text}</div>
-            </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <div class="expense-amount">-${formatNum(item.amount)} đ</div>
-              <button class="more-btn" onclick="toggleDropdown(event, ${item.id})">⋮</button>
-              <div class="dropdown-menu" id="dropdown-${item.id}">
-                <button class="dropdown-item" onclick="openModal(${item.id})">✏️ Sửa</button>
-                <button class="dropdown-item danger" onclick="deleteExpense(${item.id})">🗑️ Xóa</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    /* ===== TAB 2: RENDER BÁO CÁO ===== */
-    function renderReport() {
-      const now = new Date();
-
-      /* --- 1. BÁO CÁO TUẦN NÀY (Thứ 2 -> Chủ Nhật) --- */
-      const startOfWeek = new Date(now);
-      const day = now.getDay() || 7;
-      startOfWeek.setDate(now.getDate() - day + 1);
-      startOfWeek.setHours(0,0,0,0);
-
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      endOfWeek.setHours(23,59,59,999);
-
-      document.getElementById('labelWeekRange').innerText = 
-        `(${startOfWeek.getDate()}/${startOfWeek.getMonth()+1} -> ${endOfWeek.getDate()}/${endOfWeek.getMonth()+1})`;
-
-      const weekExpenses = expenses.filter(e => {
-        const d = new Date(e.datetime);
-        return d >= startOfWeek && d <= endOfWeek;
-      });
-
-      renderCategorySection(weekExpenses, 'totalWeek', 'breakdownWeek', 'pieChartWeek');
-
-
-      /* --- 2. BÁO CÁO THÁNG NÀY --- */
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth();
-
-      const startOfMonth = new Date(currentYear, currentMonth, 1);
-      const endOfMonth = new Date(currentYear, currentMonth + 1, 0);
-
-      document.getElementById('labelMonthRange').innerText = 
-        `(${startOfMonth.getDate()}/${startOfMonth.getMonth()+1} -> ${endOfMonth.getDate()}/${endOfMonth.getMonth()+1})`;
-
-      const monthExpenses = expenses.filter(e => {
-        const d = new Date(e.datetime);
-        return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
-      });
-
-      renderCategorySection(monthExpenses, 'totalMonth', 'breakdownMonth', 'pieChartMonth');
-
-
-      /* --- 3. BÁO CÁO THÁNG TRƯỚC --- */
-      const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
-      const lastMonthYear = lastMonthDate.getFullYear();
-      const lastMonthIndex = lastMonthDate.getMonth();
-
-      const startOfLastMonth = new Date(lastMonthYear, lastMonthIndex, 1);
-      const endOfLastMonth = new Date(lastMonthYear, lastMonthIndex + 1, 0);
-
-      document.getElementById('labelLastMonthRange').innerText = 
-        `(${startOfLastMonth.getDate()}/${startOfLastMonth.getMonth()+1} -> ${endOfLastMonth.getDate()}/${endOfLastMonth.getMonth()+1})`;
-
-      const lastMonthExpenses = expenses.filter(e => {
-        const d = new Date(e.datetime);
-        return d.getFullYear() === lastMonthYear && d.getMonth() === lastMonthIndex;
-      });
-
-      renderCategorySection(lastMonthExpenses, 'totalLastMonth', 'breakdownLastMonth', 'pieChartLastMonth');
-
-
-      /* --- 4. BÁO CÁO NĂM NAY (12 THÁNG) --- */
-      const monthlyTotals = Array(12).fill(0);
-
-      expenses.forEach(e => {
-        const d = new Date(e.datetime);
-        if (d.getFullYear() === currentYear) {
-          monthlyTotals[d.getMonth()] += e.amount;
-        }
-      });
-
-      const totalYear = monthlyTotals.reduce((a, b) => a + b, 0);
-      document.getElementById('totalYear').innerText = `${formatNum(totalYear)} VND`;
-
-      const yearLabels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
-      drawBarChart('barChartYear', yearLabels, monthlyTotals, 42);
-    }
-
-    /* Helper render chung cho các mục biểu đồ tròn */
-    function renderCategorySection(expList, totalElId, breakdownElId, chartCanvasId) {
-      const total = expList.reduce((sum, e) => sum + e.amount, 0);
-      document.getElementById(totalElId).innerText = `${formatNum(total)} VND`;
-
-      const catTotals = {};
-      CATEGORIES.forEach(c => catTotals[c] = 0);
-      expList.forEach(e => {
-        if (catTotals[e.category] !== undefined) catTotals[e.category] += e.amount;
-        else catTotals["Khác"] += e.amount;
-      });
-
-      document.getElementById(breakdownElId).innerHTML = CATEGORIES.map((cat, idx) => {
-        const amt = catTotals[cat];
-        if (amt === 0) return '';
-        const pct = total > 0 ? ((amt / total) * 100).toFixed(1) : 0;
-        return `
-          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-            <span><span style="color:${CAT_COLORS[idx]}; font-weight:bold;">●</span> ${cat} (${pct}%)</span>
-            <b>${formatNum(amt)} VND</b>
-          </div>
-        `;
-      }).join('');
-
-      drawPieChart(chartCanvasId, Object.values(catTotals), total);
-    }
-
-    /* ===== VẼ BIỂU ĐỒ TRÒN ===== */
-    function drawPieChart(canvasId, dataArr, total) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      const dpr = window.devicePixelRatio || 1;
-
-      const w = canvas.parentElement.clientWidth || 300;
-      const h = 220;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.height = h + "px";
-
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
-
-      const cx = w / 2;
-      const cy = h / 2;
-      const radius = Math.min(w, h) / 2 - 16;
-
-      if (total <= 0) {
-        ctx.fillStyle = '#8e8e93';
-        ctx.font = '14px -apple-system, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Chưa có chi tiêu trong khoảng thời gian này', cx, cy);
-        return;
-      }
-
-      let startAngle = -Math.PI / 2;
-      dataArr.forEach((val, i) => {
-        if (val <= 0) return;
-        const sliceAngle = (val / total) * 2 * Math.PI;
-        const endAngle = startAngle + sliceAngle;
-
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = CAT_COLORS[i];
-        ctx.fill();
-
-        startAngle = endAngle;
-      });
-
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius * 0.55, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
-      ctx.fill();
-    }
-
-    /* ===== VẼ BIỂU ĐỒ CỘT ===== */
-    function drawBarChart(canvasId, labels, values, columnStepWidth = 40) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      const dpr = window.devicePixelRatio || 1;
-
-      const parentWidth = canvas.parentElement.clientWidth || 300;
-      const minChartWidth = labels.length * columnStepWidth;
-      const w = Math.max(parentWidth, minChartWidth);
-      const h = 220;
-
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = w + "px";
-      canvas.style.height = h + "px";
-
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
-
-      const maxVal = Math.max(...values, 1);
-      const paddingLeft = 15;
-      const paddingRight = 15;
-      const paddingBottom = 30;
-      const chartWidth = w - paddingLeft - paddingRight;
-      const chartHeight = h - paddingBottom - 25;
-
-      const barWidth = Math.min(24, (chartWidth / labels.length) * 0.6);
-
-      labels.forEach((lbl, i) => {
-        const val = values[i];
-        const barH = (val / maxVal) * chartHeight;
-        const slotWidth = chartWidth / labels.length;
-        const x = paddingLeft + (i * slotWidth) + (slotWidth - barWidth) / 2;
-        const y = h - paddingBottom - barH;
-
-        ctx.fillStyle = val > 0 ? '#007aff' : '#e5e5ea';
-        const renderH = val > 0 ? Math.max(barH, 4) : 2;
-        const renderY = val > 0 ? y : h - paddingBottom - 2;
-
-        ctx.beginPath();
-        if (typeof ctx.roundRect === 'function') {
-          ctx.roundRect(x, renderY, barWidth, renderH, [4, 4, 0, 0]);
-        } else {
-          ctx.rect(x, renderY, barWidth, renderH);
-        }
-        ctx.fill();
-
-        ctx.fillStyle = '#1c1c1e';
-        ctx.font = '11px -apple-system, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(lbl, x + barWidth / 2, h - 8);
-
-        if (val > 0) {
-          ctx.fillStyle = '#8e8e93';
-          ctx.font = '9px -apple-system, sans-serif';
-          let displayVal = val >= 1e6 ? (val/1e6).toFixed(1) + 'M' : (val/1e3).toFixed(0) + 'k';
-          ctx.fillText(displayVal, x + barWidth / 2, renderY - 5);
-        }
-      });
-    }
-
-    /* ===== BACKUP & RESTORE ===== */
-    function exportData() {
-      const blob = new Blob([JSON.stringify(expenses, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `ChiTieu_Backup.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function importData(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const data = JSON.parse(evt.target.result);
-          if (Array.isArray(data) && confirm("Dữ liệu hiện tại sẽ bị ghi đè. Bạn chắc chắn chứ?")) {
-            expenses = data;
-            saveData();
-            renderRecords();
-            renderReport();
-            alert("Phục hồi dữ liệu thành công!");
-          }
-        } catch (err) {
-          alert("File không hợp lệ!");
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    /* ===== KHỞI TẠO ===== */
-    window.onload = function() {
-      loadData();
-      renderRecords();
-    };
   </script>
 </body>
 </html>
