@@ -58,17 +58,13 @@
       padding-top: env(safe-area-inset-top, 0px);
     }
 
+    /* Đổi màu tab inactive sang màu xám chuẩn */
     .tab-item {
       flex: 1; text-align: center; color: var(--muted); font-size: 11px; cursor: pointer;
       display: flex; flex-direction: column; align-items: center; gap: 2px;
-      opacity: 0.5; /* Mặc định nhạt màu cho tab không chọn */
-      transition: opacity 0.2s ease, color 0.2s ease;
+      font-weight: 400;
     }
-    .tab-item.active { 
-      color: var(--primary); 
-      font-weight: 600; 
-      opacity: 1; /* Hiển thị rõ nét khi đang chọn */
-    }
+    .tab-item.active { color: var(--primary); font-weight: 600; }
     .tab-item .icon { font-size: 20px; }
 
     .container {
@@ -237,6 +233,7 @@
       z-index: 100;
       overflow: hidden;
       min-width: 110px;
+      border: 1px solid #e3e3e8;
     }
     .dropdown-menu.active { display: flex; }
     .dropdown-item {
@@ -245,7 +242,7 @@
       color: var(--text);
       cursor: pointer;
       background: none; border: none; text-align: left;
-      border-bottom: 1px solid #f2f2f7;
+      border-bottom: 1px solid #efeff4; /* Đường kẻ phân tách rõ ràng */
       min-height: unset;
       font-weight: normal;
     }
@@ -387,7 +384,16 @@
   <script>
     /* ===== DANH MỤC CỐ ĐỊNH & MÀU SẮC ===== */
     const CATEGORIES = ["Đổ xăng", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Khác"];
-    const CAT_COLORS = ['#ff9500', '#007aff', '#af52de', '#ff2d55', '#5856d6', '#34c759', '#ff3b30', '#8e8e93'];
+    const CAT_COLORS_MAP = {
+      "Đổ xăng": '#ff9500',
+      "Điện Nước": '#007aff',
+      "Tiền Học": '#af52de',
+      "Ăn Uống": '#ff2d55',
+      "Du lịch": '#5856d6',
+      "Mua Sắm": '#34c759',
+      "Sửa xe": '#ff3b30',
+      "Khác": '#8e8e93'
+    };
 
     let expenses = [];
 
@@ -655,7 +661,7 @@
       drawBarChart('barChartYear', yearLabels, monthlyTotals, 42);
     }
 
-    /* Hàm phụ tính toán & hiển thị biểu đồ tròn + bảng phân tích */
+    /* Hàm phụ tính toán & hiển thị biểu đồ tròn + bảng phân tích (đã thêm sắp xếp giảm dần) */
     function renderPieSection(expenseList, totalElId, breakdownElId, chartCanvasId) {
       const total = expenseList.reduce((sum, e) => sum + e.amount, 0);
       document.getElementById(totalElId).innerText = `${formatNum(total)} VND`;
@@ -667,28 +673,29 @@
         else catTotals["Khác"] += e.amount;
       });
 
-      // Tạo mảng danh mục chứa dữ liệu và sắp xếp % từ cao xuống thấp
-      const breakdownList = CATEGORIES.map((cat, idx) => ({
-        cat,
-        color: CAT_COLORS[idx],
-        amt: catTotals[cat],
-        pct: total > 0 ? ((catTotals[cat] / total) * 100) : 0
-      }))
-      .filter(item => item.amt > 0)
-      .sort((a, b) => b.pct - a.pct); // Sắp xếp % giảm dần
+      // Tạo mảng danh mục và sắp xếp theo số tiền chi giảm dần
+      const sortedCategories = CATEGORIES.map(cat => ({
+        category: cat,
+        amount: catTotals[cat],
+        color: CAT_COLORS_MAP[cat]
+      })).filter(item => item.amount > 0)
+        .sort((a, b) => b.amount - a.amount);
 
-      document.getElementById(breakdownElId).innerHTML = breakdownList.map(item => `
-        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-          <span><span style="color:${item.color}; font-weight:bold;">●</span> ${item.cat} (${item.pct.toFixed(1)}%)</span>
-          <b>${formatNum(item.amt)} VND</b>
-        </div>
-      `).join('');
+      document.getElementById(breakdownElId).innerHTML = sortedCategories.map(item => {
+        const pct = total > 0 ? ((item.amount / total) * 100).toFixed(1) : 0;
+        return `
+          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+            <span><span style="color:${item.color}; font-weight:bold;">●</span> ${item.category} (${pct}%)</span>
+            <b>${formatNum(item.amount)} VND</b>
+          </div>
+        `;
+      }).join('');
 
-      drawPieChart(chartCanvasId, Object.values(catTotals), total);
+      drawPieChart(chartCanvasId, sortedCategories, total);
     }
 
     /* ===== VẼ BIỂU ĐỒ TRÒN ===== */
-    function drawPieChart(canvasId, dataArr, total) {
+    function drawPieChart(canvasId, sortedData, total) {
       const canvas = document.getElementById(canvasId);
       const ctx = canvas.getContext('2d');
       const dpr = window.devicePixelRatio || 1;
@@ -715,16 +722,16 @@
       }
 
       let startAngle = -Math.PI / 2;
-      dataArr.forEach((val, i) => {
-        if (val <= 0) return;
-        const sliceAngle = (val / total) * 2 * Math.PI;
+      sortedData.forEach(item => {
+        if (item.amount <= 0) return;
+        const sliceAngle = (item.amount / total) * 2 * Math.PI;
         const endAngle = startAngle + sliceAngle;
 
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.arc(cx, cy, radius, startAngle, endAngle);
         ctx.closePath();
-        ctx.fillStyle = CAT_COLORS[i];
+        ctx.fillStyle = item.color;
         ctx.fill();
 
         startAngle = endAngle;
