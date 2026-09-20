@@ -494,7 +494,7 @@
       <h2 style="margin-bottom:16px;">Thêm danh mục mới</h2>
       
       <label for="newCatName">Tên danh mục (ví dụ: 🎮 Giải trí)</label>
-      <input type="text" id="newCatName" placeholder="Nhập tên danh mục...">
+      <input type="text" id="newCatName" placeholder="Nhập tên danh mục (có thể bao gồm icon)...">
 
       <label for="newCatColor">Màu đại diện</label>
       <input type="color" id="newCatColor" value="#007aff" style="height:44px; padding:2px; cursor:pointer;">
@@ -507,18 +507,18 @@
   </div>
 
   <script>
-    /* ===== DANH MỤC MẶC ĐỊNH & MÀU SẮC ===== */
+    /* ===== DANH MỤC MẶC ĐỊNH & MÀU SẮC (ĐÃ BỔ SUNG ICON) ===== */
     const DEFAULT_CATEGORIES = [
-      { name: "Đổ xăng", color: "#ff9500", isDefault: true },
-      { name: "Cước thoại Internet", color: "#30b0c7", isDefault: true },
-      { name: "Điện Nước", color: "#007aff", isDefault: true },
-      { name: "Khám chữa bệnh", color: "#ff2d55", isDefault: true },
-      { name: "Tiền Học", color: "#af52de", isDefault: true },
-      { name: "Ăn Uống", color: "#ff9500", isDefault: true },
-      { name: "Du lịch", color: "#5856d6", isDefault: true },
-      { name: "Mua Sắm", color: "#34c759", isDefault: true },
-      { name: "Sửa xe", color: "#ff3b30", isDefault: true },
-      { name: "Khác", color: "#8e8e93", isDefault: true }
+      { name: "⛽ Đổ xăng", color: "#ff9500", isDefault: true },
+      { name: "🌐 Cước thoại Internet", color: "#30b0c7", isDefault: true },
+      { name: "⚡ Điện Nước", color: "#007aff", isDefault: true },
+      { name: "🏥 Khám chữa bệnh", color: "#ff2d55", isDefault: true },
+      { name: "🎓 Tiền Học", color: "#af52de", isDefault: true },
+      { name: "🍜 Ăn Uống", color: "#ff9500", isDefault: true },
+      { name: "✈️ Du lịch", color: "#5856d6", isDefault: true },
+      { name: "🛍️ Mua Sắm", color: "#34c759", isDefault: true },
+      { name: "🔧 Sửa xe", color: "#ff3b30", isDefault: true },
+      { name: "📦 Khác", color: "#8e8e93", isDefault: true }
     ];
 
     let categoriesList = [];
@@ -583,15 +583,15 @@
 
     /* ===== LOCAL STORAGE ===== */
     function saveData() {
-      localStorage.setItem("expenses_data_v4", JSON.stringify(expenses));
-      localStorage.setItem("categories_data_v4", JSON.stringify(categoriesList));
-      localStorage.setItem("monthly_budget_v4", monthlyBudget.toString());
+      localStorage.setItem("expenses_data_v5", JSON.stringify(expenses));
+      localStorage.setItem("categories_data_v5", JSON.stringify(categoriesList));
+      localStorage.setItem("monthly_budget_v5", monthlyBudget.toString());
     }
 
     function loadData() {
-      expenses = JSON.parse(localStorage.getItem("expenses_data_v4")) || [];
-      categoriesList = JSON.parse(localStorage.getItem("categories_data_v4")) || DEFAULT_CATEGORIES;
-      monthlyBudget = Number(localStorage.getItem("monthly_budget_v4")) || 14000000;
+      expenses = JSON.parse(localStorage.getItem("expenses_data_v5")) || [];
+      categoriesList = JSON.parse(localStorage.getItem("categories_data_v5")) || DEFAULT_CATEGORIES;
+      monthlyBudget = Number(localStorage.getItem("monthly_budget_v5")) || 14000000;
 
       updateCategoryDropdown();
     }
@@ -630,7 +630,7 @@
       } else {
         document.getElementById('modalTitle').innerText = "Thêm khoản chi mới";
         document.getElementById('editId').value = "";
-        document.getElementById('expCategory').value = categoriesList[0]?.name || "Khác";
+        document.getElementById('expCategory').value = categoriesList[0]?.name || "📦 Khác";
         document.getElementById('expAmount').value = "";
         document.getElementById('expNote').value = "";
         document.getElementById('expDateTime').value = getNowForInput();
@@ -721,7 +721,6 @@
       const textBase = `Hạn mức tháng: ${formatNum(monthlyBudget)} VND (Đã dùng: ${formatNum(currentMonthTotal)} VND)`;
 
       const warnLimit = monthlyBudget * 0.8;
-      const dangerLimit = monthlyBudget * 0.95;
 
       if (currentMonthTotal < warnLimit) {
         statusEl.classList.add('budget-safe');
@@ -879,8 +878,9 @@
       expenseList.forEach(e => {
         if (catTotals[e.category] !== undefined) catTotals[e.category] += e.amount;
         else {
-          if (!catTotals["Khác"]) catTotals["Khác"] = 0;
-          catTotals["Khác"] += e.amount;
+          const fallbackKey = categoriesList.find(c => c.name.includes("Khác"))?.name || "📦 Khác";
+          if (!catTotals[fallbackKey]) catTotals[fallbackKey] = 0;
+          catTotals[fallbackKey] += e.amount;
         }
       });
 
