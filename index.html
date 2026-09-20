@@ -48,7 +48,7 @@
     .tab-bar {
       position: fixed; top: 0; left: 0; right: 0;
       height: 60px;
-      background: #e5e5ea; /* Nền chung của thanh tab */
+      background: #e5e5ea;
       border-bottom: 1px solid #d1d1d6;
       display: flex;
       align-items: center;
@@ -56,7 +56,6 @@
       padding-top: env(safe-area-inset-top, 0px);
     }
 
-    /* Phân cách giữa các tab bằng dấu gạch */
     .tab-divider {
       width: 1px;
       height: 28px;
@@ -75,13 +74,13 @@
       align-items: center; 
       justify-content: center;
       gap: 2px;
-      background: #e5e5ea; /* Nền màu xám khi KHÔNG chọn */
+      background: #e5e5ea;
       opacity: 0.7;
       transition: background 0.2s ease, opacity 0.2s ease, color 0.2s ease;
     }
 
     .tab-item.active { 
-      background: #ffffff; /* Nền trắng khi ĐANG chọn */
+      background: #ffffff;
       color: var(--primary); 
       font-weight: 600; 
       opacity: 1;
@@ -116,7 +115,6 @@
       margin: 0;
     }
 
-    /* Dòng thông báo Hạn mức chi tiêu */
     .budget-limit-info {
       font-style: italic;
       font-size: 13px;
@@ -125,7 +123,6 @@
       transition: color 0.3s ease;
     }
 
-    /* Màu sắc theo cảnh báo */
     .budget-safe { color: var(--success); }
     .budget-warning { color: var(--warning); }
     .budget-danger { color: var(--danger); }
@@ -428,14 +425,6 @@
         </div>
       </div>
 
-      <!-- SAO LƯU & PHỤC HỒI -->
-      <div class="card">
-        <h2>🗂️ Sao lưu & Phục hồi</h2>
-        <button class="btn-primary" onclick="exportData()" style="margin-bottom:10px;">📤 Xuất dữ liệu (.json)</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-        <button class="btn-success" onclick="document.getElementById('importFile').click()">📥 Phục hồi dữ liệu</button>
-      </div>
-
     </div>
 
     <!-- TAB 3: CÀI ĐẶT -->
@@ -455,6 +444,14 @@
         <label for="monthlyBudgetInput">Số tiền hạn mức (VND)</label>
         <input type="text" id="monthlyBudgetInput" inputmode="numeric" placeholder="14.000.000">
         <button class="btn-success" onclick="saveMonthlyBudget()">Lưu hạn mức</button>
+      </div>
+
+      <!-- SAO LƯU & PHỤC HỒI (Đã chuyển sang Tab Cài đặt) -->
+      <div class="card">
+        <h2>🗂️ Sao lưu & Phục hồi</h2>
+        <button class="btn-primary" onclick="exportData()" style="margin-bottom:10px;">📤 Xuất dữ liệu (.json)</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        <button class="btn-success" onclick="document.getElementById('importFile').click()">📥 Phục hồi dữ liệu</button>
       </div>
 
     </div>
@@ -507,7 +504,7 @@
   </div>
 
   <script>
-    /* ===== DANH MỤC MẶC ĐỊNH & MÀU SẮC (ĐÃ BỔ SUNG ICON) ===== */
+    /* ===== DANH MỤC MẶC ĐỊNH & MÀU SẮC (Đã đổi icon "Khác" thành 🔖) ===== */
     const DEFAULT_CATEGORIES = [
       { name: "⛽ Đổ xăng", color: "#ff9500", isDefault: true },
       { name: "🌐 Cước thoại Internet", color: "#30b0c7", isDefault: true },
@@ -518,7 +515,7 @@
       { name: "✈️ Du lịch", color: "#5856d6", isDefault: true },
       { name: "🛍️ Mua Sắm", color: "#34c759", isDefault: true },
       { name: "🔧 Sửa xe", color: "#ff3b30", isDefault: true },
-      { name: "📦 Khác", color: "#8e8e93", isDefault: true }
+      { name: "🔖 Khác", color: "#8e8e93", isDefault: true }
     ];
 
     let categoriesList = [];
@@ -593,6 +590,17 @@
       categoriesList = JSON.parse(localStorage.getItem("categories_data_v5")) || DEFAULT_CATEGORIES;
       monthlyBudget = Number(localStorage.getItem("monthly_budget_v5")) || 14000000;
 
+      // Cập nhật nâng cấp icon Khác nếu người dùng có dữ liệu cũ
+      categoriesList = categoriesList.map(c => {
+        if (c.name === "📦 Khác") return { ...c, name: "🔖 Khác" };
+        return c;
+      });
+
+      expenses = expenses.map(e => {
+        if (e.category === "📦 Khác") return { ...e, category: "🔖 Khác" };
+        return e;
+      });
+
       updateCategoryDropdown();
     }
 
@@ -618,19 +626,30 @@
     function openModal(id = null) {
       closeAllDropdowns();
       updateCategoryDropdown();
+      
+      const selectEl = document.getElementById('expCategory');
+
       if (id) {
         const item = expenses.find(e => e.id === id);
         if (!item) return;
         document.getElementById('modalTitle').innerText = "Sửa khoản chi";
         document.getElementById('editId').value = item.id;
-        document.getElementById('expCategory').value = item.category;
+        selectEl.value = item.category;
         document.getElementById('expAmount').value = formatNum(item.amount);
         document.getElementById('expNote').value = item.note || "";
         document.getElementById('expDateTime').value = item.datetime || getNowForInput();
       } else {
         document.getElementById('modalTitle').innerText = "Thêm khoản chi mới";
         document.getElementById('editId').value = "";
-        document.getElementById('expCategory').value = categoriesList[0]?.name || "📦 Khác";
+        
+        // Ưu tiên chọn danh mục "Khác" đầu tiên khi nhấn +
+        const otherCat = categoriesList.find(c => c.name.includes("Khác"));
+        if (otherCat) {
+          selectEl.value = otherCat.name;
+        } else if (categoriesList.length > 0) {
+          selectEl.value = categoriesList[0].name;
+        }
+
         document.getElementById('expAmount').value = "";
         document.getElementById('expNote').value = "";
         document.getElementById('expDateTime').value = getNowForInput();
@@ -878,7 +897,7 @@
       expenseList.forEach(e => {
         if (catTotals[e.category] !== undefined) catTotals[e.category] += e.amount;
         else {
-          const fallbackKey = categoriesList.find(c => c.name.includes("Khác"))?.name || "📦 Khác";
+          const fallbackKey = categoriesList.find(c => c.name.includes("Khác"))?.name || "🔖 Khác";
           if (!catTotals[fallbackKey]) catTotals[fallbackKey] = 0;
           catTotals[fallbackKey] += e.amount;
         }
