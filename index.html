@@ -58,13 +58,28 @@
       padding-top: env(safe-area-inset-top, 0px);
     }
 
-    /* Đổi màu tab inactive sang màu xám chuẩn */
+    /* Đổi màu tab inactive sang nền xám nhạt */
     .tab-item {
-      flex: 1; text-align: center; color: var(--muted); font-size: 11px; cursor: pointer;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      flex: 1; 
+      height: 100%;
+      text-align: center; 
+      color: var(--muted); 
+      font-size: 11px; 
+      cursor: pointer;
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center;
+      gap: 2px;
       font-weight: 400;
+      background: #e5e5ea; /* Nền xám nhạt cho tab chưa chọn */
+      transition: background 0.2s ease, color 0.2s ease;
     }
-    .tab-item.active { color: var(--primary); font-weight: 600; }
+    .tab-item.active { 
+      color: var(--primary); 
+      font-weight: 600; 
+      background: transparent; /* Tab active có nền trong suốt nổi trên thanh bar trắng */
+    }
     .tab-item .icon { font-size: 20px; }
 
     .container {
@@ -242,7 +257,7 @@
       color: var(--text);
       cursor: pointer;
       background: none; border: none; text-align: left;
-      border-bottom: 1px solid #efeff4; /* Đường kẻ phân tách rõ ràng */
+      border-bottom: 1px solid #efeff4;
       min-height: unset;
       font-weight: normal;
     }
@@ -365,6 +380,7 @@
         <option value="Tiền Học">📚 Tiền Học</option>
         <option value="Du lịch">🧳 Du lịch</option>
         <option value="Sửa xe">🔧 Sửa xe</option>
+        <option value="Đám Hiếu Hỉ">💌 Đám Hiếu Hỉ</option>
         <option value="Khác">📌 Khác</option>
       </select>
 
@@ -383,7 +399,7 @@
 
   <script>
     /* ===== DANH MỤC CỐ ĐỊNH & MÀU SẮC ===== */
-    const CATEGORIES = ["Đổ xăng", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Khác"];
+    const CATEGORIES = ["Đổ xăng", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Đám Hiếu Hỉ", "Khác"];
     const CAT_COLORS_MAP = {
       "Đổ xăng": '#ff9500',
       "Điện Nước": '#007aff',
@@ -392,6 +408,7 @@
       "Du lịch": '#5856d6',
       "Mua Sắm": '#34c759',
       "Sửa xe": '#ff3b30',
+      "Đám Hiếu Hỉ": '#e056fd',
       "Khác": '#8e8e93'
     };
 
@@ -661,7 +678,7 @@
       drawBarChart('barChartYear', yearLabels, monthlyTotals, 42);
     }
 
-    /* Hàm phụ tính toán & hiển thị biểu đồ tròn + bảng phân tích (đã thêm sắp xếp giảm dần) */
+    /* Hàm phụ tính toán & hiển thị biểu đồ tròn + bảng phân tích */
     function renderPieSection(expenseList, totalElId, breakdownElId, chartCanvasId) {
       const total = expenseList.reduce((sum, e) => sum + e.amount, 0);
       document.getElementById(totalElId).innerText = `${formatNum(total)} VND`;
