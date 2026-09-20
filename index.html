@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>Quản lý Chi tiêu</title>
-  <link rel="apple-touch-icon" href="IMG_1639.jpeg">
+  <link rel="apple-touch-icon" href="IMG_1651.png">
 
   <style>
     :root {
@@ -15,6 +15,7 @@
       --primary: #007aff;
       --danger: #ff3b30;
       --success: #34c759;
+      --warning: #ff9500;
       --shadow: 0 4px 16px rgba(0,0,0,0.06);
       --radius: 14px;
       --pad: 16px;
@@ -58,27 +59,16 @@
       padding-top: env(safe-area-inset-top, 0px);
     }
 
-    /* Đổi màu tab inactive sang nền xám nhạt */
     .tab-item {
-      flex: 1; 
-      height: 100%;
-      text-align: center; 
-      color: var(--muted); 
-      font-size: 11px; 
-      cursor: pointer;
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      justify-content: center;
-      gap: 2px;
-      font-weight: 400;
-      background: #e5e5ea; /* Nền xám nhạt cho tab chưa chọn */
-      transition: background 0.2s ease, color 0.2s ease;
+      flex: 1; text-align: center; color: var(--muted); font-size: 11px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      opacity: 0.5;
+      transition: opacity 0.2s ease, color 0.2s ease;
     }
     .tab-item.active { 
       color: var(--primary); 
       font-weight: 600; 
-      background: transparent; /* Tab active có nền trong suốt nổi trên thanh bar trắng */
+      opacity: 1;
     }
     .tab-item .icon { font-size: 20px; }
 
@@ -88,7 +78,7 @@
       padding: 0 16px;
     }
 
-    /* Đóng băng tiêu đề "Chi tiêu gần đây" khi cuộn */
+    /* Đóng băng tiêu đề "Chi tiêu" khi cuộn */
     .sticky-header {
       position: sticky;
       top: 60px;
@@ -98,14 +88,31 @@
       margin: 0;
     }
 
-    .sticky-header h2 {
-      font-size: 18px;
-      margin: 0;
+    .sticky-header .header-card {
       background: var(--card);
       padding: 12px 16px;
       border-radius: var(--radius);
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
+
+    .sticky-header h2 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    /* Dòng thông báo Hạn mức chi tiêu */
+    .budget-limit-info {
+      font-style: italic;
+      font-size: 13px;
+      margin-top: 4px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    /* Màu sắc theo cảnh báo */
+    .budget-safe { color: var(--success); }
+    .budget-warning { color: var(--warning); }
+    .budget-danger { color: var(--danger); }
 
     h2 { font-size: 16px; margin: 0 0 12px; }
 
@@ -120,7 +127,6 @@
 
     label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
 
-    /* Font size 16px chống iOS auto-zoom khi focus */
     input, select, button {
       width: 100%;
       min-height: 44px;
@@ -221,7 +227,6 @@
       margin-bottom: 2px;
     }
 
-    /* Màu gian hiển thị hôm nay vs trước đó */
     .expense-info .sub-today { font-size: 12px; color: var(--success); font-weight: 600; }
     .expense-info .sub-old { font-size: 12px; color: var(--text); }
 
@@ -248,7 +253,6 @@
       z-index: 100;
       overflow: hidden;
       min-width: 110px;
-      border: 1px solid #e3e3e8;
     }
     .dropdown-menu.active { display: flex; }
     .dropdown-item {
@@ -257,7 +261,7 @@
       color: var(--text);
       cursor: pointer;
       background: none; border: none; text-align: left;
-      border-bottom: 1px solid #efeff4;
+      border-bottom: 1px solid #f2f2f7;
       min-height: unset;
       font-weight: normal;
     }
@@ -304,7 +308,10 @@
     <div id="tab-record" class="tab-content active">
       <!-- Tiêu đề đóng băng khi cuộn -->
       <div class="sticky-header">
-        <h2>📋 Chi tiêu</h2>
+        <div class="header-card">
+          <h2>📋 Chi tiêu</h2>
+          <div id="budgetStatus" class="budget-limit-info">Hạn mức tháng: 13.000.000 VND</div>
+        </div>
       </div>
 
       <div class="card" style="margin-top: 4px;">
@@ -373,7 +380,6 @@
 
       <label for="expCategory">Danh mục</label>
       <select id="expCategory">
-        <option value="Khác">📌 Khác</option>
         <option value="Ăn Uống">🍜 Ăn Uống</option>
         <option value="Mua Sắm">🛍️ Mua Sắm</option>
         <option value="Đổ xăng">⛽ Đổ xăng</option>
@@ -381,8 +387,7 @@
         <option value="Tiền Học">📚 Tiền Học</option>
         <option value="Du lịch">🧳 Du lịch</option>
         <option value="Sửa xe">🔧 Sửa xe</option>
-        <option value="Đám Hiếu Hỉ">💌 Đám Hiếu Hỉ</option>
-        <option value="Khám chữa bệnh">🏥 Khám chữa bệnh</option>
+        <option value="Khác">📌 Khác</option>
       </select>
 
       <label for="expNote">Ghi chú</label>
@@ -400,19 +405,8 @@
 
   <script>
     /* ===== DANH MỤC CỐ ĐỊNH & MÀU SẮC ===== */
-    const CATEGORIES = ["Khác", "Đổ xăng", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Đám Hiếu Hỉ", "Khám chữa bệnh"];
-    const CAT_COLORS_MAP = {
-      "Khác": '#8e8e93',
-      "Đổ xăng": '#ff9500',
-      "Điện Nước": '#007aff',
-      "Tiền Học": '#af52de',
-      "Ăn Uống": '#ff2d55',
-      "Du lịch": '#5856d6',
-      "Mua Sắm": '#34c759',
-      "Sửa xe": '#ff3b30',
-      "Đám Hiếu Hỉ": '#e056fd',
-      "Khám chữa bệnh": '#ff2d55'
-    };
+    const CATEGORIES = ["Đổ xăng", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Khác"];
+    const CAT_COLORS = ['#ff9500', '#007aff', '#af52de', '#ff2d55', '#5856d6', '#34c759', '#ff3b30', '#8e8e93'];
 
     let expenses = [];
 
@@ -427,7 +421,6 @@
       return `${yr}-${mo}-${da}T${hr}:${mi}`;
     }
 
-    /* Định dạng hiển thị thời gian linh hoạt */
     function formatDisplayDateTime(dtStr) {
       if (!dtStr) return { text: '', isToday: false };
       const d = new Date(dtStr);
@@ -459,7 +452,6 @@
       return Number((str || "").toString().replace(/\./g, "")) || 0;
     }
 
-    /* Định dạng nhập số tiền */
     const expAmountInput = document.getElementById('expAmount');
     expAmountInput.addEventListener('input', () => {
       let v = expAmountInput.value.replace(/\D/g, "");
@@ -572,8 +564,42 @@
 
     document.addEventListener('click', closeAllDropdowns);
 
+    /* ===== TÍNH TOÁN & HIỂN THỊ CẢNH BÁO HẠN MỨC THÁNG ===== */
+    function updateBudgetStatus() {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+
+      // Tổng tiền tiêu trong tháng này
+      const currentMonthTotal = expenses.reduce((sum, e) => {
+        const d = new Date(e.datetime);
+        if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
+          return sum + e.amount;
+        }
+        return sum;
+      }, 0);
+
+      const statusEl = document.getElementById('budgetStatus');
+      statusEl.className = 'budget-limit-info'; // reset class
+
+      const textBase = `Hạn mức tháng: 13.000.000 VND (Đã dùng: ${formatNum(currentMonthTotal)} VND)`;
+
+      if (currentMonthTotal < 11000000) {
+        statusEl.classList.add('budget-safe');
+        statusEl.innerText = textBase;
+      } else if (currentMonthTotal <= 13000000) {
+        statusEl.classList.add('budget-warning');
+        statusEl.innerText = textBase;
+      } else {
+        statusEl.classList.add('budget-danger');
+        statusEl.innerText = `${textBase} - Vượt hạn mức!`;
+      }
+    }
+
     /* ===== TAB 1: RENDER GHI CHÉP ===== */
     function renderRecords() {
+      updateBudgetStatus(); // Cập nhật màu cảnh báo hạn mức tháng
+      
       const recentListEl = document.getElementById('recentExpenseList');
       
       if (!expenses.length) {
@@ -581,7 +607,6 @@
         return;
       }
 
-      // Sắp xếp thời gian giảm dần (Gần nhất lên trên)
       const sortedExpenses = [...expenses].sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
 
       recentListEl.innerHTML = sortedExpenses.map(item => {
@@ -680,7 +705,6 @@
       drawBarChart('barChartYear', yearLabels, monthlyTotals, 42);
     }
 
-    /* Hàm phụ tính toán & hiển thị biểu đồ tròn + bảng phân tích */
     function renderPieSection(expenseList, totalElId, breakdownElId, chartCanvasId) {
       const total = expenseList.reduce((sum, e) => sum + e.amount, 0);
       document.getElementById(totalElId).innerText = `${formatNum(total)} VND`;
@@ -692,29 +716,26 @@
         else catTotals["Khác"] += e.amount;
       });
 
-      // Tạo mảng danh mục và sắp xếp theo số tiền chi giảm dần
-      const sortedCategories = CATEGORIES.map(cat => ({
-        category: cat,
-        amount: catTotals[cat],
-        color: CAT_COLORS_MAP[cat]
-      })).filter(item => item.amount > 0)
-        .sort((a, b) => b.amount - a.amount);
+      const breakdownList = CATEGORIES.map((cat, idx) => ({
+        cat,
+        color: CAT_COLORS[idx],
+        amt: catTotals[cat],
+        pct: total > 0 ? ((catTotals[cat] / total) * 100) : 0
+      }))
+      .filter(item => item.amt > 0)
+      .sort((a, b) => b.pct - a.pct);
 
-      document.getElementById(breakdownElId).innerHTML = sortedCategories.map(item => {
-        const pct = total > 0 ? ((item.amount / total) * 100).toFixed(1) : 0;
-        return `
-          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-            <span><span style="color:${item.color}; font-weight:bold;">●</span> ${item.category} (${pct}%)</span>
-            <b>${formatNum(item.amount)} VND</b>
-          </div>
-        `;
-      }).join('');
+      document.getElementById(breakdownElId).innerHTML = breakdownList.map(item => `
+        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+          <span><span style="color:${item.color}; font-weight:bold;">●</span> ${item.cat} (${item.pct.toFixed(1)}%)</span>
+          <b>${formatNum(item.amt)} VND</b>
+        </div>
+      `).join('');
 
-      drawPieChart(chartCanvasId, sortedCategories, total);
+      drawPieChart(chartCanvasId, Object.values(catTotals), total);
     }
 
-    /* ===== VẼ BIỂU ĐỒ TRÒN ===== */
-    function drawPieChart(canvasId, sortedData, total) {
+    function drawPieChart(canvasId, dataArr, total) {
       const canvas = document.getElementById(canvasId);
       const ctx = canvas.getContext('2d');
       const dpr = window.devicePixelRatio || 1;
@@ -741,16 +762,16 @@
       }
 
       let startAngle = -Math.PI / 2;
-      sortedData.forEach(item => {
-        if (item.amount <= 0) return;
-        const sliceAngle = (item.amount / total) * 2 * Math.PI;
+      dataArr.forEach((val, i) => {
+        if (val <= 0) return;
+        const sliceAngle = (val / total) * 2 * Math.PI;
         const endAngle = startAngle + sliceAngle;
 
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.arc(cx, cy, radius, startAngle, endAngle);
         ctx.closePath();
-        ctx.fillStyle = item.color;
+        ctx.fillStyle = CAT_COLORS[i];
         ctx.fill();
 
         startAngle = endAngle;
@@ -762,7 +783,6 @@
       ctx.fill();
     }
 
-    /* ===== VẼ BIỂU ĐỒ CỘT ===== */
     function drawBarChart(canvasId, labels, values, columnStepWidth = 40) {
       const canvas = document.getElementById(canvasId);
       const ctx = canvas.getContext('2d');
