@@ -161,7 +161,7 @@
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-success { background: var(--success); color: #fff; }
 
-    /* Floating Action Button (+) - Đã nhân đôi kích thước (112px x 112px) */
+    /* Floating Action Button (+) */
     .fab {
       position: fixed;
       right: 20px;
@@ -360,6 +360,15 @@
         </div>
       </div>
 
+      <!-- PHẦN 5: 5 NĂM GẦN NHẤT -->
+      <div class="card">
+        <h2>📆 Báo cáo 5 năm gần nhất <span id="label5YearsRange" style="font-size:13px; color:var(--muted); font-weight:normal;"></span></h2>
+        <div class="summary-num" id="total5Years">0 VND</div>
+        <div class="chart-scroll-wrapper">
+          <canvas id="barChart5Years" style="height:220px;"></canvas>
+        </div>
+      </div>
+
       <!-- SAO LƯU & PHỤC HỒI -->
       <div class="card">
         <h2>🗂️ Sao lưu & Phục hồi</h2>
@@ -377,20 +386,21 @@
       <h2 id="modalTitle" style="margin-bottom:16px;">Thêm khoản chi mới</h2>
       <input type="hidden" id="editId">
       
-      <!-- ĐƯA DANH MỤC LÊN TRÊN -->
+      <!-- DANH MỤC -->
       <label for="expCategory">Danh mục</label>
       <select id="expCategory">
         <option value="Khác">📌 Khác</option>
         <option value="Ăn Uống">🍜 Ăn Uống</option>
         <option value="Mua Sắm">🛍️ Mua Sắm</option>
         <option value="Đổ xăng">⛽ Đổ xăng</option>
+        <option value="Cước thoại Internet">📱 Cước thoại Internet</option>
         <option value="Điện Nước">💡 Điện Nước</option>
         <option value="Tiền Học">📚 Tiền Học</option>
         <option value="Du lịch">🧳 Du lịch</option>
         <option value="Sửa xe">🔧 Sửa xe</option>
       </select>
 
-      <!-- SỐ TIỀN Ở BÊN DƯỚI -->
+      <!-- SỐ TIỀN -->
       <label for="expAmount">Số tiền (VND)</label>
       <input type="text" id="expAmount" inputmode="numeric" placeholder="0">
 
@@ -408,9 +418,9 @@
   </div>
 
   <script>
-    /* ===== DANH MỤC CỐ ĐỊNH & MÀU SẮC ===== */
-    const CATEGORIES = ["Đổ xăng", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Khác"];
-    const CAT_COLORS = ['#ff9500', '#007aff', '#af52de', '#ff2d55', '#5856d6', '#34c759', '#ff3b30', '#8e8e93'];
+    /* ===== DANH MỤC CỐ ĐỊNH & MÀU SẮC (ĐÃ THÊM CƯỚC THOẠI INTERNET) ===== */
+    const CATEGORIES = ["Đổ xăng", "Cước thoại Internet", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Khác"];
+    const CAT_COLORS = ['#ff9500', '#30b0c7', '#007aff', '#af52de', '#ff2d55', '#5856d6', '#34c759', '#ff3b30', '#8e8e93'];
 
     let expenses = [];
 
@@ -498,7 +508,7 @@
       } else {
         document.getElementById('modalTitle').innerText = "Thêm khoản chi mới";
         document.getElementById('editId').value = "";
-        document.getElementById('expCategory').value = "Khác"; // Mặc định danh mục là Khác khi nhấn nút +
+        document.getElementById('expCategory').value = "Khác";
         document.getElementById('expAmount').value = "";
         document.getElementById('expNote').value = "";
         document.getElementById('expDateTime').value = getNowForInput();
@@ -575,7 +585,6 @@
       const currentYear = now.getFullYear();
       const currentMonth = now.getMonth();
 
-      // Tổng tiền tiêu trong tháng này
       const currentMonthTotal = expenses.reduce((sum, e) => {
         const d = new Date(e.datetime);
         if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
@@ -585,7 +594,7 @@
       }, 0);
 
       const statusEl = document.getElementById('budgetStatus');
-      statusEl.className = 'budget-limit-info'; // reset class
+      statusEl.className = 'budget-limit-info';
 
       const textBase = `Hạn mức tháng: 14.000.000 VND (Đã dùng: ${formatNum(currentMonthTotal)} VND)`;
 
@@ -603,7 +612,7 @@
 
     /* ===== TAB 1: RENDER GHI CHÉP ===== */
     function renderRecords() {
-      updateBudgetStatus(); // Cập nhật màu cảnh báo hạn mức tháng
+      updateBudgetStatus();
       
       const recentListEl = document.getElementById('recentExpenseList');
       
@@ -708,6 +717,32 @@
 
       const yearLabels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
       drawBarChart('barChartYear', yearLabels, monthlyTotals, 42);
+
+      /* --- 5. BÁO CÁO 5 NĂM GẦN NHẤT --- */
+      const fiveYearLabels = [];
+      const fiveYearTotals = [];
+      
+      // Lấy 5 năm gần đây (bao gồm năm hiện tại)
+      for (let i = 4; i >= 0; i--) {
+        fiveYearLabels.push((currentYear - i).toString());
+        fiveYearTotals.push(0);
+      }
+
+      document.getElementById('label5YearsRange').innerText = `(${fiveYearLabels[0]} - ${fiveYearLabels[4]})`;
+
+      expenses.forEach(e => {
+        const d = new Date(e.datetime);
+        const yr = d.getFullYear();
+        const idx = fiveYearLabels.indexOf(yr.toString());
+        if (idx !== -1) {
+          fiveYearTotals[idx] += e.amount;
+        }
+      });
+
+      const total5Years = fiveYearTotals.reduce((a, b) => a + b, 0);
+      document.getElementById('total5Years').innerText = `${formatNum(total5Years)} VND`;
+
+      drawBarChart('barChart5Years', fiveYearLabels, fiveYearTotals, 60);
     }
 
     function renderPieSection(expenseList, totalElId, breakdownElId, chartCanvasId) {
@@ -813,7 +848,7 @@
       const chartWidth = w - paddingLeft - paddingRight;
       const chartHeight = h - paddingBottom - 25;
 
-      const barWidth = Math.min(24, (chartWidth / labels.length) * 0.6);
+      const barWidth = Math.min(28, (chartWidth / labels.length) * 0.55);
 
       labels.forEach((lbl, i) => {
         const val = values[i];
