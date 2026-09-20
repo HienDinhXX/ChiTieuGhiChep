@@ -746,7 +746,7 @@
         statusEl.innerText = textBase;
       } else if (currentMonthTotal <= monthlyBudget) {
         statusEl.classList.add('budget-warning');
-        statusEl.innerText = textBase;
+        statusEl.innerText = `${textBase} - Chú ý chi tiêu!`;
       } else {
         statusEl.classList.add('budget-danger');
         statusEl.innerText = `${textBase} - Vượt hạn mức!`;
