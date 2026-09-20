@@ -737,7 +737,7 @@
       const statusEl = document.getElementById('budgetStatus');
       statusEl.className = 'budget-limit-info';
 
-      const textBase = `Hạn mức tháng: ${formatNum(monthlyBudget)} VND (Đã dùng: ${formatNum(currentMonthTotal)} VND)`;
+      const textBase = `Hạn mức tháng: ${formatNum(monthlyBudget)} VND \n(Đã chi: ${formatNum(currentMonthTotal)} VND)`;
 
       const warnLimit = monthlyBudget * 0.8;
 
