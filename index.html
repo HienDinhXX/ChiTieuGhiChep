@@ -161,24 +161,26 @@
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-success { background: var(--success); color: #fff; }
 
-    /* Floating Action Button (+) */
+    /* Floating Action Button (+) - Đã nhân đôi kích thước (112px x 112px) */
     .fab {
       position: fixed;
       right: 20px;
-      bottom: 30px;
-      width: 56px;
-      height: 56px;
-      border-radius: 28px;
+      bottom: 20px;
+      width: 112px;
+      height: 112px;
+      border-radius: 56px;
       background: var(--primary);
       color: #fff;
-      font-size: 32px;
+      font-size: 64px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 6px 16px rgba(0,122,255,0.35);
+      box-shadow: 0 10px 24px rgba(0,122,255,0.4);
       cursor: pointer;
       z-index: 90;
       user-select: none;
+      line-height: 1;
+      padding-bottom: 6px;
     }
 
     /* Modal Pop-up */
@@ -375,11 +377,10 @@
       <h2 id="modalTitle" style="margin-bottom:16px;">Thêm khoản chi mới</h2>
       <input type="hidden" id="editId">
       
-      <label for="expAmount">Số tiền (VND)</label>
-      <input type="text" id="expAmount" inputmode="numeric" placeholder="0">
-
+      <!-- ĐƯA DANH MỤC LÊN TRÊN -->
       <label for="expCategory">Danh mục</label>
       <select id="expCategory">
+        <option value="Khác">📌 Khác</option>
         <option value="Ăn Uống">🍜 Ăn Uống</option>
         <option value="Mua Sắm">🛍️ Mua Sắm</option>
         <option value="Đổ xăng">⛽ Đổ xăng</option>
@@ -387,8 +388,11 @@
         <option value="Tiền Học">📚 Tiền Học</option>
         <option value="Du lịch">🧳 Du lịch</option>
         <option value="Sửa xe">🔧 Sửa xe</option>
-        <option value="Khác">📌 Khác</option>
       </select>
+
+      <!-- SỐ TIỀN Ở BÊN DƯỚI -->
+      <label for="expAmount">Số tiền (VND)</label>
+      <input type="text" id="expAmount" inputmode="numeric" placeholder="0">
 
       <label for="expNote">Ghi chú</label>
       <input type="text" id="expNote" placeholder="Ghi chú...">
@@ -487,13 +491,14 @@
         if (!item) return;
         document.getElementById('modalTitle').innerText = "Sửa khoản chi";
         document.getElementById('editId').value = item.id;
-        document.getElementById('expAmount').value = formatNum(item.amount);
         document.getElementById('expCategory').value = item.category;
+        document.getElementById('expAmount').value = formatNum(item.amount);
         document.getElementById('expNote').value = item.note || "";
         document.getElementById('expDateTime').value = item.datetime || getNowForInput();
       } else {
         document.getElementById('modalTitle').innerText = "Thêm khoản chi mới";
         document.getElementById('editId').value = "";
+        document.getElementById('expCategory').value = "Khác"; // Mặc định danh mục là Khác khi nhấn nút +
         document.getElementById('expAmount').value = "";
         document.getElementById('expNote').value = "";
         document.getElementById('expDateTime').value = getNowForInput();
