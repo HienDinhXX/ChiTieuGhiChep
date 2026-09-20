@@ -373,6 +373,7 @@
 
       <label for="expCategory">Danh mục</label>
       <select id="expCategory">
+        <option value="Khác">📌 Khác</option>
         <option value="Ăn Uống">🍜 Ăn Uống</option>
         <option value="Mua Sắm">🛍️ Mua Sắm</option>
         <option value="Đổ xăng">⛽ Đổ xăng</option>
@@ -381,7 +382,7 @@
         <option value="Du lịch">🧳 Du lịch</option>
         <option value="Sửa xe">🔧 Sửa xe</option>
         <option value="Đám Hiếu Hỉ">💌 Đám Hiếu Hỉ</option>
-        <option value="Khác">📌 Khác</option>
+        <option value="Khám chữa bệnh">🏥 Khám chữa bệnh</option>
       </select>
 
       <label for="expNote">Ghi chú</label>
@@ -399,8 +400,9 @@
 
   <script>
     /* ===== DANH MỤC CỐ ĐỊNH & MÀU SẮC ===== */
-    const CATEGORIES = ["Đổ xăng", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Đám Hiếu Hỉ", "Khác"];
+    const CATEGORIES = ["Khác", "Đổ xăng", "Điện Nước", "Tiền Học", "Ăn Uống", "Du lịch", "Mua Sắm", "Sửa xe", "Đám Hiếu Hỉ", "Khám chữa bệnh"];
     const CAT_COLORS_MAP = {
+      "Khác": '#8e8e93',
       "Đổ xăng": '#ff9500',
       "Điện Nước": '#007aff',
       "Tiền Học": '#af52de',
@@ -409,7 +411,7 @@
       "Mua Sắm": '#34c759',
       "Sửa xe": '#ff3b30',
       "Đám Hiếu Hỉ": '#e056fd',
-      "Khác": '#8e8e93'
+      "Khám chữa bệnh": '#ff2d55'
     };
 
     let expenses = [];
