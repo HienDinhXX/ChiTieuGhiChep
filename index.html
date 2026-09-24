@@ -526,7 +526,7 @@
       { name: "🛒 Mua Sắm", color: "#34c759", isDefault: true },
       { name: "🔧 Sửa xe", color: "#ff3b30", isDefault: true },
       { name: "✉️ Đám hiếu hỉ", color: "#ff3b30", isDefault: true },
-      { name: "‼️ Khác", color: "#8e8e93", isDefault: true }
+      { name: "‼️ Chưa phân loại ", color: "#8e8e93", isDefault: true }
     ];
 
     let categoriesList = [];
@@ -654,7 +654,7 @@
         document.getElementById('editId').value = "";
         
         // Ưu tiên chọn danh mục "Khác" đầu tiên khi nhấn +
-        const otherCat = categoriesList.find(c => c.name.includes("Khác"));
+        const otherCat = categoriesList.find(c => c.name.includes("Chưa phân loại"));
         if (otherCat) {
           selectEl.value = otherCat.name;
         } else if (categoriesList.length > 0) {
@@ -908,7 +908,7 @@
       expenseList.forEach(e => {
         if (catTotals[e.category] !== undefined) catTotals[e.category] += e.amount;
         else {
-          const fallbackKey = categoriesList.find(c => c.name.includes("Khác"))?.name || "🔖 Khác";
+          const fallbackKey = categoriesList.find(c => c.name.includes("Chưa phân loại "))?.name || "🔖 Chưa phân loại";
           if (!catTotals[fallbackKey]) catTotals[fallbackKey] = 0;
           catTotals[fallbackKey] += e.amount;
         }
