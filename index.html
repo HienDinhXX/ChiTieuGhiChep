@@ -4,18 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>Quản lý Chi tiêu</title>
+
   <link rel="apple-touch-icon" href="IMG_0670.jpeg">
-    
-  
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color"
-      content="#007aff">
-  <meta name="apple-mobile-web-app-capable"
-        content="yes">
-  <meta name="apple-mobile-web-app-title"
-        content="chi tiêu">
-  <meta name="apple-mobile-web-app-status-bar-style"
-        content="default">
+
+  <meta name="theme-color" content="#007aff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="chi tiêu">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
   <style>
     :root {
       --bg: #f2f2f7;
@@ -33,30 +30,47 @@
       --container-max: 600px;
     }
 
-    *, *::before, *::after { box-sizing: border-box; }
-    input, button, select, textarea, canvas { max-width: 100%; display: block; }
-    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-    * { -webkit-tap-highlight-color: transparent; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    input, button, select, textarea, canvas {
+      max-width: 100%;
+      display: block;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
       margin: 0;
-      padding-top: 60px; /* Độ cao của Tab bar */
+      padding-top: 60px;
       padding-bottom: 80px;
     }
 
-    @supports(padding: env(safe-area-inset-top)){
+    @supports(padding: env(safe-area-inset-top)) {
       body {
         padding-left: max(0px, env(safe-area-inset-left));
         padding-right: max(0px, env(safe-area-inset-right));
       }
     }
 
-    /* Tab Bar Cố Định Ở Đầu */
+    /* TAB BAR */
+
     .tab-bar {
-      position: fixed; top: 0; left: 0; right: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
       height: 60px;
       background: #e5e5ea;
       border-bottom: 1px solid #d1d1d6;
@@ -73,15 +87,15 @@
     }
 
     .tab-item {
-      flex: 1; 
+      flex: 1;
       height: 100%;
-      text-align: center; 
-      color: var(--muted); 
-      font-size: 11px; 
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
       cursor: pointer;
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       justify-content: center;
       gap: 2px;
       background: #e5e5ea;
@@ -89,13 +103,16 @@
       transition: background 0.2s ease, opacity 0.2s ease, color 0.2s ease;
     }
 
-    .tab-item.active { 
+    .tab-item.active {
       background: #ffffff;
-      color: var(--primary); 
-      font-weight: 600; 
+      color: var(--primary);
+      font-weight: 600;
       opacity: 1;
     }
-    .tab-item .icon { font-size: 18px; }
+
+    .tab-item .icon {
+      font-size: 18px;
+    }
 
     .container {
       max-width: var(--container-max);
@@ -103,7 +120,8 @@
       padding: 0 16px;
     }
 
-    /* Đóng băng tiêu đề "Chi tiêu" khi cuộn */
+    /* HEADER */
+
     .sticky-header {
       position: sticky;
       top: 60px;
@@ -131,13 +149,25 @@
       margin-top: 4px;
       font-weight: 500;
       transition: color 0.3s ease;
+      white-space: pre-line;
     }
 
-    .budget-safe { color: var(--success); }
-    .budget-warning { color: var(--warning); }
-    .budget-danger { color: var(--danger); }
+    .budget-safe {
+      color: var(--success);
+    }
 
-    h2 { font-size: 16px; margin: 0 0 12px; }
+    .budget-warning {
+      color: var(--warning);
+    }
+
+    .budget-danger {
+      color: var(--danger);
+    }
+
+    h2 {
+      font-size: 16px;
+      margin: 0 0 12px;
+    }
 
     .card {
       background: var(--card);
@@ -148,16 +178,24 @@
       overflow: hidden;
     }
 
-    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
 
-    input, select, button {
+    input,
+    select,
+    button {
       width: 100%;
       min-height: 44px;
       font-size: 16px;
       border-radius: 10px;
     }
 
-    input, select {
+    input,
+    select {
       padding: 10px 12px;
       margin-bottom: 12px;
       border: 1px solid #e3e3e8;
@@ -165,7 +203,8 @@
       outline: none;
     }
 
-    input:focus, select:focus {
+    input:focus,
+    select:focus {
       border-color: var(--primary);
       background: #fff;
       box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
@@ -179,12 +218,23 @@
       cursor: pointer;
       transition: transform .05s ease;
     }
-    button:active { transform: translateY(1px); }
 
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-success { background: var(--success); color: #fff; }
+    button:active {
+      transform: translateY(1px);
+    }
 
-    /* Floating Action Button (+) */
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+
+    /* FAB */
+
     .fab {
       position: fixed;
       right: 20px;
@@ -206,16 +256,21 @@
       padding-bottom: 6px;
     }
 
-    /* Modal Pop-up */
+    /* MODAL */
+
     .modal-overlay {
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       background: rgba(0,0,0,0.4);
       display: none;
       align-items: flex-end;
       justify-content: center;
       z-index: 1000;
     }
-    .modal-overlay.active { display: flex; }
+
+    .modal-overlay.active {
+      display: flex;
+    }
 
     .modal-card {
       background: var(--card);
@@ -228,11 +283,17 @@
     }
 
     @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
     }
 
-    /* Danh sách khoản chi */
+    /* EXPENSE LIST */
+
     .expense-item {
       display: flex;
       justify-content: space-between;
@@ -241,9 +302,17 @@
       border-bottom: 1px solid #efeff4;
       position: relative;
     }
-    .expense-item:last-child { border-bottom: none; }
-    .expense-info .title { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
-    
+
+    .expense-item:last-child {
+      border-bottom: none;
+    }
+
+    .expense-info .title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
     .expense-info .note {
       font-size: 13px;
       font-style: italic;
@@ -252,24 +321,50 @@
       margin-bottom: 2px;
     }
 
-    .expense-info .sub-today { font-size: 12px; color: var(--success); font-weight: 600; }
-    .expense-info .sub-old { font-size: 12px; color: var(--text); }
+    .expense-info .sub-today {
+      font-size: 12px;
+      color: var(--success);
+      font-weight: 600;
+    }
 
-    .expense-amount { font-weight: 700; color: var(--danger); font-size: 15px; text-align: right; }
+    .expense-info .sub-old {
+      font-size: 12px;
+      color: var(--text);
+    }
 
-    /* Menu 3 chấm */
+    .expense-amount {
+      font-weight: 700;
+      color: var(--danger);
+      font-size: 15px;
+      text-align: right;
+    }
+
+    /* MENU 3 CHẤM */
+
     .more-btn {
-      background: none; border: none; color: var(--muted);
-      width: 32px; height: 32px; min-height: unset;
-      font-size: 18px; cursor: pointer; padding: 0;
-      display: flex; align-items: center; justify-content: center;
+      background: none;
+      border: none;
+      color: var(--muted);
+      width: 32px;
+      height: 32px;
+      min-height: unset;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 50%;
     }
-    .more-btn:hover { background: #e5e5ea; }
+
+    .more-btn:hover {
+      background: #e5e5ea;
+    }
 
     .dropdown-menu {
       position: absolute;
-      right: 0; top: 40px;
+      right: 0;
+      top: 40px;
       background: #fff;
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -279,20 +374,35 @@
       overflow: hidden;
       min-width: 110px;
     }
-    .dropdown-menu.active { display: flex; }
+
+    .dropdown-menu.active {
+      display: flex;
+    }
+
     .dropdown-item {
       padding: 10px 14px;
       font-size: 13px;
       color: var(--text);
       cursor: pointer;
-      background: none; border: none; text-align: left;
+      background: none;
+      border: none;
+      text-align: left;
       border-bottom: 1px solid #f2f2f7;
       min-height: unset;
       font-weight: normal;
     }
-    .dropdown-item:last-child { border-bottom: none; }
-    .dropdown-item.danger { color: var(--danger); }
-    .dropdown-item:hover { background: #f2f2f7; }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-item.danger {
+      color: var(--danger);
+    }
+
+    .dropdown-item:hover {
+      background: #f2f2f7;
+    }
 
     .chart-scroll-wrapper {
       width: 100%;
@@ -300,11 +410,20 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    .tab-content {
+      display: none;
+    }
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    
+    .tab-content.active {
+      display: block;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
     .summary-num {
       font-size: 20px;
       font-weight: 700;
@@ -312,7 +431,8 @@
       margin: 4px 0 12px;
     }
 
-    /* Style riêng cho Tab Cài Đặt */
+    /* SETTINGS */
+
     .category-list-item {
       display: flex;
       justify-content: space-between;
@@ -320,7 +440,11 @@
       padding: 10px 0;
       border-bottom: 1px solid #efeff4;
     }
-    .category-list-item:last-child { border-bottom: none; }
+
+    .category-list-item:last-child {
+      border-bottom: none;
+    }
+
     .category-tag {
       display: flex;
       align-items: center;
@@ -328,12 +452,14 @@
       font-size: 15px;
       font-weight: 500;
     }
+
     .color-dot {
       width: 12px;
       height: 12px;
       border-radius: 50%;
       display: inline-block;
     }
+
     .btn-delete-cat {
       background: none;
       border: none;
@@ -344,17 +470,108 @@
       min-height: unset;
       padding: 4px 8px;
     }
+
+    /* ===== BÁO CÁO THEO THỜI GIAN ===== */
+
+    .custom-report-selectors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .custom-report-result {
+      border-top: 1px solid #efeff4;
+      padding-top: 14px;
+    }
+
+    .custom-report-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .custom-report-total {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--danger);
+      margin: 4px 0 16px;
+    }
+
+    .custom-report-item {
+      margin-bottom: 14px;
+    }
+
+    .custom-report-item-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .custom-report-cat {
+      font-weight: 600;
+      min-width: 0;
+    }
+
+    .custom-report-percent {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .custom-report-amount {
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .custom-report-bar-bg {
+      height: 7px;
+      background: #e5e5ea;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .custom-report-bar {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    .custom-report-empty {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    @media (max-width: 420px) {
+      .custom-report-item-header {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .custom-report-amount {
+        grid-column: 1 / -1;
+        text-align: left;
+      }
+    }
   </style>
 </head>
+
 <body>
 
-  <!-- TAB BAR PHÍA TRÊN -->
+  <!-- TAB BAR -->
+
   <div class="tab-bar">
+
     <div class="tab-item active" onclick="switchTab('record', this)">
       <span class="icon">📝</span>
       <span>Ghi chép</span>
     </div>
-    
+
     <div class="tab-divider"></div>
 
     <div class="tab-item" onclick="switchTab('report', this)">
@@ -368,804 +585,3390 @@
       <span class="icon">⚙️</span>
       <span>Cài đặt</span>
     </div>
+
   </div>
 
   <div class="container">
 
-    <!-- TAB 1: GHI CHÉP -->
+    <!-- =====================================================
+         TAB 1: GHI CHÉP
+         ===================================================== -->
+
     <div id="tab-record" class="tab-content active">
-      <!-- Tiêu đề đóng băng khi cuộn -->
+
       <div class="sticky-header">
+
         <div class="header-card">
+
           <h2>📋 Chi tiêu</h2>
-          <div id="budgetStatus" class="budget-limit-info">Hạn mức tháng: 14.000.000 VND</div>
+
+          <div id="budgetStatus" class="budget-limit-info">
+            Hạn mức tháng: 14.000.000 VND
+          </div>
+
         </div>
+
       </div>
 
       <div class="card" style="margin-top: 4px;">
         <div id="recentExpenseList"></div>
       </div>
 
-      <!-- Nút + Nổi -->
       <div class="fab" onclick="openModal()">+</div>
+
     </div>
 
-    <!-- TAB 2: BÁO CÁO -->
+
+    <!-- =====================================================
+         TAB 2: BÁO CÁO
+         ===================================================== -->
+
     <div id="tab-report" class="tab-content" style="padding-top: 12px;">
-      
-      <!-- PHẦN 1: TUẦN NÀY -->
+
+      <!-- TUẦN NÀY -->
+
       <div class="card">
-        <h2>📊 Báo cáo Tuần này <span id="labelWeekRange" style="font-size:13px; color:var(--muted); font-weight:normal;"></span></h2>
-        <div class="summary-num" id="totalWeek">0 VND</div>
-        <canvas id="pieChartWeek" style="max-height:220px; width:100%;"></canvas>
-        <div id="breakdownWeek" style="margin-top:16px;"></div>
+
+        <h2>
+          📊 Báo cáo Tuần này
+          <span
+            id="labelWeekRange"
+            style="font-size:13px;color:var(--muted);font-weight:normal;"
+          ></span>
+        </h2>
+
+        <div class="summary-num" id="totalWeek">
+          0 VND
+        </div>
+
+        <canvas
+          id="pieChartWeek"
+          style="max-height:220px;width:100%;"
+        ></canvas>
+
+        <div
+          id="breakdownWeek"
+          style="margin-top:16px;"
+        ></div>
+
       </div>
 
-      <!-- PHẦN 2: THÁNG NÀY -->
+
+      <!-- THÁNG NÀY -->
+
       <div class="card">
-        <h2>📈 Báo cáo Tháng này <span id="labelMonthRange" style="font-size:13px; color:var(--muted); font-weight:normal;"></span></h2>
-        <div class="summary-num" id="totalMonth">0 VND</div>
-        <canvas id="pieChartMonth" style="max-height:220px; width:100%;"></canvas>
-        <div id="breakdownMonth" style="margin-top:16px;"></div>
+
+        <h2>
+          📈 Báo cáo Tháng này
+          <span
+            id="labelMonthRange"
+            style="font-size:13px;color:var(--muted);font-weight:normal;"
+          ></span>
+        </h2>
+
+        <div class="summary-num" id="totalMonth">
+          0 VND
+        </div>
+
+        <canvas
+          id="pieChartMonth"
+          style="max-height:220px;width:100%;"
+        ></canvas>
+
+        <div
+          id="breakdownMonth"
+          style="margin-top:16px;"
+        ></div>
+
       </div>
 
-      <!-- PHẦN 3: THÁNG TRƯỚC -->
+
+      <!-- THÁNG TRƯỚC -->
+
       <div class="card">
-        <h2>📉 Báo cáo Tháng trước <span id="labelLastMonthRange" style="font-size:13px; color:var(--muted); font-weight:normal;"></span></h2>
-        <div class="summary-num" id="totalLastMonth">0 VND</div>
-        <canvas id="pieChartLastMonth" style="max-height:220px; width:100%;"></canvas>
-        <div id="breakdownLastMonth" style="margin-top:16px;"></div>
+
+        <h2>
+          📉 Báo cáo Tháng trước
+          <span
+            id="labelLastMonthRange"
+            style="font-size:13px;color:var(--muted);font-weight:normal;"
+          ></span>
+        </h2>
+
+        <div class="summary-num" id="totalLastMonth">
+          0 VND
+        </div>
+
+        <canvas
+          id="pieChartLastMonth"
+          style="max-height:220px;width:100%;"
+        ></canvas>
+
+        <div
+          id="breakdownLastMonth"
+          style="margin-top:16px;"
+        ></div>
+
       </div>
 
-      <!-- PHẦN 4: NĂM NAY -->
+
+      <!-- NĂM NAY -->
+
       <div class="card">
+
         <h2>📅 Báo cáo Năm nay</h2>
-        <div class="summary-num" id="totalYear">0 VND</div>
-        <div class="chart-scroll-wrapper">
-          <canvas id="barChartYear" style="height:220px;"></canvas>
+
+        <div class="summary-num" id="totalYear">
+          0 VND
         </div>
+
+        <div class="chart-scroll-wrapper">
+
+          <canvas
+            id="barChartYear"
+            style="height:220px;"
+          ></canvas>
+
+        </div>
+
       </div>
 
-      <!-- PHẦN 5: 5 NĂM GẦN NHẤT -->
+
+      <!-- 5 NĂM GẦN NHẤT -->
+
       <div class="card">
-        <h2>📆 Báo cáo 5 năm gần nhất <span id="label5YearsRange" style="font-size:13px; color:var(--muted); font-weight:normal;"></span></h2>
-        <div class="summary-num" id="total5Years">0 VND</div>
-        <div class="chart-scroll-wrapper">
-          <canvas id="barChart5Years" style="height:220px;"></canvas>
+
+        <h2>
+          📆 Báo cáo 5 năm gần nhất
+
+          <span
+            id="label5YearsRange"
+            style="font-size:13px;color:var(--muted);font-weight:normal;"
+          ></span>
+
+        </h2>
+
+        <div class="summary-num" id="total5Years">
+          0 VND
         </div>
+
+        <div class="chart-scroll-wrapper">
+
+          <canvas
+            id="barChart5Years"
+            style="height:220px;"
+          ></canvas>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           BÁO CÁO THEO THỜI GIAN
+           ================================================= -->
+
+      <div class="card">
+
+        <h2>🔎 Báo cáo theo thời gian</h2>
+
+        <div class="custom-report-selectors">
+
+          <!-- CHỌN THÁNG -->
+
+          <div>
+
+            <label for="customReportMonth">
+              Tháng
+            </label>
+
+            <select
+              id="customReportMonth"
+              onchange="renderCustomReport()"
+            >
+
+              <option value="0">
+                Năm
+              </option>
+
+              <option value="1">
+                Tháng 1
+              </option>
+
+              <option value="2">
+                Tháng 2
+              </option>
+
+              <option value="3">
+                Tháng 3
+              </option>
+
+              <option value="4">
+                Tháng 4
+              </option>
+
+              <option value="5">
+                Tháng 5
+              </option>
+
+              <option value="6">
+                Tháng 6
+              </option>
+
+              <option value="7">
+                Tháng 7
+              </option>
+
+              <option value="8">
+                Tháng 8
+              </option>
+
+              <option value="9">
+                Tháng 9
+              </option>
+
+              <option value="10">
+                Tháng 10
+              </option>
+
+              <option value="11">
+                Tháng 11
+              </option>
+
+              <option value="12">
+                Tháng 12
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- CHỌN NĂM -->
+
+          <div>
+
+            <label for="customReportYear">
+              Năm
+            </label>
+
+            <select
+              id="customReportYear"
+              onchange="renderCustomReport()"
+            ></select>
+
+          </div>
+
+        </div>
+
+
+        <!-- KẾT QUẢ -->
+
+        <div
+          id="customReportResult"
+          class="custom-report-result"
+        ></div>
+
       </div>
 
     </div>
 
-    <!-- TAB 3: CÀI ĐẶT -->
-    <div id="tab-settings" class="tab-content" style="padding-top: 12px;">
-      
-      <!-- CÀI ĐẶT DANH MỤC -->
+
+    <!-- =====================================================
+         TAB 3: CÀI ĐẶT
+         ===================================================== -->
+
+    <div
+      id="tab-settings"
+      class="tab-content"
+      style="padding-top:12px;"
+    >
+
+      <!-- DANH MỤC -->
+
       <div class="card">
+
         <h2>🏷️ Quản lý Danh mục</h2>
+
         <div id="settingsCategoryList"></div>
 
-        <button class="btn-primary" onclick="openAddCategoryModal()" style="margin-top: 12px;">+ Thêm danh mục mới</button>
+        <button
+          class="btn-primary"
+          onclick="openAddCategoryModal()"
+          style="margin-top:12px;"
+        >
+          + Thêm danh mục mới
+        </button>
+
       </div>
 
-      <!-- CÀI ĐẶT HẠN MỨC CHI TIÊU THÁNG -->
+
+      <!-- HẠN MỨC -->
+
       <div class="card">
+
         <h2>🎯 Hạn mức chi tiêu tháng</h2>
-        <label for="monthlyBudgetInput">Số tiền hạn mức (VND)</label>
-        <input type="text" id="monthlyBudgetInput" inputmode="numeric" placeholder="14.000.000">
-        <button class="btn-success" onclick="saveMonthlyBudget()">Lưu hạn mức</button>
+
+        <label for="monthlyBudgetInput">
+          Số tiền hạn mức (VND)
+        </label>
+
+        <input
+          type="text"
+          id="monthlyBudgetInput"
+          inputmode="numeric"
+          placeholder="14.000.000"
+        >
+
+        <button
+          class="btn-success"
+          onclick="saveMonthlyBudget()"
+        >
+          Lưu hạn mức
+        </button>
+
       </div>
 
-      <!-- SAO LƯU & PHỤC HỒI (Đã chuyển sang Tab Cài đặt) -->
+
+      <!-- SAO LƯU -->
+
       <div class="card">
+
         <h2>🗂️ Sao lưu & Phục hồi</h2>
-        <button class="btn-primary" onclick="exportData()" style="margin-bottom:10px;">📤 Xuất dữ liệu (.json)</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-        <button class="btn-success" onclick="document.getElementById('importFile').click()">📥 Phục hồi dữ liệu</button>
+
+        <button
+          class="btn-primary"
+          onclick="exportData()"
+          style="margin-bottom:10px;"
+        >
+          📤 Xuất dữ liệu (.json)
+        </button>
+
+        <input
+          type="file"
+          id="importFile"
+          accept=".json"
+          style="display:none"
+          onchange="importData(event)"
+        >
+
+        <button
+          class="btn-success"
+          onclick="document.getElementById('importFile').click()"
+        >
+          📥 Phục hồi dữ liệu
+        </button>
+
       </div>
 
     </div>
 
   </div>
 
-  <!-- MODAL THÊM / SỬA KHOẢN CHI -->
-  <div class="modal-overlay" id="expenseModal" onclick="closeModalOnOverlay(event)">
+
+  <!-- =====================================================
+       MODAL THÊM / SỬA KHOẢN CHI
+       ===================================================== -->
+
+  <div
+    class="modal-overlay"
+    id="expenseModal"
+    onclick="closeModalOnOverlay(event)"
+  >
+
     <div class="modal-card">
-      <h2 id="modalTitle" style="margin-bottom:16px;">Thêm khoản chi mới</h2>
-      <input type="hidden" id="editId">
-      
-      <!-- DANH MỤC -->
-      <label for="expCategory">Danh mục</label>
+
+      <h2
+        id="modalTitle"
+        style="margin-bottom:16px;"
+      >
+        Thêm khoản chi mới
+      </h2>
+
+      <input
+        type="hidden"
+        id="editId"
+      >
+
+
+      <label for="expCategory">
+        Danh mục
+      </label>
+
       <select id="expCategory"></select>
 
-      <!-- SỐ TIỀN -->
-      <label for="expAmount">Số tiền (VND)</label>
-      <input type="text" id="expAmount" inputmode="numeric" placeholder="0">
 
-      <label for="expNote">Ghi chú</label>
-      <input type="text" id="expNote" placeholder="Ghi chú...">
+      <label for="expAmount">
+        Số tiền (VND)
+      </label>
 
-      <label for="expDateTime">Ngày & Giờ</label>
-      <input type="datetime-local" id="expDateTime">
+      <input
+        type="text"
+        id="expAmount"
+        inputmode="numeric"
+        placeholder="0"
+      >
 
-      <div class="grid-2" style="margin-top:8px;">
-        <button type="button" style="background:#e5e5ea; color:#333;" onclick="closeModal()">Hủy</button>
-        <button type="button" class="btn-primary" onclick="saveExpense()">Lưu khoản chi</button>
+
+      <label for="expNote">
+        Ghi chú
+      </label>
+
+      <input
+        type="text"
+        id="expNote"
+        placeholder="Ghi chú..."
+      >
+
+
+      <label for="expDateTime">
+        Ngày & Giờ
+      </label>
+
+      <input
+        type="datetime-local"
+        id="expDateTime"
+      >
+
+
+      <div
+        class="grid-2"
+        style="margin-top:8px;"
+      >
+
+        <button
+          type="button"
+          style="background:#e5e5ea;color:#333;"
+          onclick="closeModal()"
+        >
+          Hủy
+        </button>
+
+        <button
+          type="button"
+          class="btn-primary"
+          onclick="saveExpense()"
+        >
+          Lưu khoản chi
+        </button>
+
       </div>
+
     </div>
+
   </div>
 
-  <!-- MODAL THÊM DANH MỤC MỚI -->
-  <div class="modal-overlay" id="addCategoryModal" onclick="closeAddCatModalOnOverlay(event)">
+
+  <!-- =====================================================
+       MODAL THÊM DANH MỤC
+       ===================================================== -->
+
+  <div
+    class="modal-overlay"
+    id="addCategoryModal"
+    onclick="closeAddCatModalOnOverlay(event)"
+  >
+
     <div class="modal-card">
-      <h2 style="margin-bottom:16px;">Thêm danh mục mới</h2>
-      
-      <label for="newCatName">Tên danh mục (ví dụ: 🎮 Giải trí)</label>
-      <input type="text" id="newCatName" placeholder="Nhập tên danh mục (có thể bao gồm icon)...">
 
-      <label for="newCatColor">Màu đại diện</label>
-      <input type="color" id="newCatColor" value="#007aff" style="height:44px; padding:2px; cursor:pointer;">
+      <h2 style="margin-bottom:16px;">
+        Thêm danh mục mới
+      </h2>
 
-      <div class="grid-2" style="margin-top:8px;">
-        <button type="button" style="background:#e5e5ea; color:#333;" onclick="closeAddCategoryModal()">Hủy</button>
-        <button type="button" class="btn-primary" onclick="saveNewCategory()">Thêm danh mục</button>
+
+      <label for="newCatName">
+        Tên danh mục
+      </label>
+
+      <input
+        type="text"
+        id="newCatName"
+        placeholder="Nhập tên danh mục (có thể bao gồm icon)..."
+      >
+
+
+      <label for="newCatColor">
+        Màu đại diện
+      </label>
+
+      <input
+        type="color"
+        id="newCatColor"
+        value="#007aff"
+        style="height:44px;padding:2px;cursor:pointer;"
+      >
+
+
+      <div
+        class="grid-2"
+        style="margin-top:8px;"
+      >
+
+        <button
+          type="button"
+          style="background:#e5e5ea;color:#333;"
+          onclick="closeAddCategoryModal()"
+        >
+          Hủy
+        </button>
+
+        <button
+          type="button"
+          class="btn-primary"
+          onclick="saveNewCategory()"
+        >
+          Thêm danh mục
+        </button>
+
       </div>
+
     </div>
+
   </div>
+
 
   <script>
-    /* ===== DANH MỤC MẶC ĐỊNH & MÀU SẮC (Đã đổi icon "Khác" thành 🔖) ===== */
+
+    /* =====================================================
+       DANH MỤC MẶC ĐỊNH
+       ===================================================== */
+
     const DEFAULT_CATEGORIES = [
-      { name: "⛽ Đổ xăng", color: "#ff9500", isDefault: true },
-      { name: "🌐 Cước thoại Internet", color: "#30b0c7", isDefault: true },
-      { name: "⚡ Điện Nước", color: "#007aff", isDefault: true },
-      { name: "🏥 Khám chữa bệnh", color: "#ff2d55", isDefault: true },
-      { name: "🎓 Tiền Học", color: "#af52de", isDefault: true },
-      { name: "🍜 Ăn Uống", color: "#ff9500", isDefault: true },
-      { name: "✈️ Du lịch", color: "#5856d6", isDefault: true },
-      { name: "🛒 Mua Sắm", color: "#34c759", isDefault: true },
-      { name: "🔧 Sửa xe", color: "#ff3b30", isDefault: true },
-      { name: "✉️ Đám hiếu hỉ", color: "#ff3b30", isDefault: true },
-      { name: "‼️ Chưa phân loại ", color: "#8e8e93", isDefault: true }
+
+      {
+        name: "⛽ Đổ xăng",
+        color: "#ff9500",
+        isDefault: true
+      },
+
+      {
+        name: "🌐 Cước thoại Internet",
+        color: "#30b0c7",
+        isDefault: true
+      },
+
+      {
+        name: "⚡ Điện Nước",
+        color: "#007aff",
+        isDefault: true
+      },
+
+      {
+        name: "🏥 Khám chữa bệnh",
+        color: "#ff2d55",
+        isDefault: true
+      },
+
+      {
+        name: "🎓 Tiền Học",
+        color: "#af52de",
+        isDefault: true
+      },
+
+      {
+        name: "🍜 Ăn Uống",
+        color: "#ff9500",
+        isDefault: true
+      },
+
+      {
+        name: "✈️ Du lịch",
+        color: "#5856d6",
+        isDefault: true
+      },
+
+      {
+        name: "🛒 Mua Sắm",
+        color: "#34c759",
+        isDefault: true
+      },
+
+      {
+        name: "🔧 Sửa xe",
+        color: "#ff3b30",
+        isDefault: true
+      },
+
+      {
+        name: "✉️ Đám hiếu hỉ",
+        color: "#ff3b30",
+        isDefault: true
+      },
+
+      {
+        name: "‼️ Chưa phân loại ",
+        color: "#8e8e93",
+        isDefault: true
+      }
+
     ];
 
+
     let categoriesList = [];
+
     let expenses = [];
+
     let monthlyBudget = 14000000;
 
-    /* ===== UTILS ===== */
+
+    /* =====================================================
+       UTILS
+       ===================================================== */
+
     function getNowForInput() {
+
       const now = new Date();
+
       const yr = now.getFullYear();
-      const mo = String(now.getMonth() + 1).padStart(2, '0');
-      const da = String(now.getDate()).padStart(2, '0');
-      const hr = String(now.getHours()).padStart(2, '0');
-      const mi = String(now.getMinutes()).padStart(2, '0');
+
+      const mo = String(
+        now.getMonth() + 1
+      ).padStart(2, '0');
+
+      const da = String(
+        now.getDate()
+      ).padStart(2, '0');
+
+      const hr = String(
+        now.getHours()
+      ).padStart(2, '0');
+
+      const mi = String(
+        now.getMinutes()
+      ).padStart(2, '0');
+
       return `${yr}-${mo}-${da}T${hr}:${mi}`;
+
     }
+
 
     function formatDisplayDateTime(dtStr) {
-      if (!dtStr) return { text: '', isToday: false };
+
+      if (!dtStr) {
+        return {
+          text: '',
+          isToday: false
+        };
+      }
+
       const d = new Date(dtStr);
-      if (isNaN(d.getTime())) return { text: dtStr, isToday: false };
+
+      if (isNaN(d.getTime())) {
+        return {
+          text: dtStr,
+          isToday: false
+        };
+      }
 
       const now = new Date();
-      const isToday = d.getFullYear() === now.getFullYear() &&
-                      d.getMonth() === now.getMonth() &&
-                      d.getDate() === now.getDate();
 
-      const hr = String(d.getHours()).padStart(2, '0');
-      const mi = String(d.getMinutes()).padStart(2, '0');
+      const isToday =
+        d.getFullYear() === now.getFullYear() &&
+        d.getMonth() === now.getMonth() &&
+        d.getDate() === now.getDate();
+
+      const hr = String(
+        d.getHours()
+      ).padStart(2, '0');
+
+      const mi = String(
+        d.getMinutes()
+      ).padStart(2, '0');
+
 
       if (isToday) {
-        return { text: `Hôm nay ${hr}:${mi}`, isToday: true };
-      } else {
-        const da = String(d.getDate()).padStart(2, '0');
-        const mo = String(d.getMonth() + 1).padStart(2, '0');
-        const yr = d.getFullYear();
-        return { text: `${da}/${mo}/${yr} ${hr}:${mi}`, isToday: false };
+
+        return {
+          text: `Hôm nay ${hr}:${mi}`,
+          isToday: true
+        };
+
       }
+
+
+      const da = String(
+        d.getDate()
+      ).padStart(2, '0');
+
+      const mo = String(
+        d.getMonth() + 1
+      ).padStart(2, '0');
+
+      const yr = d.getFullYear();
+
+
+      return {
+        text: `${da}/${mo}/${yr} ${hr}:${mi}`,
+        isToday: false
+      };
+
     }
+
 
     function formatNum(n) {
-      return (Number(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+      return (Number(n) || 0)
+        .toString()
+        .replace(
+          /\B(?=(\d{3})+(?!\d))/g,
+          "."
+        );
+
     }
+
 
     function parseNum(str) {
-      return Number((str || "").toString().replace(/\./g, "")) || 0;
+
+      return Number(
+        (str || "")
+          .toString()
+          .replace(/\./g, "")
+      ) || 0;
+
     }
 
-    // Tự động định dạng ô nhập tiền khoản chi
-    const expAmountInput = document.getElementById('expAmount');
-    expAmountInput.addEventListener('input', () => {
-      let v = expAmountInput.value.replace(/\D/g, "");
-      expAmountInput.value = v ? formatNum(v) : "";
-    });
 
-    // Tự động định dạng ô nhập hạn mức
-    const budgetInput = document.getElementById('monthlyBudgetInput');
-    budgetInput.addEventListener('input', () => {
-      let v = budgetInput.value.replace(/\D/g, "");
-      budgetInput.value = v ? formatNum(v) : "";
-    });
+    /* =====================================================
+       INPUT ĐỊNH DẠNG TIỀN
+       ===================================================== */
 
-    /* ===== LOCAL STORAGE ===== */
+    const expAmountInput =
+      document.getElementById('expAmount');
+
+
+    expAmountInput.addEventListener(
+      'input',
+      () => {
+
+        let v =
+          expAmountInput.value
+            .replace(/\D/g, "");
+
+        expAmountInput.value =
+          v ? formatNum(v) : "";
+
+      }
+    );
+
+
+    const budgetInput =
+      document.getElementById('monthlyBudgetInput');
+
+
+    budgetInput.addEventListener(
+      'input',
+      () => {
+
+        let v =
+          budgetInput.value
+            .replace(/\D/g, "");
+
+        budgetInput.value =
+          v ? formatNum(v) : "";
+
+      }
+    );
+
+
+    /* =====================================================
+       LOCAL STORAGE
+       ===================================================== */
+
     function saveData() {
-      localStorage.setItem("expenses_data_v5", JSON.stringify(expenses));
-      localStorage.setItem("categories_data_v5", JSON.stringify(categoriesList));
-      localStorage.setItem("monthly_budget_v5", monthlyBudget.toString());
+
+      localStorage.setItem(
+        "expenses_data_v5",
+        JSON.stringify(expenses)
+      );
+
+      localStorage.setItem(
+        "categories_data_v5",
+        JSON.stringify(categoriesList)
+      );
+
+      localStorage.setItem(
+        "monthly_budget_v5",
+        monthlyBudget.toString()
+      );
+
     }
+
 
     function loadData() {
-      expenses = JSON.parse(localStorage.getItem("expenses_data_v5")) || [];
-      categoriesList = JSON.parse(localStorage.getItem("categories_data_v5")) || DEFAULT_CATEGORIES;
-      monthlyBudget = Number(localStorage.getItem("monthly_budget_v5")) || 14000000;
 
-      // Cập nhật nâng cấp icon Khác nếu người dùng có dữ liệu cũ
-      categoriesList = categoriesList.map(c => {
-        if (c.name === "📦 Khác") return { ...c, name: "🔖 Khác" };
-        return c;
-      });
+      try {
 
-      expenses = expenses.map(e => {
-        if (e.category === "📦 Khác") return { ...e, category: "🔖 Khác" };
-        return e;
-      });
+        expenses =
+          JSON.parse(
+            localStorage.getItem(
+              "expenses_data_v5"
+            )
+          ) || [];
+
+      } catch {
+
+        expenses = [];
+
+      }
+
+
+      try {
+
+        categoriesList =
+          JSON.parse(
+            localStorage.getItem(
+              "categories_data_v5"
+            )
+          ) || DEFAULT_CATEGORIES;
+
+      } catch {
+
+        categoriesList =
+          [...DEFAULT_CATEGORIES];
+
+      }
+
+
+      monthlyBudget =
+        Number(
+          localStorage.getItem(
+            "monthly_budget_v5"
+          )
+        ) || 14000000;
+
+
+      categoriesList =
+        categoriesList.map(c => {
+
+          if (c.name === "📦 Khác") {
+
+            return {
+              ...c,
+              name: "🔖 Khác"
+            };
+
+          }
+
+          return c;
+
+        });
+
+
+      expenses =
+        expenses.map(e => {
+
+          if (e.category === "📦 Khác") {
+
+            return {
+              ...e,
+              category: "🔖 Khác"
+            };
+
+          }
+
+          return e;
+
+        });
+
 
       updateCategoryDropdown();
+
     }
+
 
     function updateCategoryDropdown() {
-      const selectEl = document.getElementById('expCategory');
-      selectEl.innerHTML = categoriesList.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+      const selectEl =
+        document.getElementById(
+          'expCategory'
+        );
+
+
+      selectEl.innerHTML =
+        categoriesList
+          .map(c =>
+            `<option value="${c.name}">
+              ${c.name}
+            </option>`
+          )
+          .join('');
+
     }
 
-    /* ===== CHUYỂN TAB ===== */
-    function switchTab(tabName, el) {
-      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-      document.querySelectorAll('.tab-item').forEach(ti => ti.classList.remove('active'));
 
-      document.getElementById('tab-' + tabName).classList.add('active');
+    /* =====================================================
+       CHUYỂN TAB
+       ===================================================== */
+
+    function switchTab(tabName, el) {
+
+      document
+        .querySelectorAll('.tab-content')
+        .forEach(tc =>
+          tc.classList.remove('active')
+        );
+
+
+      document
+        .querySelectorAll('.tab-item')
+        .forEach(ti =>
+          ti.classList.remove('active')
+        );
+
+
+      document
+        .getElementById(
+          'tab-' + tabName
+        )
+        .classList.add('active');
+
+
       el.classList.add('active');
 
-      if (tabName === 'report') renderReport();
-      else if (tabName === 'settings') renderSettings();
-      else renderRecords();
+
+      if (tabName === 'report') {
+
+        renderReport();
+
+        renderCustomReport();
+
+      }
+
+      else if (tabName === 'settings') {
+
+        renderSettings();
+
+      }
+
+      else {
+
+        renderRecords();
+
+      }
+
     }
 
-    /* ===== MODAL THÊM / SỬA KHOẢN CHI ===== */
+
+    /* =====================================================
+       MODAL THÊM / SỬA
+       ===================================================== */
+
     function openModal(id = null) {
+
       closeAllDropdowns();
+
       updateCategoryDropdown();
-      
-      const selectEl = document.getElementById('expCategory');
+
+
+      const selectEl =
+        document.getElementById(
+          'expCategory'
+        );
+
 
       if (id) {
-        const item = expenses.find(e => e.id === id);
-        if (!item) return;
-        document.getElementById('modalTitle').innerText = "Sửa khoản chi";
-        document.getElementById('editId').value = item.id;
-        selectEl.value = item.category;
-        document.getElementById('expAmount').value = formatNum(item.amount);
-        document.getElementById('expNote').value = item.note || "";
-        document.getElementById('expDateTime').value = item.datetime || getNowForInput();
-      } else {
-        document.getElementById('modalTitle').innerText = "Thêm khoản chi mới";
-        document.getElementById('editId').value = "";
-        
-        // Ưu tiên chọn danh mục "Khác" đầu tiên khi nhấn +
-        const otherCat = categoriesList.find(c => c.name.includes("Chưa phân loại"));
-        if (otherCat) {
-          selectEl.value = otherCat.name;
-        } else if (categoriesList.length > 0) {
-          selectEl.value = categoriesList[0].name;
-        }
 
-        document.getElementById('expAmount').value = "";
-        document.getElementById('expNote').value = "";
-        document.getElementById('expDateTime').value = getNowForInput();
+        const item =
+          expenses.find(
+            e => e.id === id
+          );
+
+
+        if (!item) return;
+
+
+        document.getElementById(
+          'modalTitle'
+        ).innerText =
+          "Sửa khoản chi";
+
+
+        document.getElementById(
+          'editId'
+        ).value =
+          item.id;
+
+
+        selectEl.value =
+          item.category;
+
+
+        document.getElementById(
+          'expAmount'
+        ).value =
+          formatNum(item.amount);
+
+
+        document.getElementById(
+          'expNote'
+        ).value =
+          item.note || "";
+
+
+        document.getElementById(
+          'expDateTime'
+        ).value =
+          item.datetime ||
+          getNowForInput();
+
       }
 
-      document.getElementById('expenseModal').classList.add('active');
-      setTimeout(() => document.getElementById('expAmount').focus(), 100);
+      else {
+
+        document.getElementById(
+          'modalTitle'
+        ).innerText =
+          "Thêm khoản chi mới";
+
+
+        document.getElementById(
+          'editId'
+        ).value = "";
+
+
+        const otherCat =
+          categoriesList.find(
+            c =>
+              c.name.includes(
+                "Chưa phân loại"
+              )
+          );
+
+
+        if (otherCat) {
+
+          selectEl.value =
+            otherCat.name;
+
+        }
+
+        else if (
+          categoriesList.length > 0
+        ) {
+
+          selectEl.value =
+            categoriesList[0].name;
+
+        }
+
+
+        document.getElementById(
+          'expAmount'
+        ).value = "";
+
+
+        document.getElementById(
+          'expNote'
+        ).value = "";
+
+
+        document.getElementById(
+          'expDateTime'
+        ).value =
+          getNowForInput();
+
+      }
+
+
+      document
+        .getElementById(
+          'expenseModal'
+        )
+        .classList.add('active');
+
+
+      setTimeout(
+        () =>
+          document
+            .getElementById(
+              'expAmount'
+            )
+            .focus(),
+        100
+      );
+
     }
+
 
     function closeModal() {
-      document.getElementById('expenseModal').classList.remove('active');
+
+      document
+        .getElementById(
+          'expenseModal'
+        )
+        .classList.remove('active');
+
     }
+
 
     function closeModalOnOverlay(e) {
-      if (e.target.classList.contains('modal-overlay')) closeModal();
+
+      if (
+        e.target.classList.contains(
+          'modal-overlay'
+        )
+      ) {
+
+        closeModal();
+
+      }
+
     }
 
-    /* ===== CẬP NHẬT KHOẢN CHI ===== */
+
+    /* =====================================================
+       LƯU KHOẢN CHI
+       ===================================================== */
+
     function saveExpense() {
-      const editId = document.getElementById('editId').value;
-      const amount = parseNum(document.getElementById('expAmount').value);
-      const category = document.getElementById('expCategory').value;
-      const note = document.getElementById('expNote').value.trim();
-      const datetime = document.getElementById('expDateTime').value || getNowForInput();
+
+      const editId =
+        document.getElementById(
+          'editId'
+        ).value;
+
+
+      const amount =
+        parseNum(
+          document.getElementById(
+            'expAmount'
+          ).value
+        );
+
+
+      const category =
+        document.getElementById(
+          'expCategory'
+        ).value;
+
+
+      const note =
+        document.getElementById(
+          'expNote'
+        ).value.trim();
+
+
+      const datetime =
+        document.getElementById(
+          'expDateTime'
+        ).value ||
+        getNowForInput();
+
 
       if (amount <= 0) {
-        alert("Vui lòng nhập số tiền hợp lệ!");
+
+        alert(
+          "Vui lòng nhập số tiền hợp lệ!"
+        );
+
         return;
+
       }
+
 
       if (editId) {
-        const idx = expenses.findIndex(e => e.id == editId);
+
+        const idx =
+          expenses.findIndex(
+            e => e.id == editId
+          );
+
+
         if (idx !== -1) {
-          expenses[idx] = { ...expenses[idx], amount, category, note, datetime };
+
+          expenses[idx] = {
+            ...expenses[idx],
+            amount,
+            category,
+            note,
+            datetime
+          };
+
         }
-      } else {
-        expenses.unshift({ id: Date.now(), amount, category, note, datetime });
+
       }
 
+      else {
+
+        expenses.unshift({
+
+          id: Date.now(),
+
+          amount,
+
+          category,
+
+          note,
+
+          datetime
+
+        });
+
+      }
+
+
       saveData();
+
       closeModal();
+
       renderRecords();
+
     }
+
 
     function deleteExpense(id) {
+
       closeAllDropdowns();
-      if (confirm("Xóa khoản chi này?")) {
-        expenses = expenses.filter(e => e.id !== id);
+
+
+      if (
+        confirm(
+          "Xóa khoản chi này?"
+        )
+      ) {
+
+        expenses =
+          expenses.filter(
+            e => e.id !== id
+          );
+
+
         saveData();
+
         renderRecords();
+
       }
+
     }
 
-    /* ===== MENU 3 CHẤM ===== */
+
+    /* =====================================================
+       MENU 3 CHẤM
+       ===================================================== */
+
     function toggleDropdown(e, id) {
+
       e.stopPropagation();
-      const currentMenu = document.getElementById(`dropdown-${id}`);
-      const isVisible = currentMenu.classList.contains('active');
+
+
+      const currentMenu =
+        document.getElementById(
+          `dropdown-${id}`
+        );
+
+
+      const isVisible =
+        currentMenu.classList.contains(
+          'active'
+        );
+
+
       closeAllDropdowns();
+
+
       if (!isVisible) {
-        currentMenu.classList.add('active');
+
+        currentMenu.classList.add(
+          'active'
+        );
+
       }
+
     }
+
 
     function closeAllDropdowns() {
-      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('active'));
+
+      document
+        .querySelectorAll(
+          '.dropdown-menu'
+        )
+        .forEach(
+          m =>
+            m.classList.remove(
+              'active'
+            )
+        );
+
     }
 
-    document.addEventListener('click', closeAllDropdowns);
 
-    /* ===== TÍNH TOÁN & HIỂN THỊ CẢNH BÁO HẠN MỨC THÁNG ===== */
+    document.addEventListener(
+      'click',
+      closeAllDropdowns
+    );
+
+
+    /* =====================================================
+       HẠN MỨC
+       ===================================================== */
+
     function updateBudgetStatus() {
+
       const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth();
 
-      const currentMonthTotal = expenses.reduce((sum, e) => {
-        const d = new Date(e.datetime);
-        if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
-          return sum + e.amount;
-        }
-        return sum;
-      }, 0);
+      const currentYear =
+        now.getFullYear();
 
-      const statusEl = document.getElementById('budgetStatus');
-      statusEl.className = 'budget-limit-info';
+      const currentMonth =
+        now.getMonth();
 
-      const textBase = `Hạn mức tháng: ${formatNum(monthlyBudget)} VND \n(Đã chi: ${formatNum(currentMonthTotal)} VND)`;
 
-      const warnLimit = monthlyBudget * 0.8;
+      const currentMonthTotal =
+        expenses.reduce(
+          (sum, e) => {
 
-      if (currentMonthTotal < warnLimit) {
-        statusEl.classList.add('budget-safe');
-        statusEl.innerText = textBase;
-      } else if (currentMonthTotal <= monthlyBudget) {
-        statusEl.classList.add('budget-warning');
-        statusEl.innerText = `${textBase} - Chú ý chi tiêu!`;
-      } else {
-        statusEl.classList.add('budget-danger');
-        statusEl.innerText = `${textBase} - Vượt hạn mức!`;
+            const d =
+              new Date(e.datetime);
+
+
+            if (
+              d.getFullYear() ===
+                currentYear &&
+              d.getMonth() ===
+                currentMonth
+            ) {
+
+              return sum + e.amount;
+
+            }
+
+
+            return sum;
+
+          },
+          0
+        );
+
+
+      const statusEl =
+        document.getElementById(
+          'budgetStatus'
+        );
+
+
+      statusEl.className =
+        'budget-limit-info';
+
+
+      const textBase =
+        `Hạn mức tháng: ${formatNum(monthlyBudget)} VND\n` +
+        `(Đã chi: ${formatNum(currentMonthTotal)} VND)`;
+
+
+      const warnLimit =
+        monthlyBudget * 0.8;
+
+
+      if (
+        currentMonthTotal <
+        warnLimit
+      ) {
+
+        statusEl.classList.add(
+          'budget-safe'
+        );
+
+        statusEl.innerText =
+          textBase;
+
       }
+
+      else if (
+        currentMonthTotal <=
+        monthlyBudget
+      ) {
+
+        statusEl.classList.add(
+          'budget-warning'
+        );
+
+        statusEl.innerText =
+          `${textBase} - Chú ý chi tiêu!`;
+
+      }
+
+      else {
+
+        statusEl.classList.add(
+          'budget-danger'
+        );
+
+        statusEl.innerText =
+          `${textBase} - Vượt hạn mức!`;
+
+      }
+
     }
 
-    /* ===== TAB 1: RENDER GHI CHÉP ===== */
+
+    /* =====================================================
+       GHI CHÉP
+       ===================================================== */
+
     function renderRecords() {
+
       updateBudgetStatus();
-      
-      const recentListEl = document.getElementById('recentExpenseList');
-      
+
+
+      const recentListEl =
+        document.getElementById(
+          'recentExpenseList'
+        );
+
+
       if (!expenses.length) {
-        recentListEl.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px 0;">Chưa có khoản chi nào. Bấm nút + để thêm mới.</p>';
+
+        recentListEl.innerHTML = `
+          <p
+            style="
+              color:var(--muted);
+              font-size:13px;
+              text-align:center;
+              padding:12px 0;
+            "
+          >
+            Chưa có khoản chi nào.
+            Bấm nút + để thêm mới.
+          </p>
+        `;
+
         return;
+
       }
 
-      const sortedExpenses = [...expenses].sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
 
-      recentListEl.innerHTML = sortedExpenses.map(item => {
-        const dtInfo = formatDisplayDateTime(item.datetime);
-        const subClass = dtInfo.isToday ? 'sub-today' : 'sub-old';
+      const sortedExpenses =
+        [...expenses].sort(
+          (a, b) =>
+            new Date(b.datetime) -
+            new Date(a.datetime)
+        );
 
-        return `
-          <div class="expense-item">
-            <div class="expense-info">
-              <div class="title">${item.category}</div>
-              ${item.note ? `<div class="note">${item.note}</div>` : ''}
-              <div class="${subClass}">${dtInfo.text}</div>
-            </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <div class="expense-amount">-${formatNum(item.amount)} đ</div>
-              <button class="more-btn" onclick="toggleDropdown(event, ${item.id})">⋮</button>
-              <div class="dropdown-menu" id="dropdown-${item.id}">
-                <button class="dropdown-item" onclick="openModal(${item.id})">✏️ Sửa</button>
-                <button class="dropdown-item danger" onclick="deleteExpense(${item.id})">🗑️ Xóa</button>
+
+      recentListEl.innerHTML =
+        sortedExpenses
+          .map(item => {
+
+            const dtInfo =
+              formatDisplayDateTime(
+                item.datetime
+              );
+
+
+            const subClass =
+              dtInfo.isToday
+                ? 'sub-today'
+                : 'sub-old';
+
+
+            return `
+
+              <div class="expense-item">
+
+                <div class="expense-info">
+
+                  <div class="title">
+                    ${item.category}
+                  </div>
+
+                  ${
+                    item.note
+                      ? `
+                        <div class="note">
+                          ${item.note}
+                        </div>
+                      `
+                      : ''
+                  }
+
+                  <div class="${subClass}">
+                    ${dtInfo.text}
+                  </div>
+
+                </div>
+
+
+                <div
+                  style="
+                    display:flex;
+                    align-items:center;
+                    gap:8px;
+                  "
+                >
+
+                  <div class="expense-amount">
+                    -${formatNum(item.amount)} đ
+                  </div>
+
+
+                  <button
+                    class="more-btn"
+                    onclick="toggleDropdown(event, ${item.id})"
+                  >
+                    ⋮
+                  </button>
+
+
+                  <div
+                    class="dropdown-menu"
+                    id="dropdown-${item.id}"
+                  >
+
+                    <button
+                      class="dropdown-item"
+                      onclick="openModal(${item.id})"
+                    >
+                      ✏️ Sửa
+                    </button>
+
+                    <button
+                      class="dropdown-item danger"
+                      onclick="deleteExpense(${item.id})"
+                    >
+                      🗑️ Xóa
+                    </button>
+
+                  </div>
+
+                </div>
+
               </div>
-            </div>
-          </div>
-        `;
-      }).join('');
+
+            `;
+
+          })
+          .join('');
+
     }
 
-    /* ===== TAB 2: RENDER BÁO CÁO ===== */
+
+    /* =====================================================
+       BÁO CÁO
+       ===================================================== */
+
     function renderReport() {
+
       const now = new Date();
 
-      /* --- 1. BÁO CÁO TUẦN NÀY --- */
-      const startOfWeek = new Date(now);
-      const day = now.getDay() || 7; 
-      startOfWeek.setDate(now.getDate() - day + 1);
-      startOfWeek.setHours(0,0,0,0);
 
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      endOfWeek.setHours(23,59,59,999);
+      /* TUẦN */
 
-      document.getElementById('labelWeekRange').innerText = 
+      const startOfWeek =
+        new Date(now);
+
+
+      const day =
+        now.getDay() || 7;
+
+
+      startOfWeek.setDate(
+        now.getDate() -
+        day +
+        1
+      );
+
+
+      startOfWeek.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+
+      const endOfWeek =
+        new Date(startOfWeek);
+
+
+      endOfWeek.setDate(
+        startOfWeek.getDate() +
+        6
+      );
+
+
+      endOfWeek.setHours(
+        23,
+        59,
+        59,
+        999
+      );
+
+
+      document.getElementById(
+        'labelWeekRange'
+      ).innerText =
         `(${startOfWeek.getDate()}/${startOfWeek.getMonth()+1} -> ${endOfWeek.getDate()}/${endOfWeek.getMonth()+1})`;
 
-      const weekExpenses = expenses.filter(e => {
-        const d = new Date(e.datetime);
-        return d >= startOfWeek && d <= endOfWeek;
-      });
 
-      renderPieSection(weekExpenses, 'totalWeek', 'breakdownWeek', 'pieChartWeek');
+      const weekExpenses =
+        expenses.filter(e => {
 
-      /* --- 2. BÁO CÁO THÁNG NÀY --- */
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth();
+          const d =
+            new Date(e.datetime);
 
-      const startOfMonth = new Date(currentYear, currentMonth, 1);
-      const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+          return (
+            d >= startOfWeek &&
+            d <= endOfWeek
+          );
 
-      document.getElementById('labelMonthRange').innerText = 
+        });
+
+
+      renderPieSection(
+        weekExpenses,
+        'totalWeek',
+        'breakdownWeek',
+        'pieChartWeek'
+      );
+
+
+      /* THÁNG NÀY */
+
+      const currentYear =
+        now.getFullYear();
+
+      const currentMonth =
+        now.getMonth();
+
+
+      const startOfMonth =
+        new Date(
+          currentYear,
+          currentMonth,
+          1
+        );
+
+
+      const endOfMonth =
+        new Date(
+          currentYear,
+          currentMonth + 1,
+          0,
+          23,
+          59,
+          59,
+          999
+        );
+
+
+      document.getElementById(
+        'labelMonthRange'
+      ).innerText =
         `(${startOfMonth.getDate()}/${startOfMonth.getMonth()+1} -> ${endOfMonth.getDate()}/${endOfMonth.getMonth()+1})`;
 
-      const monthExpenses = expenses.filter(e => {
-        const d = new Date(e.datetime);
-        return d >= startOfMonth && d <= endOfMonth;
-      });
 
-      renderPieSection(monthExpenses, 'totalMonth', 'breakdownMonth', 'pieChartMonth');
+      const monthExpenses =
+        expenses.filter(e => {
 
-      /* --- 3. BÁO CÁO THÁNG TRƯỚC --- */
-      const startOfLastMonth = new Date(currentYear, currentMonth - 1, 1);
-      const endOfLastMonth = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
+          const d =
+            new Date(e.datetime);
 
-      document.getElementById('labelLastMonthRange').innerText = 
+          return (
+            d >= startOfMonth &&
+            d <= endOfMonth
+          );
+
+        });
+
+
+      renderPieSection(
+        monthExpenses,
+        'totalMonth',
+        'breakdownMonth',
+        'pieChartMonth'
+      );
+
+
+      /* THÁNG TRƯỚC */
+
+      const startOfLastMonth =
+        new Date(
+          currentYear,
+          currentMonth - 1,
+          1
+        );
+
+
+      const endOfLastMonth =
+        new Date(
+          currentYear,
+          currentMonth,
+          0,
+          23,
+          59,
+          59,
+          999
+        );
+
+
+      document.getElementById(
+        'labelLastMonthRange'
+      ).innerText =
         `(${startOfLastMonth.getDate()}/${startOfLastMonth.getMonth()+1} -> ${endOfLastMonth.getDate()}/${endOfLastMonth.getMonth()+1})`;
 
-      const lastMonthExpenses = expenses.filter(e => {
-        const d = new Date(e.datetime);
-        return d >= startOfLastMonth && d <= endOfLastMonth;
-      });
 
-      renderPieSection(lastMonthExpenses, 'totalLastMonth', 'breakdownLastMonth', 'pieChartLastMonth');
+      const lastMonthExpenses =
+        expenses.filter(e => {
 
-      /* --- 4. BÁO CÁO NĂM NAY --- */
-      const monthlyTotals = Array(12).fill(0);
+          const d =
+            new Date(e.datetime);
+
+          return (
+            d >= startOfLastMonth &&
+            d <= endOfLastMonth
+          );
+
+        });
+
+
+      renderPieSection(
+        lastMonthExpenses,
+        'totalLastMonth',
+        'breakdownLastMonth',
+        'pieChartLastMonth'
+      );
+
+
+      /* NĂM NAY */
+
+      const monthlyTotals =
+        Array(12).fill(0);
+
 
       expenses.forEach(e => {
-        const d = new Date(e.datetime);
-        if (d.getFullYear() === currentYear) {
-          monthlyTotals[d.getMonth()] += e.amount;
+
+        const d =
+          new Date(e.datetime);
+
+
+        if (
+          d.getFullYear() ===
+          currentYear
+        ) {
+
+          monthlyTotals[
+            d.getMonth()
+          ] += e.amount;
+
         }
+
       });
 
-      const totalYear = monthlyTotals.reduce((a, b) => a + b, 0);
-      document.getElementById('totalYear').innerText = `${formatNum(totalYear)} VND`;
 
-      const yearLabels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
-      drawBarChart('barChartYear', yearLabels, monthlyTotals, 42);
+      const totalYear =
+        monthlyTotals.reduce(
+          (a, b) => a + b,
+          0
+        );
 
-      /* --- 5. BÁO CÁO 5 NĂM GẦN NHẤT --- */
+
+      document.getElementById(
+        'totalYear'
+      ).innerText =
+        `${formatNum(totalYear)} VND`;
+
+
+      const yearLabels = [
+        'T1',
+        'T2',
+        'T3',
+        'T4',
+        'T5',
+        'T6',
+        'T7',
+        'T8',
+        'T9',
+        'T10',
+        'T11',
+        'T12'
+      ];
+
+
+      drawBarChart(
+        'barChartYear',
+        yearLabels,
+        monthlyTotals,
+        42
+      );
+
+
+      /* 5 NĂM */
+
       const fiveYearLabels = [];
+
       const fiveYearTotals = [];
-      
-      for (let i = 4; i >= 0; i--) {
-        fiveYearLabels.push((currentYear - i).toString());
+
+
+      for (
+        let i = 4;
+        i >= 0;
+        i--
+      ) {
+
+        fiveYearLabels.push(
+          (
+            currentYear - i
+          ).toString()
+        );
+
         fiveYearTotals.push(0);
+
       }
 
-      document.getElementById('label5YearsRange').innerText = `(${fiveYearLabels[0]} - ${fiveYearLabels[4]})`;
+
+      document.getElementById(
+        'label5YearsRange'
+      ).innerText =
+        `(${fiveYearLabels[0]} - ${fiveYearLabels[4]})`;
+
 
       expenses.forEach(e => {
-        const d = new Date(e.datetime);
-        const yr = d.getFullYear();
-        const idx = fiveYearLabels.indexOf(yr.toString());
+
+        const d =
+          new Date(e.datetime);
+
+        const yr =
+          d.getFullYear();
+
+
+        const idx =
+          fiveYearLabels.indexOf(
+            yr.toString()
+          );
+
+
         if (idx !== -1) {
-          fiveYearTotals[idx] += e.amount;
+
+          fiveYearTotals[idx] +=
+            e.amount;
+
         }
+
       });
 
-      const total5Years = fiveYearTotals.reduce((a, b) => a + b, 0);
-      document.getElementById('total5Years').innerText = `${formatNum(total5Years)} VND`;
 
-      drawBarChart('barChart5Years', fiveYearLabels, fiveYearTotals, 60);
+      const total5Years =
+        fiveYearTotals.reduce(
+          (a, b) => a + b,
+          0
+        );
+
+
+      document.getElementById(
+        'total5Years'
+      ).innerText =
+        `${formatNum(total5Years)} VND`;
+
+
+      drawBarChart(
+        'barChart5Years',
+        fiveYearLabels,
+        fiveYearTotals,
+        60
+      );
+
     }
 
-    function renderPieSection(expenseList, totalElId, breakdownElId, chartCanvasId) {
-      const total = expenseList.reduce((sum, e) => sum + e.amount, 0);
-      document.getElementById(totalElId).innerText = `${formatNum(total)} VND`;
+
+    /* =====================================================
+       BÁO CÁO PIE
+       ===================================================== */
+
+    function renderPieSection(
+      expenseList,
+      totalElId,
+      breakdownElId,
+      chartCanvasId
+    ) {
+
+      const total =
+        expenseList.reduce(
+          (sum, e) =>
+            sum + e.amount,
+          0
+        );
+
+
+      document.getElementById(
+        totalElId
+      ).innerText =
+        `${formatNum(total)} VND`;
+
 
       const catTotals = {};
-      categoriesList.forEach(c => catTotals[c.name] = 0);
-      
+
+
+      categoriesList.forEach(
+        c =>
+          catTotals[c.name] = 0
+      );
+
+
       expenseList.forEach(e => {
-        if (catTotals[e.category] !== undefined) catTotals[e.category] += e.amount;
-        else {
-          const fallbackKey = categoriesList.find(c => c.name.includes("Chưa phân loại "))?.name || "🔖 Chưa phân loại";
-          if (!catTotals[fallbackKey]) catTotals[fallbackKey] = 0;
-          catTotals[fallbackKey] += e.amount;
+
+        if (
+          catTotals[e.category] !==
+          undefined
+        ) {
+
+          catTotals[e.category] +=
+            e.amount;
+
         }
+
+        else {
+
+          const fallbackKey =
+            categoriesList.find(
+              c =>
+                c.name.includes(
+                  "Chưa phân loại"
+                )
+            )?.name ||
+            "🔖 Chưa phân loại";
+
+
+          if (!catTotals[fallbackKey]) {
+            catTotals[fallbackKey] = 0;
+          }
+
+
+          catTotals[fallbackKey] +=
+            e.amount;
+
+        }
+
       });
 
-      const breakdownList = categoriesList.map(c => ({
-        cat: c.name,
-        color: c.color,
-        amt: catTotals[c.name] || 0,
-        pct: total > 0 ? (((catTotals[c.name] || 0) / total) * 100) : 0
-      }))
-      .filter(item => item.amt > 0)
-      .sort((a, b) => b.pct - a.pct);
 
-      document.getElementById(breakdownElId).innerHTML = breakdownList.map(item => `
-        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-          <span><span style="color:${item.color}; font-weight:bold;">●</span> ${item.cat} (${item.pct.toFixed(1)}%)</span>
-          <b>${formatNum(item.amt)} VND</b>
-        </div>
-      `).join('');
+      const breakdownList =
+        categoriesList
+          .map(c => ({
 
-      const pieData = categoriesList.map(c => catTotals[c.name] || 0);
-      const pieColors = categoriesList.map(c => c.color);
-      drawPieChart(chartCanvasId, pieData, pieColors, total);
+            cat: c.name,
+
+            color: c.color,
+
+            amt:
+              catTotals[c.name] || 0,
+
+            pct:
+              total > 0
+                ? (
+                    (
+                      catTotals[c.name] ||
+                      0
+                    ) /
+                    total
+                  ) *
+                  100
+                : 0
+
+          }))
+          .filter(
+            item =>
+              item.amt > 0
+          )
+          .sort(
+            (a, b) =>
+              b.pct - a.pct
+          );
+
+
+      document.getElementById(
+        breakdownElId
+      ).innerHTML =
+        breakdownList
+          .map(item => `
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                font-size:13px;
+                margin-bottom:6px;
+              "
+            >
+
+              <span>
+
+                <span
+                  style="
+                    color:${item.color};
+                    font-weight:bold;
+                  "
+                >
+                  ●
+                </span>
+
+                ${item.cat}
+                (${item.pct.toFixed(1)}%)
+
+              </span>
+
+              <b>
+                ${formatNum(item.amt)} VND
+              </b>
+
+            </div>
+
+          `)
+          .join('');
+
+
+      const pieData =
+        categoriesList.map(
+          c =>
+            catTotals[c.name] || 0
+        );
+
+
+      const pieColors =
+        categoriesList.map(
+          c => c.color
+        );
+
+
+      drawPieChart(
+        chartCanvasId,
+        pieData,
+        pieColors,
+        total
+      );
+
     }
 
-    function drawPieChart(canvasId, dataArr, colorsArr, total) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      const dpr = window.devicePixelRatio || 1;
 
-      const w = canvas.parentElement.clientWidth || 300;
+    /* =====================================================
+       BIỂU ĐỒ TRÒN
+       ===================================================== */
+
+    function drawPieChart(
+      canvasId,
+      dataArr,
+      colorsArr,
+      total
+    ) {
+
+      const canvas =
+        document.getElementById(
+          canvasId
+        );
+
+
+      const ctx =
+        canvas.getContext('2d');
+
+
+      const dpr =
+        window.devicePixelRatio || 1;
+
+
+      const w =
+        canvas.parentElement
+          .clientWidth || 300;
+
+
       const h = 220;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.height = h + "px";
 
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
 
-      const cx = w / 2;
-      const cy = h / 2;
-      const radius = Math.min(w, h) / 2 - 16;
+      canvas.width =
+        w * dpr;
+
+
+      canvas.height =
+        h * dpr;
+
+
+      canvas.style.height =
+        h + "px";
+
+
+      ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+      );
+
+
+      ctx.clearRect(
+        0,
+        0,
+        w,
+        h
+      );
+
+
+      const cx =
+        w / 2;
+
+
+      const cy =
+        h / 2;
+
+
+      const radius =
+        Math.min(w, h) / 2 - 16;
+
 
       if (total <= 0) {
-        ctx.fillStyle = '#8e8e93';
-        ctx.font = '14px -apple-system, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Chưa có chi tiêu trong khoảng thời gian này', cx, cy);
+
+        ctx.fillStyle =
+          '#8e8e93';
+
+
+        ctx.font =
+          '14px -apple-system, sans-serif';
+
+
+        ctx.textAlign =
+          'center';
+
+
+        ctx.fillText(
+          'Chưa có chi tiêu trong khoảng thời gian này',
+          cx,
+          cy
+        );
+
+
         return;
+
       }
 
-      let startAngle = -Math.PI / 2;
-      dataArr.forEach((val, i) => {
-        if (val <= 0) return;
-        const sliceAngle = (val / total) * 2 * Math.PI;
-        const endAngle = startAngle + sliceAngle;
 
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = colorsArr[i] || '#8e8e93';
-        ctx.fill();
+      let startAngle =
+        -Math.PI / 2;
 
-        startAngle = endAngle;
-      });
+
+      dataArr.forEach(
+        (val, i) => {
+
+          if (val <= 0) return;
+
+
+          const sliceAngle =
+            (val / total) *
+            2 *
+            Math.PI;
+
+
+          const endAngle =
+            startAngle +
+            sliceAngle;
+
+
+          ctx.beginPath();
+
+
+          ctx.moveTo(
+            cx,
+            cy
+          );
+
+
+          ctx.arc(
+            cx,
+            cy,
+            radius,
+            startAngle,
+            endAngle
+          );
+
+
+          ctx.closePath();
+
+
+          ctx.fillStyle =
+            colorsArr[i] ||
+            '#8e8e93';
+
+
+          ctx.fill();
+
+
+          startAngle =
+            endAngle;
+
+        }
+      );
+
 
       ctx.beginPath();
-      ctx.arc(cx, cy, radius * 0.55, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
+
+
+      ctx.arc(
+        cx,
+        cy,
+        radius * 0.55,
+        0,
+        Math.PI * 2
+      );
+
+
+      ctx.fillStyle =
+        '#ffffff';
+
+
       ctx.fill();
+
     }
 
-    function drawBarChart(canvasId, labels, values, columnStepWidth = 40) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      const dpr = window.devicePixelRatio || 1;
 
-      const parentWidth = canvas.parentElement.clientWidth || 300;
-      const minChartWidth = labels.length * columnStepWidth;
-      const w = Math.max(parentWidth, minChartWidth);
+    /* =====================================================
+       BIỂU ĐỒ CỘT
+       ===================================================== */
+
+    function drawBarChart(
+      canvasId,
+      labels,
+      values,
+      columnStepWidth = 40
+    ) {
+
+      const canvas =
+        document.getElementById(
+          canvasId
+        );
+
+
+      const ctx =
+        canvas.getContext('2d');
+
+
+      const dpr =
+        window.devicePixelRatio || 1;
+
+
+      const parentWidth =
+        canvas.parentElement
+          .clientWidth || 300;
+
+
+      const minChartWidth =
+        labels.length *
+        columnStepWidth;
+
+
+      const w =
+        Math.max(
+          parentWidth,
+          minChartWidth
+        );
+
+
       const h = 220;
 
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = w + "px";
-      canvas.style.height = h + "px";
 
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
+      canvas.width =
+        w * dpr;
 
-      const maxVal = Math.max(...values, 1);
+
+      canvas.height =
+        h * dpr;
+
+
+      canvas.style.width =
+        w + "px";
+
+
+      canvas.style.height =
+        h + "px";
+
+
+      ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+      );
+
+
+      ctx.clearRect(
+        0,
+        0,
+        w,
+        h
+      );
+
+
+      const maxVal =
+        Math.max(
+          ...values,
+          1
+        );
+
+
       const paddingLeft = 15;
+
       const paddingRight = 15;
+
       const paddingBottom = 30;
-      const chartWidth = w - paddingLeft - paddingRight;
-      const chartHeight = h - paddingBottom - 25;
 
-      const barWidth = Math.min(28, (chartWidth / labels.length) * 0.55);
 
-      labels.forEach((lbl, i) => {
-        const val = values[i];
-        const barH = (val / maxVal) * chartHeight;
-        const slotWidth = chartWidth / labels.length;
-        const x = paddingLeft + (i * slotWidth) + (slotWidth - barWidth) / 2;
-        const y = h - paddingBottom - barH;
+      const chartWidth =
+        w -
+        paddingLeft -
+        paddingRight;
 
-        ctx.fillStyle = val > 0 ? '#007aff' : '#e5e5ea';
-        const renderH = val > 0 ? Math.max(barH, 4) : 2;
-        const renderY = val > 0 ? y : h - paddingBottom - 2;
 
-        ctx.beginPath();
-        if (typeof ctx.roundRect === 'function') {
-          ctx.roundRect(x, renderY, barWidth, renderH, [4, 4, 0, 0]);
-        } else {
-          ctx.rect(x, renderY, barWidth, renderH);
+      const chartHeight =
+        h -
+        paddingBottom -
+        25;
+
+
+      const barWidth =
+        Math.min(
+          28,
+          (
+            chartWidth /
+            labels.length
+          ) * 0.55
+        );
+
+
+      labels.forEach(
+        (lbl, i) => {
+
+          const val =
+            values[i];
+
+
+          const barH =
+            (val / maxVal) *
+            chartHeight;
+
+
+          const slotWidth =
+            chartWidth /
+            labels.length;
+
+
+          const x =
+            paddingLeft +
+            (i * slotWidth) +
+            (
+              (
+                slotWidth -
+                barWidth
+              ) / 2
+            );
+
+
+          const y =
+            h -
+            paddingBottom -
+            barH;
+
+
+          ctx.fillStyle =
+            val > 0
+              ? '#007aff'
+              : '#e5e5ea';
+
+
+          const renderH =
+            val > 0
+              ? Math.max(
+                  barH,
+                  4
+                )
+              : 2;
+
+
+          const renderY =
+            val > 0
+              ? y
+              : h -
+                paddingBottom -
+                2;
+
+
+          ctx.beginPath();
+
+
+          if (
+            typeof ctx.roundRect ===
+            'function'
+          ) {
+
+            ctx.roundRect(
+              x,
+              renderY,
+              barWidth,
+              renderH,
+              [4, 4, 0, 0]
+            );
+
+          }
+
+          else {
+
+            ctx.rect(
+              x,
+              renderY,
+              barWidth,
+              renderH
+            );
+
+          }
+
+
+          ctx.fill();
+
+
+          ctx.fillStyle =
+            '#1c1c1e';
+
+
+          ctx.font =
+            '11px -apple-system, sans-serif';
+
+
+          ctx.textAlign =
+            'center';
+
+
+          ctx.fillText(
+            lbl,
+            x +
+              barWidth / 2,
+            h - 8
+          );
+
+
+          if (val > 0) {
+
+            ctx.fillStyle =
+              '#8e8e93';
+
+
+            ctx.font =
+              '9px -apple-system, sans-serif';
+
+
+            let displayVal =
+              val >= 1e6
+                ? (
+                    val / 1e6
+                  ).toFixed(1) + 'M'
+                : (
+                    val / 1e3
+                  ).toFixed(0) + 'k';
+
+
+            ctx.fillText(
+              displayVal,
+              x +
+                barWidth / 2,
+              renderY - 5
+            );
+
+          }
+
         }
-        ctx.fill();
+      );
 
-        ctx.fillStyle = '#1c1c1e';
-        ctx.font = '11px -apple-system, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(lbl, x + barWidth / 2, h - 8);
-
-        if (val > 0) {
-          ctx.fillStyle = '#8e8e93';
-          ctx.font = '9px -apple-system, sans-serif';
-          let displayVal = val >= 1e6 ? (val/1e6).toFixed(1) + 'M' : (val/1e3).toFixed(0) + 'k';
-          ctx.fillText(displayVal, x + barWidth / 2, renderY - 5);
-        }
-      });
     }
 
-    /* ===== TAB 3: RENDER & XỬ LÝ CÀI ĐẶT ===== */
-    function renderSettings() {
-      const listEl = document.getElementById('settingsCategoryList');
-      listEl.innerHTML = categoriesList.map((c, idx) => `
-        <div class="category-list-item">
-          <div class="category-tag">
-            <span class="color-dot" style="background-color: ${c.color}"></span>
-            <span>${c.name}</span>
+
+    /* =====================================================
+       BÁO CÁO TÙY CHỌN THÁNG / NĂM
+       ===================================================== */
+
+    function initCustomReportYearSelect() {
+
+      const yearSelect =
+        document.getElementById(
+          'customReportYear'
+        );
+
+
+      if (!yearSelect) return;
+
+
+      const currentYear =
+        new Date().getFullYear();
+
+
+      yearSelect.innerHTML = '';
+
+
+      /*
+       * 10 năm gần nhất:
+       *
+       * Ví dụ năm 2026:
+       * 2026
+       * 2025
+       * 2024
+       * ...
+       * 2017
+       */
+
+      for (
+        let i = 0;
+        i < 10;
+        i++
+      ) {
+
+        const year =
+          currentYear - i;
+
+
+        const option =
+          document.createElement(
+            'option'
+          );
+
+
+        option.value =
+          year;
+
+
+        option.textContent =
+          year;
+
+
+        yearSelect.appendChild(
+          option
+        );
+
+      }
+
+
+      yearSelect.value =
+        currentYear;
+
+
+      const monthSelect =
+        document.getElementById(
+          'customReportMonth'
+        );
+
+
+      if (monthSelect) {
+
+        /*
+         * 0 = cả năm
+         *
+         * Khi mở lần đầu:
+         * mặc định xem cả năm hiện tại.
+         */
+
+        monthSelect.value =
+          "0";
+
+      }
+
+
+      renderCustomReport();
+
+    }
+
+
+    function renderCustomReport() {
+
+      const monthSelect =
+        document.getElementById(
+          'customReportMonth'
+        );
+
+
+      const yearSelect =
+        document.getElementById(
+          'customReportYear'
+        );
+
+
+      const resultEl =
+        document.getElementById(
+          'customReportResult'
+        );
+
+
+      if (
+        !monthSelect ||
+        !yearSelect ||
+        !resultEl
+      ) {
+
+        return;
+
+      }
+
+
+      const selectedMonth =
+        Number(
+          monthSelect.value
+        );
+
+
+      const selectedYear =
+        Number(
+          yearSelect.value
+        );
+
+
+      let filteredExpenses = [];
+
+
+      /* ================================================
+         NẾU CHỌN "NĂM"
+         => LẤY TOÀN BỘ KHOẢN CHI CỦA NĂM
+         ================================================ */
+
+      if (
+        selectedMonth === 0
+      ) {
+
+        filteredExpenses =
+          expenses.filter(e => {
+
+            const d =
+              new Date(
+                e.datetime
+              );
+
+
+            return (
+              !isNaN(
+                d.getTime()
+              ) &&
+              d.getFullYear() ===
+                selectedYear
+            );
+
+          });
+
+      }
+
+
+      /* ================================================
+         NẾU CHỌN THÁNG
+         => CHỈ LẤY THÁNG ĐÓ CỦA NĂM ĐÃ CHỌN
+         ================================================ */
+
+      else {
+
+        const monthIndex =
+          selectedMonth - 1;
+
+
+        filteredExpenses =
+          expenses.filter(e => {
+
+            const d =
+              new Date(
+                e.datetime
+              );
+
+
+            return (
+              !isNaN(
+                d.getTime()
+              ) &&
+              d.getFullYear() ===
+                selectedYear &&
+              d.getMonth() ===
+                monthIndex
+            );
+
+          });
+
+      }
+
+
+      /* ================================================
+         TỔNG CHI
+         ================================================ */
+
+      const total =
+        filteredExpenses.reduce(
+          (sum, e) =>
+            sum +
+            Number(
+              e.amount || 0
+            ),
+          0
+        );
+
+
+      /* ================================================
+         TIÊU ĐỀ
+         ================================================ */
+
+      let reportTitle;
+
+
+      if (
+        selectedMonth === 0
+      ) {
+
+        reportTitle =
+          `Báo cáo năm ${selectedYear}`;
+
+      }
+
+      else {
+
+        reportTitle =
+          `Báo cáo tháng ${selectedMonth}/${selectedYear}`;
+
+      }
+
+
+      /* ================================================
+         KHÔNG CÓ DỮ LIỆU
+         ================================================ */
+
+      if (total <= 0) {
+
+        resultEl.innerHTML = `
+
+          <div class="custom-report-title">
+            ${reportTitle}
           </div>
-          ${!c.isDefault ? `<button class="btn-delete-cat" onclick="deleteCategory(${idx})">🗑️ Xóa</button>` : ''}
-        </div>
-      `).join('');
 
-      document.getElementById('monthlyBudgetInput').value = formatNum(monthlyBudget);
+          <div class="custom-report-empty">
+            Chưa có khoản chi nào trong
+            khoảng thời gian này.
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+
+      /* ================================================
+         TỔNG THEO DANH MỤC
+         ================================================ */
+
+      const categoryTotals = {};
+
+
+      filteredExpenses.forEach(e => {
+
+        let categoryName =
+          e.category;
+
+
+        /*
+         * Nếu danh mục của khoản chi
+         * không còn tồn tại trong danh mục hiện tại
+         * thì đưa về "Chưa phân loại".
+         */
+
+        const categoryExists =
+          categoriesList.some(
+            c =>
+              c.name ===
+              categoryName
+          );
+
+
+        if (!categoryExists) {
+
+          const fallbackCategory =
+            categoriesList.find(
+              c =>
+                c.name.includes(
+                  "Chưa phân loại"
+                )
+            );
+
+
+          categoryName =
+            fallbackCategory
+              ? fallbackCategory.name
+              : "‼️ Chưa phân loại";
+
+        }
+
+
+        if (
+          !categoryTotals[
+            categoryName
+          ]
+        ) {
+
+          categoryTotals[
+            categoryName
+          ] = 0;
+
+        }
+
+
+        categoryTotals[
+          categoryName
+        ] +=
+          Number(
+            e.amount || 0
+          );
+
+      });
+
+
+      /* ================================================
+         TẠO DANH SÁCH BÁO CÁO
+         ================================================ */
+
+      const reportItems =
+        Object.entries(
+          categoryTotals
+        )
+
+        .map(
+          ([category, amount]) => {
+
+            const categoryObj =
+              categoriesList.find(
+                c =>
+                  c.name ===
+                  category
+              );
+
+
+            const color =
+              categoryObj
+                ? categoryObj.color
+                : "#8e8e93";
+
+
+            const percentage =
+              (
+                amount /
+                total
+              ) * 100;
+
+
+            return {
+
+              category,
+
+              amount,
+
+              percentage,
+
+              color
+
+            };
+
+          }
+        )
+
+        .sort(
+          (a, b) =>
+            b.amount -
+            a.amount
+        );
+
+
+      /* ================================================
+         HIỂN THỊ CHI TIẾT
+         ================================================ */
+
+      const itemsHTML =
+        reportItems
+          .map(
+            item => `
+
+              <div class="custom-report-item">
+
+                <div class="custom-report-item-header">
+
+                  <div class="custom-report-cat">
+
+                    <span
+                      style="
+                        color:${item.color};
+                        font-size:16px;
+                      "
+                    >
+                      ●
+                    </span>
+
+                    ${item.category}
+
+                  </div>
+
+
+                  <div class="custom-report-percent">
+
+                    ${item.percentage.toFixed(1)}%
+
+                  </div>
+
+
+                  <div class="custom-report-amount">
+
+                    ${formatNum(item.amount)}
+                    VND
+
+                  </div>
+
+                </div>
+
+
+              </div>
+
+            `
+          )
+          .join('');
+
+
+      /* ================================================
+         ĐƯA RA MÀN HÌNH
+         ================================================ */
+
+      resultEl.innerHTML = `
+
+        <div class="custom-report-title">
+          ${reportTitle}
+        </div>
+
+        <div class="custom-report-total">
+          ${formatNum(total)} VND
+        </div>
+
+        ${itemsHTML}
+
+      `;
+
     }
+
+
+    /* =====================================================
+       CÀI ĐẶT
+       ===================================================== */
+
+    function renderSettings() {
+
+      const listEl =
+        document.getElementById(
+          'settingsCategoryList'
+        );
+
+
+      listEl.innerHTML =
+        categoriesList
+          .map(
+            (c, idx) => `
+
+              <div class="category-list-item">
+
+                <div class="category-tag">
+
+                  <span
+                    class="color-dot"
+                    style="
+                      background-color:${c.color}
+                    "
+                  ></span>
+
+                  <span>
+                    ${c.name}
+                  </span>
+
+                </div>
+
+
+                ${
+                  !c.isDefault
+                    ? `
+                      <button
+                        class="btn-delete-cat"
+                        onclick="deleteCategory(${idx})"
+                      >
+                        🗑️ Xóa
+                      </button>
+                    `
+                    : ''
+                }
+
+              </div>
+
+            `
+          )
+          .join('');
+
+
+      document.getElementById(
+        'monthlyBudgetInput'
+      ).value =
+        formatNum(
+          monthlyBudget
+        );
+
+    }
+
 
     function openAddCategoryModal() {
-      document.getElementById('newCatName').value = "";
-      document.getElementById('newCatColor').value = "#007aff";
-      document.getElementById('addCategoryModal').classList.add('active');
+
+      document.getElementById(
+        'newCatName'
+      ).value = "";
+
+
+      document.getElementById(
+        'newCatColor'
+      ).value =
+        "#007aff";
+
+
+      document
+        .getElementById(
+          'addCategoryModal'
+        )
+        .classList.add(
+          'active'
+        );
+
     }
+
 
     function closeAddCategoryModal() {
-      document.getElementById('addCategoryModal').classList.remove('active');
+
+      document
+        .getElementById(
+          'addCategoryModal'
+        )
+        .classList.remove(
+          'active'
+        );
+
     }
+
 
     function closeAddCatModalOnOverlay(e) {
-      if (e.target.classList.contains('modal-overlay')) closeAddCategoryModal();
+
+      if (
+        e.target.classList.contains(
+          'modal-overlay'
+        )
+      ) {
+
+        closeAddCategoryModal();
+
+      }
+
     }
+
 
     function saveNewCategory() {
-      const name = document.getElementById('newCatName').value.trim();
-      const color = document.getElementById('newCatColor').value;
+
+      const name =
+        document.getElementById(
+          'newCatName'
+        ).value.trim();
+
+
+      const color =
+        document.getElementById(
+          'newCatColor'
+        ).value;
+
 
       if (!name) {
-        alert("Vui lòng nhập tên danh mục!");
+
+        alert(
+          "Vui lòng nhập tên danh mục!"
+        );
+
         return;
+
       }
 
-      if (categoriesList.some(c => c.name.toLowerCase() === name.toLowerCase())) {
-        alert("Danh mục này đã tồn tại!");
+
+      if (
+        categoriesList.some(
+          c =>
+            c.name.toLowerCase() ===
+            name.toLowerCase()
+        )
+      ) {
+
+        alert(
+          "Danh mục này đã tồn tại!"
+        );
+
         return;
+
       }
 
-      categoriesList.push({ name, color, isDefault: false });
+
+      categoriesList.push({
+
+        name,
+
+        color,
+
+        isDefault: false
+
+      });
+
+
       saveData();
+
       closeAddCategoryModal();
+
       renderSettings();
+
       updateCategoryDropdown();
+
     }
+
 
     function deleteCategory(index) {
-      const catName = categoriesList[index].name;
-      if (confirm(`Bạn chắc chắn muốn xóa danh mục "${catName}"?`)) {
-        categoriesList.splice(index, 1);
+
+      const catName =
+        categoriesList[index].name;
+
+
+      if (
+        confirm(
+          `Bạn chắc chắn muốn xóa danh mục "${catName}"?`
+        )
+      ) {
+
+        categoriesList.splice(
+          index,
+          1
+        );
+
+
         saveData();
+
         renderSettings();
+
         updateCategoryDropdown();
+
       }
+
     }
+
 
     function saveMonthlyBudget() {
-      const val = parseNum(document.getElementById('monthlyBudgetInput').value);
+
+      const val =
+        parseNum(
+          document.getElementById(
+            'monthlyBudgetInput'
+          ).value
+        );
+
+
       if (val <= 0) {
-        alert("Vui lòng nhập hạn mức hợp lệ!");
+
+        alert(
+          "Vui lòng nhập hạn mức hợp lệ!"
+        );
+
         return;
+
       }
-      monthlyBudget = val;
+
+
+      monthlyBudget =
+        val;
+
+
       saveData();
-      alert("Đã cập nhật hạn mức chi tiêu tháng!");
+
+
+      alert(
+        "Đã cập nhật hạn mức chi tiêu tháng!"
+      );
+
+
       updateBudgetStatus();
+
     }
 
-    /* ===== BACKUP & RESTORE ===== */
+
+    /* =====================================================
+       BACKUP & RESTORE
+       ===================================================== */
+
     function exportData() {
+
       const backupObj = {
+
         expenses,
-        categories: categoriesList,
+
+        categories:
+          categoriesList,
+
         monthlyBudget
+
       };
-      const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `ChiTieu_Backup.json`;
+
+
+      const blob =
+        new Blob(
+          [
+            JSON.stringify(
+              backupObj,
+              null,
+              2
+            )
+          ],
+          {
+            type:
+              "application/json"
+          }
+        );
+
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+
+      const a =
+        document.createElement(
+          "a"
+        );
+
+
+      a.href =
+        url;
+
+
+      a.download =
+        `ChiTieu_Backup.json`;
+
+
       a.click();
-      URL.revokeObjectURL(url);
+
+
+      URL.revokeObjectURL(
+        url
+      );
+
     }
+
 
     function importData(e) {
-      const file = e.target.files[0];
+
+      const file =
+        e.target.files[0];
+
+
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const data = JSON.parse(evt.target.result);
-          if (confirm("Dữ liệu hiện tại sẽ bị ghi đè. Bạn chắc chắn chứ?")) {
-            if (Array.isArray(data)) {
-              expenses = data;
-            } else {
-              expenses = data.expenses || [];
-              categoriesList = data.categories || DEFAULT_CATEGORIES;
-              monthlyBudget = data.monthlyBudget || 14000000;
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        function(evt) {
+
+          try {
+
+            const data =
+              JSON.parse(
+                evt.target.result
+              );
+
+
+            if (
+              confirm(
+                "Dữ liệu hiện tại sẽ bị ghi đè. Bạn chắc chắn chứ?"
+              )
+            ) {
+
+              if (
+                Array.isArray(data)
+              ) {
+
+                expenses =
+                  data;
+
+              }
+
+              else {
+
+                expenses =
+                  data.expenses ||
+                  [];
+
+                categoriesList =
+                  data.categories ||
+                  DEFAULT_CATEGORIES;
+
+                monthlyBudget =
+                  data.monthlyBudget ||
+                  14000000;
+
+              }
+
+
+              saveData();
+
+              updateCategoryDropdown();
+
+              renderRecords();
+
+              renderReport();
+
+              renderSettings();
+
+              initCustomReportYearSelect();
+
+
+              alert(
+                "Phục hồi dữ liệu thành công!"
+              );
+
             }
-            saveData();
-            renderRecords();
-            renderReport();
-            renderSettings();
-            alert("Phục hồi dữ liệu thành công!");
+
           }
-        } catch (err) {
-          alert("File không hợp lệ!");
-        }
-      };
-      reader.readAsText(file);
+
+          catch (err) {
+
+            alert(
+              "File không hợp lệ!"
+            );
+
+          }
+
+        };
+
+
+      reader.readAsText(
+        file
+      );
+
     }
 
-    /* ===== KHỞI TẠO ===== */
-    window.onload = function() {
-      loadData();
-      renderRecords();
-    };
+
+    /* =====================================================
+       KHỞI TẠO
+       ===================================================== */
+
+    window.onload =
+      function() {
+
+        loadData();
+
+        renderRecords();
+
+        initCustomReportYearSelect();
+
+      };
+
   </script>
+
 </body>
 </html>
