@@ -1382,6 +1382,8 @@
 
     function saveData() {
 
+      sortedExpensesCache = null;
+
       localStorage.setItem(
         "expenses_data_v5",
         JSON.stringify(expenses)
@@ -1401,6 +1403,8 @@
 
 
     function loadData() {
+
+      sortedExpensesCache = null;
 
       try {
 
@@ -2012,6 +2016,12 @@
        GHI CHÉP
        ===================================================== */
 
+    // Phân trang tự động cho danh sách ghi chép
+    let recordsVisibleCount = 100;
+    const RECORDS_PAGE_SIZE = 100;
+    // Cache danh sách đã sắp xếp; làm mới khi dữ liệu được lưu/nạp.
+    let sortedExpensesCache = null;
+
     function renderRecords() {
 
       updateBudgetStatus();
@@ -2024,6 +2034,7 @@
 
 
       if (!expenses.length) {
+        recordsVisibleCount = 100;
 
         recentListEl.innerHTML = `
           <p
@@ -2044,16 +2055,19 @@
       }
 
 
-      const sortedExpenses =
-        [...expenses].sort(
-          (a, b) =>
-            new Date(b.datetime) -
-            new Date(a.datetime)
+      if (!sortedExpensesCache) {
+        sortedExpensesCache = [...expenses].sort(
+          (a, b) => new Date(b.datetime) - new Date(a.datetime)
         );
+      }
+      const sortedExpenses = sortedExpensesCache;
 
+
+      const visibleExpenses =
+        sortedExpenses.slice(0, recordsVisibleCount);
 
       recentListEl.innerHTML =
-        sortedExpenses
+        visibleExpenses
           .map(item => {
 
             const dtInfo =
@@ -2146,7 +2160,41 @@
           })
           .join('');
 
+      // Chỉ báo số mục đã hiển thị và tổng số mục
+      const remaining = sortedExpenses.length - visibleExpenses.length;
+      const loadMoreEl = document.getElementById('recordsLoadMore');
+      if (loadMoreEl) loadMoreEl.remove();
+
+      if (remaining > 0) {
+        const indicator = document.createElement('div');
+        indicator.id = 'recordsLoadMore';
+        indicator.style.cssText = 'text-align:center;color:var(--muted);font-size:13px;padding:14px 8px;';
+        indicator.textContent = `Đã hiển thị ${visibleExpenses.length.toLocaleString('vi-VN')} / ${sortedExpenses.length.toLocaleString('vi-VN')} mục · Kéo xuống để xem thêm`;
+        recentListEl.appendChild(indicator);
+      } else if (sortedExpenses.length > 100) {
+        const indicator = document.createElement('div');
+        indicator.id = 'recordsLoadMore';
+        indicator.style.cssText = 'text-align:center;color:var(--muted);font-size:13px;padding:14px 8px;';
+        indicator.textContent = `Đã hiển thị tất cả ${sortedExpenses.length.toLocaleString('vi-VN')} mục`;
+        recentListEl.appendChild(indicator);
+      }
+
     }
+
+    // Tự tải thêm 100 mục khi người dùng cuộn gần cuối trang
+    window.addEventListener('scroll', () => {
+      const recordTab = document.getElementById('tab-record');
+      if (!recordTab || !recordTab.classList.contains('active')) return;
+
+      const nearBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 500;
+
+      if (nearBottom && recordsVisibleCount < expenses.length) {
+        recordsVisibleCount += RECORDS_PAGE_SIZE;
+        renderRecords();
+      }
+    }, { passive: true });
 
 
     /* =====================================================
