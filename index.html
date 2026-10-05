@@ -471,6 +471,82 @@
       padding: 4px 8px;
     }
 
+    /* ===== PASSWORD ===== */
+    .password-form-grid {
+      display: grid;
+      gap: 0;
+    }
+
+    .password-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #efeff4;
+    }
+
+    .password-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .password-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .password-app {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 3px;
+      word-break: break-word;
+    }
+
+    .password-account,
+    .password-note,
+    .password-value {
+      font-size: 13px;
+      color: var(--muted);
+      word-break: break-word;
+      margin-top: 2px;
+    }
+
+    .password-value {
+      color: var(--text);
+      letter-spacing: 1px;
+    }
+
+    .password-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .password-action-btn {
+      width: auto;
+      min-height: 30px;
+      height: 30px;
+      padding: 4px 7px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #e5e5ea;
+      color: var(--text);
+    }
+
+    .password-action-btn.delete {
+      background: #ffe5e3;
+      color: var(--danger);
+    }
+
+    .password-empty {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 14px 0;
+    }
+
     /* ===== BÁO CÁO THEO THỜI GIAN ===== */
 
     .custom-report-selectors {
@@ -577,6 +653,13 @@
     <div class="tab-item" onclick="switchTab('report', this)">
       <span class="icon">📊</span>
       <span>Báo cáo</span>
+    </div>
+
+    <div class="tab-divider"></div>
+
+    <div class="tab-item" onclick="switchTab('password', this)">
+      <span class="icon">🔐</span>
+      <span>Password</span>
     </div>
 
     <div class="tab-divider"></div>
@@ -875,7 +958,85 @@
 
 
     <!-- =====================================================
-         TAB 3: CÀI ĐẶT
+         TAB 3: PASSWORD
+         ===================================================== -->
+
+    <div
+      id="tab-password"
+      class="tab-content"
+      style="padding-top:12px;"
+    >
+
+      <div class="card">
+
+        <h2>🔐 Password</h2>
+
+        <div class="password-form-grid">
+
+          <label for="passwordAppInput">Tên ứng dụng</label>
+          <input
+            type="text"
+            id="passwordAppInput"
+            placeholder="Ví dụ: Facebook, Gmail..."
+          >
+
+          <label for="passwordAccountInput">Tài khoản</label>
+          <input
+            type="text"
+            id="passwordAccountInput"
+            placeholder="Tên tài khoản / email..."
+          >
+
+          <label for="passwordValueInput">Mật khẩu</label>
+          <input
+            type="password"
+            id="passwordValueInput"
+            placeholder="Nhập mật khẩu..."
+            autocomplete="new-password"
+          >
+
+          <label for="passwordNoteInput">Ghi chú</label>
+          <input
+            type="text"
+            id="passwordNoteInput"
+            placeholder="Ghi chú..."
+          >
+
+          <button
+            id="passwordSaveButton"
+            class="btn-primary"
+            type="button"
+            onclick="savePasswordItem()"
+          >
+            + Thêm
+          </button>
+
+          <button
+            id="passwordCancelEditButton"
+            type="button"
+            onclick="cancelPasswordEdit()"
+            style="display:none;background:#e5e5ea;color:#333;margin-top:8px;"
+          >
+            Hủy sửa
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h2>📋 Danh sách Password</h2>
+
+        <div id="passwordList"></div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TAB 4: CÀI ĐẶT
          ===================================================== -->
 
     <div
@@ -1214,6 +1375,10 @@
 
     let expenses = [];
 
+    let passwordItems = [];
+
+    let editingPasswordId = null;
+
     let monthlyBudget = 14000000;
 
 
@@ -1399,6 +1564,11 @@
         monthlyBudget.toString()
       );
 
+      localStorage.setItem(
+        "password_data_v1",
+        JSON.stringify(passwordItems)
+      );
+
     }
 
 
@@ -1445,6 +1615,26 @@
             "monthly_budget_v5"
           )
         ) || 14000000;
+
+
+      try {
+
+        passwordItems =
+          JSON.parse(
+            localStorage.getItem(
+              "password_data_v1"
+            )
+          ) || [];
+
+        if (!Array.isArray(passwordItems)) {
+          passwordItems = [];
+        }
+
+      } catch {
+
+        passwordItems = [];
+
+      }
 
 
       categoriesList =
@@ -1541,6 +1731,12 @@
         renderReport();
 
         renderCustomReport();
+
+      }
+
+      else if (tabName === 'password') {
+
+        renderPasswordList();
 
       }
 
@@ -3601,6 +3797,329 @@
 
 
     /* =====================================================
+       PASSWORD
+       ===================================================== */
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+
+    function clearPasswordForm() {
+
+      document.getElementById('passwordAppInput').value = "";
+      document.getElementById('passwordAccountInput').value = "";
+      document.getElementById('passwordValueInput').value = "";
+      document.getElementById('passwordNoteInput').value = "";
+
+      editingPasswordId = null;
+
+      document.getElementById('passwordSaveButton').innerText = "+ Thêm";
+
+      document.getElementById('passwordCancelEditButton').style.display = "none";
+
+    }
+
+
+    function savePasswordItem() {
+
+      const app =
+        document.getElementById('passwordAppInput').value.trim();
+
+      const account =
+        document.getElementById('passwordAccountInput').value.trim();
+
+      const password =
+        document.getElementById('passwordValueInput').value;
+
+      const note =
+        document.getElementById('passwordNoteInput').value.trim();
+
+
+      if (!app) {
+
+        alert("Vui lòng nhập tên ứng dụng!");
+
+        document.getElementById('passwordAppInput').focus();
+
+        return;
+
+      }
+
+
+      if (!account) {
+
+        alert("Vui lòng nhập tài khoản!");
+
+        document.getElementById('passwordAccountInput').focus();
+
+        return;
+
+      }
+
+
+      if (!password) {
+
+        alert("Vui lòng nhập mật khẩu!");
+
+        document.getElementById('passwordValueInput').focus();
+
+        return;
+
+      }
+
+
+      if (editingPasswordId !== null) {
+
+        const idx =
+          passwordItems.findIndex(
+            item => item.id === editingPasswordId
+          );
+
+        if (idx !== -1) {
+
+          passwordItems[idx] = {
+            ...passwordItems[idx],
+            app,
+            account,
+            password,
+            note
+          };
+
+        }
+
+      }
+
+      else {
+
+        passwordItems.unshift({
+
+          id: Date.now(),
+
+          app,
+
+          account,
+
+          password,
+
+          note
+
+        });
+
+      }
+
+
+      saveData();
+
+      clearPasswordForm();
+
+      renderPasswordList();
+
+    }
+
+
+    function renderPasswordList() {
+
+      const listEl =
+        document.getElementById('passwordList');
+
+      if (!listEl) return;
+
+
+      if (!passwordItems.length) {
+
+        listEl.innerHTML = `
+          <div class="password-empty">
+            Chưa có thông tin Password nào.
+          </div>
+        `;
+
+        return;
+
+      }
+
+
+      listEl.innerHTML =
+        passwordItems.map(item => `
+
+          <div class="password-list-item">
+
+            <div class="password-info">
+
+              <div class="password-app">
+                ${escapeHTML(item.app)}
+              </div>
+
+              <div class="password-account">
+                👤 ${escapeHTML(item.account)}
+              </div>
+
+              <div class="password-value">
+                🔑 <span id="password-display-${item.id}">••••••••</span>
+              </div>
+
+              ${
+                item.note
+                  ? `
+                    <div class="password-note">
+                      📝 ${escapeHTML(item.note)}
+                    </div>
+                  `
+                  : ''
+              }
+
+            </div>
+
+            <div class="password-actions">
+
+              <button
+                type="button"
+                class="password-action-btn"
+                onclick="togglePasswordVisibility(${item.id}, this)"
+              >
+                👁 Hiện
+              </button>
+
+              <button
+                type="button"
+                class="password-action-btn"
+                onclick="editPasswordItem(${item.id})"
+              >
+                Sửa
+              </button>
+
+              <button
+                type="button"
+                class="password-action-btn delete"
+                onclick="deletePasswordItem(${item.id})"
+              >
+                Xóa
+              </button>
+
+            </div>
+
+          </div>
+
+        `).join('');
+
+    }
+
+
+    function togglePasswordVisibility(id, button) {
+
+      const item =
+        passwordItems.find(
+          entry => entry.id === id
+        );
+
+      const display =
+        document.getElementById(`password-display-${id}`);
+
+      if (!item || !display) return;
+
+      const isVisible = display.dataset.visible === 'true';
+
+      if (isVisible) {
+        display.textContent = '••••••••';
+        display.dataset.visible = 'false';
+        button.innerHTML = '👁 Hiện';
+      } else {
+        display.textContent = item.password || '';
+        display.dataset.visible = 'true';
+        button.innerHTML = '🙈 Ẩn';
+      }
+    }
+
+
+    function editPasswordItem(id) {
+
+      const item =
+        passwordItems.find(
+          entry => entry.id === id
+        );
+
+      if (!item) return;
+
+
+      editingPasswordId = id;
+
+      document.getElementById('passwordAppInput').value =
+        item.app || "";
+
+      document.getElementById('passwordAccountInput').value =
+        item.account || "";
+
+      document.getElementById('passwordValueInput').value =
+        item.password || "";
+
+      document.getElementById('passwordNoteInput').value =
+        item.note || "";
+
+
+      document.getElementById('passwordSaveButton').innerText =
+        "Lưu thay đổi";
+
+      document.getElementById('passwordCancelEditButton').style.display =
+        "block";
+
+
+      document.getElementById('passwordAppInput').focus();
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+
+    }
+
+
+    function cancelPasswordEdit() {
+
+      clearPasswordForm();
+
+    }
+
+
+    function deletePasswordItem(id) {
+
+      const item =
+        passwordItems.find(
+          entry => entry.id === id
+        );
+
+      if (!item) return;
+
+
+      if (
+        confirm(
+          `Xóa Password của "${item.app}"?`
+        )
+      ) {
+
+        passwordItems =
+          passwordItems.filter(
+            entry => entry.id !== id
+          );
+
+        if (editingPasswordId === id) {
+          clearPasswordForm();
+        }
+
+        saveData();
+
+        renderPasswordList();
+
+      }
+
+    }
+
+
+    /* =====================================================
        CÀI ĐẶT
        ===================================================== */
 
@@ -3861,7 +4380,10 @@
         categories:
           categoriesList,
 
-        monthlyBudget
+        monthlyBudget,
+
+        passwords:
+          passwordItems
 
       };
 
@@ -3949,6 +4471,8 @@
                 expenses =
                   data;
 
+                passwordItems = [];
+
               }
 
               else {
@@ -3965,6 +4489,11 @@
                   data.monthlyBudget ||
                   14000000;
 
+                passwordItems =
+                  Array.isArray(data.passwords)
+                    ? data.passwords
+                    : [];
+
               }
 
 
@@ -3975,6 +4504,8 @@
               renderRecords();
 
               renderReport();
+
+              renderPasswordList();
 
               renderSettings();
 
@@ -4017,6 +4548,8 @@
         loadData();
 
         renderRecords();
+
+        renderPasswordList();
 
         initCustomReportYearSelect();
 
