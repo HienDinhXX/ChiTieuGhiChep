@@ -540,6 +540,39 @@
       color: var(--danger);
     }
 
+
+    .password-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-input-wrap input {
+      width: 100%;
+      padding-right: 42px;
+    }
+
+    .password-input-toggle {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .password-input-toggle:hover {
+      background: #e5e5ea;
+      color: var(--text);
+    }
+
     .password-empty {
       color: var(--muted);
       font-size: 13px;
@@ -988,12 +1021,21 @@
           >
 
           <label for="passwordValueInput">Mật khẩu</label>
-          <input
-            type="password"
-            id="passwordValueInput"
-            placeholder="Nhập mật khẩu..."
-            autocomplete="new-password"
-          >
+          <div class="password-input-wrap">
+            <input
+              type="password"
+              id="passwordValueInput"
+              placeholder="Nhập mật khẩu..."
+              autocomplete="new-password"
+            >
+            <button
+              type="button"
+              class="password-input-toggle"
+              onclick="togglePasswordInputVisibility()"
+              aria-label="Hiện mật khẩu"
+              title="Hiện mật khẩu"
+            >👁</button>
+          </div>
 
           <label for="passwordNoteInput">Ghi chú</label>
           <input
@@ -4033,6 +4075,28 @@
         display.dataset.visible = 'true';
         button.innerHTML = '🙈 Ẩn';
       }
+    }
+
+
+    function togglePasswordInputVisibility() {
+
+      const input =
+        document.getElementById('passwordValueInput');
+
+      const button =
+        document.querySelector('.password-input-toggle');
+
+      if (!input || !button) return;
+
+      const isVisible = input.type === 'text';
+
+      input.type = isVisible ? 'password' : 'text';
+      button.innerHTML = isVisible ? '👁' : '🙈';
+      button.title = isVisible ? 'Hiện mật khẩu' : 'Ẩn mật khẩu';
+      button.setAttribute(
+        'aria-label',
+        isVisible ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'
+      );
     }
 
 
