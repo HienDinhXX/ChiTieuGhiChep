@@ -1058,7 +1058,7 @@
             style="display:none;background:#e5e5ea;color:#333;margin-top:8px;"
           >
             Hủy sửa
-s          </button>
+          </button>
 
         </div>
 
@@ -4022,7 +4022,7 @@ s          </button>
                 class="password-action-btn"
                 onclick="togglePasswordVisibility(${item.id}, this)"
               >
-                👁 Hiện
+                👁
               </button>
 
               <button
@@ -4030,7 +4030,7 @@ s          </button>
                 class="password-action-btn"
                 onclick="editPasswordItem(${item.id})"
               >
-                Sửa
+                ✏️
               </button>
 
               <button
@@ -4038,7 +4038,7 @@ s          </button>
                 class="password-action-btn delete"
                 onclick="deletePasswordItem(${item.id})"
               >
-                Xóa
+                🗑️
               </button>
 
             </div>
@@ -4067,11 +4067,11 @@ s          </button>
       if (isVisible) {
         display.textContent = '••••••••';
         display.dataset.visible = 'false';
-        button.innerHTML = '👁 Hiện';
+        button.innerHTML = '👁';
       } else {
         display.textContent = item.password || '';
         display.dataset.visible = 'true';
-        button.innerHTML = '🙈 Ẩn';
+        button.innerHTML = '🙈';
       }
     }
 
