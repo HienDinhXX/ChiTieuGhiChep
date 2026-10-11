@@ -694,6 +694,106 @@
       padding: 14px 0;
     }
 
+
+    /* PASSWORD: bố cục hàng ngang tối giản theo mẫu */
+    #tab-password .password-form-grid {
+      display: grid;
+      grid-template-columns: minmax(92px, 30%) minmax(0, 1fr);
+      align-items: center;
+      column-gap: 10px;
+    }
+    #tab-password .password-form-grid > label {
+      margin: 0;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      color: #555;
+      font-size: 14px;
+    }
+    #tab-password .password-form-grid > input,
+    #tab-password .password-form-grid > .password-input-wrap {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+      min-height: 44px;
+      border: 0;
+      border-bottom: 1px solid #e5e5ea;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    #tab-password .password-form-grid > input {
+      padding: 8px 0;
+      text-align: right;
+      font-size: 14px;
+      color: var(--text);
+    }
+    #tab-password .password-form-grid > input::placeholder {
+      color: #a1a1a6;
+      opacity: 1;
+      text-align: right;
+    }
+    #tab-password .password-form-grid > input:focus {
+      border-bottom-color: var(--primary);
+      background: transparent;
+      box-shadow: none;
+    }
+    #tab-password .password-form-grid > .password-input-wrap {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    #tab-password .password-input-wrap input {
+      min-width: 0;
+      width: 100%;
+      min-height: 42px;
+      margin: 0;
+      padding: 8px 34px 8px 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      text-align: right;
+      font-size: 14px;
+    }
+    #tab-password .password-input-wrap input::placeholder {
+      color: #a1a1a6;
+      text-align: right;
+      opacity: 1;
+    }
+    #tab-password .password-input-wrap input:focus {
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    #tab-password .password-input-toggle {
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 30px;
+    }
+    #tab-password #passwordSaveButton,
+    #tab-password #passwordCancelEditButton {
+      grid-column: 1 / -1;
+    }
+    #tab-password #passwordSaveButton {
+      margin-top: 12px;
+      border-radius: 10px;
+    }
+    #tab-password #passwordCancelEditButton {
+      margin-top: 0 !important;
+    }
+    @media (max-width: 380px) {
+      #tab-password .password-form-grid {
+        grid-template-columns: minmax(78px, 28%) minmax(0, 1fr);
+        column-gap: 8px;
+      }
+      #tab-password .password-form-grid > label { font-size: 13px; }
+      #tab-password .password-form-grid > input,
+      #tab-password .password-input-wrap input { font-size: 13px; }
+    }
+
     /* ===== BÁO CÁO THEO THỜI GIAN ===== */
 
     .custom-report-selectors {
