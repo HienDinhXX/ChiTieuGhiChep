@@ -472,6 +472,36 @@
     }
 
     /* ===== PASSWORD ===== */
+    .password-list-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .password-list-heading h2 {
+      margin: 0;
+      flex: 0 0 auto;
+      font-size: 16px;
+    }
+    .password-search {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      min-height: 36px;
+      height: 36px;
+      margin: 0;
+      padding: 7px 10px;
+      border: 1px solid #e3e3e8;
+      border-radius: 10px;
+      background: #f2f2f7;
+      font-size: 14px;
+    }
+    @media (max-width: 380px) {
+      .password-list-heading { gap: 7px; }
+      .password-list-heading h2 { font-size: 14px; }
+      .password-search { font-size: 13px; padding-left: 8px; padding-right: 8px; }
+    }
     .password-form-grid {
       display: grid;
       gap: 0;
@@ -1129,7 +1159,18 @@
 
       <div class="card">
 
-        <h2>📋 Danh sách Password</h2>
+        <div class="password-list-heading">
+          <h2>📋 Danh sách Password</h2>
+          <input
+            type="search"
+            id="passwordSearchInput"
+            class="password-search"
+            placeholder="🔍 Tìm kiếm..."
+            aria-label="Tìm kiếm danh sách Password"
+            autocomplete="off"
+            oninput="renderPasswordList()"
+          >
+        </div>
 
         <div id="passwordList"></div>
 
@@ -4035,20 +4076,35 @@
 
 
       if (!passwordItems.length) {
-
         listEl.innerHTML = `
           <div class="password-empty">
             Chưa có thông tin Password nào.
           </div>
         `;
-
         return;
-
       }
 
+      const searchInput = document.getElementById('passwordSearchInput');
+      const keyword = (searchInput ? searchInput.value : '').trim().toLocaleLowerCase('vi');
+      const filteredItems = passwordItems.filter(item => {
+        const searchableText = [item.app, item.account, item.note]
+          .map(value => String(value || ''))
+          .join(' ')
+          .toLocaleLowerCase('vi');
+        return searchableText.includes(keyword);
+      });
+
+      if (!filteredItems.length) {
+        listEl.innerHTML = `
+          <div class="password-empty">
+            Không tìm thấy Password phù hợp.
+          </div>
+        `;
+        return;
+      }
 
       listEl.innerHTML =
-        passwordItems.map(item => `
+        filteredItems.map(item => `
 
           <div class="password-list-item">
 
