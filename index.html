@@ -519,25 +519,88 @@
     .password-actions {
       display: flex;
       align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
+      justify-content: flex-end;
+      gap: 3px;
+      flex: 0 0 auto;
+      flex-wrap: nowrap;
+      position: relative;
     }
 
-    .password-action-btn {
-      width: auto;
-      min-height: 30px;
-      height: 30px;
-      padding: 4px 7px;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 600;
-      background: #e5e5ea;
-      color: var(--text);
+    .password-copy-menu {
+      position: fixed;
+      z-index: 2147483000;
+      min-width: 156px;
+      max-width: calc(100vw - 16px);
+      padding: 4px;
+      border: 1px solid rgba(60,60,67,.14);
+      border-radius: 12px;
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 8px 28px rgba(0,0,0,.16);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
+
+    .password-copy-menu button {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #1c1c1e;
+      text-align: left;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .password-copy-menu button:active { background: #f2f2f7; }
+
+    .password-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 29px;
+      min-width: 29px;
+      min-height: 29px;
+      height: 29px;
+      padding: 0;
+      border: 0;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      background: #f2f2f7;
+      color: #3a3a3c;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .password-action-btn:active { background: #e5e5ea; }
 
     .password-action-btn.delete {
       background: #ffe5e3;
       color: var(--danger);
+    }
+
+    .password-copy-hidden {
+      display: none;
+    }
+
+    .password-copy-hidden.visible {
+      display: inline-flex;
+    }
+
+    .password-copy-inline {
+      display: inline-flex;
+    }
+
+    .password-copy-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+      margin-top: 7px;
+      letter-spacing: normal;
     }
 
 
@@ -4000,7 +4063,7 @@
               </div>
 
               <div class="password-value">
-                🔑 <span id="password-display-${item.id}">••••••••</span>
+                🔑 <span id="password-display-${item.id}" data-visible="false">••••••••</span>
               </div>
 
               ${
@@ -4019,27 +4082,35 @@
 
               <button
                 type="button"
+                class="password-action-btn password-copy-inline"
+                onclick="showPasswordCopyMenu(${item.id}, this)"
+                aria-label="Copy"
+                title="Copy"
+              >📋</button>
+
+              <button
+                type="button"
                 class="password-action-btn"
                 onclick="togglePasswordVisibility(${item.id}, this)"
-              >
-                👁
-              </button>
+                aria-label="Hiện mật khẩu"
+                title="Hiện/ẩn mật khẩu"
+              >👁</button>
 
               <button
                 type="button"
                 class="password-action-btn"
                 onclick="editPasswordItem(${item.id})"
-              >
-                ✏️
-              </button>
+                aria-label="Sửa"
+                title="Sửa"
+              >✏️</button>
 
               <button
                 type="button"
                 class="password-action-btn delete"
                 onclick="deletePasswordItem(${item.id})"
-              >
-                🗑️
-              </button>
+                aria-label="Xóa"
+                title="Xóa"
+              >🗑️</button>
 
             </div>
 
@@ -4068,10 +4139,103 @@
         display.textContent = '••••••••';
         display.dataset.visible = 'false';
         button.innerHTML = '👁';
+        button.title = 'Hiện mật khẩu';
       } else {
         display.textContent = item.password || '';
         display.dataset.visible = 'true';
         button.innerHTML = '🙈';
+        button.title = 'Ẩn mật khẩu';
+      }
+    }
+
+
+
+    function showPasswordCopyMenu(id, button) {
+      const existing = document.querySelector('.password-copy-menu');
+      if (existing && existing.dataset.passwordId === String(id)) {
+        existing.remove();
+        return;
+      }
+      document.querySelectorAll('.password-copy-menu').forEach(menu => menu.remove());
+      const item = passwordItems.find(entry => entry.id === id);
+      const display = document.getElementById(`password-display-${id}`);
+      if (!item || !display) return;
+
+      const menu = document.createElement('div');
+      menu.className = 'password-copy-menu';
+      menu.dataset.passwordId = String(id);
+      menu.innerHTML = `<button type="button" onclick="copyPasswordAccount(${id}); this.closest('.password-copy-menu').remove();"><span>👤</span><span>Copy tài khoản</span></button>`;
+      if (display.dataset.visible === 'true') {
+        menu.insertAdjacentHTML('beforeend', `<button type="button" onclick="copyPasswordField(${id}); this.closest('.password-copy-menu').remove();"><span>🔑</span><span>Copy mật khẩu</span></button>`);
+      }
+      document.body.appendChild(menu);
+
+      // Measure after attaching to body, then position within the visible viewport.
+      const rect = button.getBoundingClientRect();
+      const margin = 8;
+      const menuRect = menu.getBoundingClientRect();
+      let left = rect.right - menuRect.width;
+      left = Math.max(margin, Math.min(left, window.innerWidth - menuRect.width - margin));
+      let top = rect.bottom + 6;
+      if (top + menuRect.height > window.innerHeight - margin) top = rect.top - menuRect.height - 6;
+      top = Math.max(margin, Math.min(top, window.innerHeight - menuRect.height - margin));
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
+
+      const closeOnOutside = event => {
+        if (!menu.contains(event.target) && event.target !== button) closeMenu();
+      };
+      const closeOnEscape = event => { if (event.key === 'Escape') closeMenu(); };
+      const closeMenu = () => {
+        menu.remove();
+        document.removeEventListener('pointerdown', closeOnOutside, true);
+        document.removeEventListener('keydown', closeOnEscape);
+        window.removeEventListener('resize', closeMenu);
+        window.removeEventListener('scroll', closeMenu, true);
+      };
+      setTimeout(() => document.addEventListener('pointerdown', closeOnOutside, true), 0);
+      document.addEventListener('keydown', closeOnEscape);
+      window.addEventListener('resize', closeMenu, { once: true });
+      window.addEventListener('scroll', closeMenu, { once: true, capture: true });
+    }
+
+    async function copyPasswordAccount(id) {
+      const item = passwordItems.find(entry => entry.id === id);
+      if (!item) return;
+      await copyPasswordText(item.account || '', 'Tài khoản');
+    }
+
+
+    async function copyPasswordField(id) {
+      const item = passwordItems.find(entry => entry.id === id);
+      const display = document.getElementById(`password-display-${id}`);
+      if (!item || !display || display.dataset.visible !== 'true') {
+        alert('Vui lòng bấm nút mắt để hiện mật khẩu trước.');
+        return;
+      }
+      await copyPasswordText(item.password || '', 'Mật khẩu');
+    }
+
+
+    async function copyPasswordText(value, label) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(value);
+        } else {
+          const temp = document.createElement('textarea');
+          temp.value = value;
+          temp.setAttribute('readonly', '');
+          temp.style.position = 'fixed';
+          temp.style.opacity = '0';
+          document.body.appendChild(temp);
+          temp.select();
+          const copied = document.execCommand('copy');
+          temp.remove();
+          if (!copied) throw new Error('Copy không thành công');
+        }
+        alert('Đã copy ' + label.toLowerCase() + ' vào clipboard.');
+      } catch (error) {
+        alert('Không thể copy tự động. Vui lòng thử lại trên HTTPS hoặc trình duyệt hỗ trợ clipboard.');
       }
     }
 
