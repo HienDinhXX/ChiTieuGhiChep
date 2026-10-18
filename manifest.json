@@ -3,7 +3,7 @@
   "short_name" : "chi tiêu",
   "start_url" : "./",
   "display" :  "standalone",
-  "background_color" : "#f2f2f7",
+  "background_color" : "#f9feff",
   "theme_color" : "#ff9fb5",
   "icons" : [ 
   { 
