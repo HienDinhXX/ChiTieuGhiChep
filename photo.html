@@ -154,6 +154,28 @@
                 font-size: 16px !important; /* Ngăn Safari iOS phóng to khi nhập liệu */
             }
         }
+        /* Bảng tùy chỉnh dấu */
+        #stampModal { position: fixed; inset: 0; z-index: 50; }
+        #stampModal.hidden { display: none; }
+        .stamp-modal-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.45); }
+        .stamp-modal-box {
+            position: absolute;
+            left: 50%;
+            top: 12px;
+            transform: translateX(-50%);
+            width: min(92%, 440px);
+            max-height: calc(100% - 24px);
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+        .stamp-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 8px 16px; border-bottom: 1px solid #e2e8f0; }
+        .stamp-modal-body { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 16px 8px; }
+        .stamp-modal-body .stamp-settings-section { margin-top: 0; padding-top: 0; border-top: 0; }
+        .stamp-modal-footer { padding: 10px 16px 14px; border-top: 1px solid #e2e8f0; }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
@@ -162,7 +184,7 @@
 
         <!-- Chọn ảnh và tùy chỉnh dấu trong cùng một khung -->
         <section class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 custom-shadow text-sm">
-            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-3">Chọn ảnh & tùy chỉnh dấu</h2>
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-3">Chọn ảnh</h2>
             <div class="grid grid-cols-2 gap-2">
                 <!-- Inputs ẩn -->
                 <input type="file" id="fileGallery" accept="image/*" multiple class="hidden">
@@ -183,6 +205,74 @@
                     <span class="whitespace-nowrap">Chụp ảnh</span>
                 </button>
             </div>
+
+            <!-- Nút mở bảng tùy chỉnh dấu -->
+            <button id="btnOpenStampSettings" type="button" aria-haspopup="dialog" aria-controls="stampModal"
+                class="mt-2 w-full flex items-center justify-between gap-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold text-sm py-2.5 px-4 rounded-xl border border-slate-200 transition duration-200 cursor-pointer">
+                <span class="flex items-center gap-2">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                    Tùy chỉnh dấu
+                </span>
+                <svg class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+        </section>
+
+        <!-- Danh sách hiển thị đủ tất cả ảnh đã chọn -->
+        <section id="imageGallerySection" class="hidden bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 custom-shadow">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">Danh sách ảnh đã chọn</h2>
+                <span id="imageCountBadge" class="text-xs font-semibold text-blue-600"></span>
+            </div>
+            <div id="imageGalleryGrid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1"></div>
+            <p class="mt-3 text-xs text-slate-500">Chạm vào ảnh để xem trước và chỉnh dấu.</p>
+        </section>
+
+        <!-- Khu vực xem trước Canvas & Nút tải xuống -->
+        <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 custom-shadow flex flex-col items-center">
+            <div class="w-full flex items-center justify-between mb-4">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">XEM TRƯỚC</h2>
+                <span id="resolutionBadge" class="text-xs text-slate-400 font-mono">Chưa chọn ảnh</span>
+            </div>
+
+            <!-- Khung chứa Canvas -->
+            <div class="w-full bg-slate-900/5 border border-slate-200 rounded-xl p-2 sm:p-4 flex items-center justify-center min-h-[300px] max-h-[600px] overflow-auto relative">
+                <!-- Placeholder khi chưa có ảnh -->
+                <div id="canvasPlaceholder" class="text-center p-8 text-slate-400 flex flex-col items-center">
+                    <svg class="w-16 h-16 mb-3 stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="text-sm font-medium">Vui lòng tải ảnh lên hoặc chụp ảnh để bắt đầu</p>
+                </div>
+
+                <canvas id="watermarkCanvas" class="hidden max-w-full max-h-[550px] object-contain rounded-lg shadow-md"></canvas>
+            </div>
+
+            <!-- Nút Tải xuống -->
+            <button id="btnDownload" type="button" disabled class="mt-6 w-full sm:w-auto min-w-[260px] flex items-center justify-center space-x-3 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-emerald-500/20 transition-all duration-200 text-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                <span id="downloadButtonText">Tải xuống ảnh</span>
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Bảng tùy chỉnh dấu -->
+    <div id="stampModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stampModalTitle">
+        <div id="stampModalBackdrop" class="stamp-modal-backdrop"></div>
+        <div id="stampModalBox" class="stamp-modal-box">
+            <div class="stamp-modal-header">
+                <h3 id="stampModalTitle" class="text-base font-semibold text-slate-800">Tùy chỉnh dấu</h3>
+                <button id="btnCloseStampSettings" type="button" aria-label="Đóng" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="stamp-modal-body">
             <div class="stamp-settings-section">
             <div class="stamp-settings-list">
                 <!-- Dòng 1: Vị trí / Địa điểm -->
@@ -239,48 +329,12 @@
                 </div>
             </div>
             </div>
-        </section>
-
-        <!-- Danh sách hiển thị đủ tất cả ảnh đã chọn -->
-        <section id="imageGallerySection" class="hidden bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 custom-shadow">
-            <div class="flex items-center justify-between gap-3 mb-3">
-                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">Danh sách ảnh đã chọn</h2>
-                <span id="imageCountBadge" class="text-xs font-semibold text-blue-600"></span>
             </div>
-            <div id="imageGalleryGrid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1"></div>
-            <p class="mt-3 text-xs text-slate-500">Chạm vào ảnh để xem trước và chỉnh dấu.</p>
-        </section>
-
-        <!-- Khu vực xem trước Canvas & Nút tải xuống -->
-        <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 custom-shadow flex flex-col items-center">
-            <div class="w-full flex items-center justify-between mb-4">
-                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">XEM TRƯỚC</h2>
-                <span id="resolutionBadge" class="text-xs text-slate-400 font-mono">Chưa chọn ảnh</span>
+            <div class="stamp-modal-footer">
+                <button id="btnDoneStampSettings" type="button" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm py-2.5 rounded-xl transition">Xong</button>
             </div>
-
-            <!-- Khung chứa Canvas -->
-            <div class="w-full bg-slate-900/5 border border-slate-200 rounded-xl p-2 sm:p-4 flex items-center justify-center min-h-[300px] max-h-[600px] overflow-auto relative">
-                <!-- Placeholder khi chưa có ảnh -->
-                <div id="canvasPlaceholder" class="text-center p-8 text-slate-400 flex flex-col items-center">
-                    <svg class="w-16 h-16 mb-3 stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <p class="text-sm font-medium">Vui lòng tải ảnh lên hoặc chụp ảnh để bắt đầu</p>
-                </div>
-
-                <canvas id="watermarkCanvas" class="hidden max-w-full max-h-[550px] object-contain rounded-lg shadow-md"></canvas>
-            </div>
-
-            <!-- Nút Tải xuống -->
-            <button id="btnDownload" type="button" disabled class="mt-6 w-full sm:w-auto min-w-[260px] flex items-center justify-center space-x-3 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-emerald-500/20 transition-all duration-200 text-lg">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                </svg>
-                <span id="downloadButtonText">Tải xuống ảnh</span>
-            </button>
-        </section>
-
-    </main>
+        </div>
+    </div>
 
     <script>
         // Các phần tử DOM
@@ -825,6 +879,54 @@ locationInput.addEventListener('input', () => {
                     : 'Tải xuống ảnh';
                 btnDownload.disabled = false;
             }
+        });
+
+        // ===== Bảng tùy chỉnh dấu =====
+        const stampModal = document.getElementById('stampModal');
+        const stampModalBox = document.getElementById('stampModalBox');
+        const btnOpenStampSettings = document.getElementById('btnOpenStampSettings');
+
+        // Khi chạy trong iframe (tab Ảnh của index.html), iframe cao bằng cả nội dung
+        // nên phải đặt bảng vào đúng vùng người dùng đang nhìn thấy trên màn hình.
+        function positionStampModal() {
+            let top = 12;
+            let maxHeight = window.innerHeight - 24;
+            try {
+                const frameEl = window.frameElement;
+                if (frameEl) {
+                    const r = frameEl.getBoundingClientRect();
+                    const bar = window.parent.document.querySelector('.tab-bar');
+                    const barBottom = bar ? bar.getBoundingClientRect().bottom : 0;
+                    const visTop = Math.max(0, barBottom - r.top);
+                    const visBottom = Math.min(window.innerHeight, window.parent.innerHeight - r.top);
+                    top = visTop + 12;
+                    maxHeight = Math.max(240, visBottom - visTop - 24);
+                }
+            } catch (_) {}
+            stampModalBox.style.top = top + 'px';
+            stampModalBox.style.maxHeight = maxHeight + 'px';
+        }
+
+        function openStampSettings() {
+            stampModal.classList.remove('hidden');
+            positionStampModal();
+            try { window.parent.addEventListener('scroll', positionStampModal, { passive: true }); } catch (_) {}
+            window.addEventListener('resize', positionStampModal);
+        }
+
+        function closeStampSettings() {
+            stampModal.classList.add('hidden');
+            try { window.parent.removeEventListener('scroll', positionStampModal); } catch (_) {}
+            window.removeEventListener('resize', positionStampModal);
+            btnOpenStampSettings.focus({ preventScroll: true });
+        }
+
+        btnOpenStampSettings.addEventListener('click', openStampSettings);
+        document.getElementById('btnCloseStampSettings').addEventListener('click', closeStampSettings);
+        document.getElementById('btnDoneStampSettings').addEventListener('click', closeStampSettings);
+        document.getElementById('stampModalBackdrop').addEventListener('click', closeStampSettings);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !stampModal.classList.contains('hidden')) closeStampSettings();
         });
 
         // Khởi tạo thời gian ban đầu
