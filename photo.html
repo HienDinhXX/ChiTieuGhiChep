@@ -720,7 +720,10 @@ locationInput.addEventListener('input', () => {
             const randomNumber = Math.floor(Math.random() * 1000) + 1;
             const randomNumber2 = Math.floor(Math.random() * 100) + 1;
             const randomNumber3 = Math.floor(Math.random() * 1000) + 1;
-            return `IMG_${dateForFilename}_${timeRaw}${seconds}${milliseconds}_${randomNumber}_${randomNumber2}${randomNumber3}.png`;
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const randomLetters = letters.charAt(Math.floor(Math.random() * letters.length)) + 
+                                  letters.charAt(Math.floor(Math.random() * letters.length));
+            return `IMG_${dateForFilename}_${timeRaw}${seconds}${milliseconds}_${randomNumber}${randomLetters}_${randomNumber2}${randomNumber3}.png`;
         }
 
         function updatePreviewInfo() {
