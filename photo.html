@@ -705,7 +705,7 @@ locationInput.addEventListener('input', () => {
         canvas.addEventListener('pointerup', stopStampDrag);
         canvas.addEventListener('pointercancel', stopStampDrag);
 
-        // Tên file: IMG_ngaythangnam_giophutgiay_soNgauNhien.png
+        // Tên file: IMG_......png
         function generateFileName() {
             const dateRaw = dateInput.value.replace(/[^0-9]/g, ''); // YYYYMMDD
             const dateForFilename = dateRaw.length === 8
@@ -716,9 +716,11 @@ locationInput.addEventListener('input', () => {
                 })();
             const timeRaw = (timeInput.value || '00:00').replace(/[^0-9]/g, '').padStart(4, '0');
             const seconds = String(new Date().getSeconds()).padStart(2, '0');
+            const milliseconds = String(new Date().getMilliseconds()).padStart(3, '0');
             const randomNumber = Math.floor(Math.random() * 1000) + 1;
             const randomNumber2 = Math.floor(Math.random() * 100) + 1;
-            return `IMG_${dateForFilename}_${timeRaw}${seconds}_${randomNumber}_${randomNumber2}.png`;
+            const randomNumber3 = Math.floor(Math.random() * 1000) + 1;
+            return `IMG_${dateForFilename}_${timeRaw}${seconds}${milliseconds}_${randomNumber}_${randomNumber2}${randomNumber3}.png`;
         }
 
         function updatePreviewInfo() {
