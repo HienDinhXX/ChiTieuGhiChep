@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng Dung Đóng Dấu Ảnh (Watermark)</title>
+
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Styling slider track & thumb */
+        input[type=range] {
+            accent-color: #2563eb;
+        }
+        .custom-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+        /* Form cài đặt kiểu nhãn bên trái, ô nhập bên phải */
+        .stamp-settings-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .stamp-settings-heading {
+            margin-bottom: 6px;
+            line-height: 1.25;
+        }
+        .stamp-settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        .stamp-settings-list > div:not(.settings-two-column) {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-width: 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+            margin: 0;
+        }
+        .stamp-settings-list > div > label,
+        .stamp-settings-list > div:not(.settings-two-column) label {
+            flex: 0 0 30%;
+            width: 30%;
+            min-width: 72px;
+            margin: 0;
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.3;
+            font-weight: 400;
+        }
+        .stamp-settings-list .relative {
+            flex: 1 1 auto;
+            width: 70%;
+            min-width: 0;
+        }
+        #locationInput, #timeInput, #dateInput, #timeFormatSelect, #positionSelect {
+            box-sizing: border-box;
+            display: block;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            height: 38px;
+            margin: 0;
+            border: 0;
+            border-radius: 0;
+            border-bottom: 1px solid #cbd5e1;
+            background-color: #fff;
+            color: #334155;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            font-size: 16px !important; /* iOS: >=16px để tránh tự zoom khi chạm ô nhập */
+            line-height: normal;
+            vertical-align: middle;
+            box-shadow: none;
+        }
+        #locationInput { padding: 0 34px 0 8px; }
+        #timeInput, #dateInput {
+            padding: 0 8px;
+            text-align: right;
+            -webkit-appearance: auto;
+            appearance: auto;
+            align-self: center;
+        }
+        /* Căn phần giá trị giờ/ngày vào giữa chiều cao ô trên Safari iPhone */
+        #timeInput::-webkit-date-and-time-value,
+        #dateInput::-webkit-date-and-time-value {
+            text-align: right;
+            min-height: 1em;
+            line-height: normal;
+            padding: 0;
+            margin: 0;
+        }
+        #timeFormatSelect, #positionSelect {
+            padding: 0 24px 0 8px;
+            text-align: right;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        #locationInput:focus, #timeInput:focus, #dateInput:focus,
+        #timeFormatSelect:focus, #positionSelect:focus {
+            outline: none;
+            border-bottom: 2px solid #2563eb;
+        }
+        .settings-two-column {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-width: 0;
+            gap: 0;
+        }
+        .settings-two-column > div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-width: 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .settings-two-column label {
+            flex: 0 0 30%;
+            width: 30%;
+            min-width: 72px;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.3;
+            color: #475569;
+            font-weight: 400;
+        }
+        .stamp-settings-list p {
+            display: block;
+            padding: 8px 0;
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+        .stamp-settings-list input[type="range"] { margin-top: 3px; }
+        @media (max-width: 430px) {
+            .stamp-settings-list > div:not(.settings-two-column),
+            .settings-two-column > div { gap: 8px; }
+            .stamp-settings-list > div > label,
+            .stamp-settings-list > div:not(.settings-two-column) label,
+            .settings-two-column label { flex-basis: 28%; width: 28%; min-width: 66px; font-size: 13px; }
+            #locationInput, #timeInput, #dateInput, #timeFormatSelect, #positionSelect {
+                font-size: 16px !important; /* Ngăn Safari iOS phóng to khi nhập liệu */
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
+
+    <main class="max-w-5xl mx-auto px-4 mt-4 space-y-6">
+
+        <!-- Chọn ảnh và tùy chỉnh dấu trong cùng một khung -->
+        <section class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 custom-shadow text-sm">
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-3">Chọn ảnh & tùy chỉnh dấu</h2>
+            <div class="grid grid-cols-2 gap-2">
+                <!-- Inputs ẩn -->
+                <input type="file" id="fileGallery" accept="image/*" multiple class="hidden">
+                <input type="file" id="fileCamera" accept="image/*" capture="environment" class="hidden">
+
+                <button id="btnGallery" type="button" class="flex min-w-0 items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm py-2.5 px-2 rounded-xl transition duration-200 shadow-lg shadow-blue-500/20 cursor-pointer">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span class="whitespace-nowrap">Tải ảnh từ máy</span>
+                </button>
+
+                <button id="btnCamera" type="button" class="flex min-w-0 items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-sm py-2.5 px-2 rounded-xl transition duration-200 shadow-lg shadow-emerald-500/20 cursor-pointer">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="whitespace-nowrap">Chụp ảnh</span>
+                </button>
+            </div>
+            <div class="stamp-settings-section">
+            <div class="stamp-settings-list">
+                <!-- Dòng 1: Vị trí / Địa điểm -->
+                <div>
+                    <label for="locationInput" class="block text-sm font-medium text-slate-700 mb-1">Vị trí</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <input type="text" id="locationInput" value="Ninh Bình, Việt Nam" class="w-full box-border px-3.5 py-2.5 pr-11 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 text-sm outline-none transition" placeholder="Nhập tên địa điểm...">
+                        <button id="btnGetLocation" type="button" title="Lấy vị trí hiện tại" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-blue-600 rounded-lg transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 00-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dòng 2: Giờ -->
+                <div>
+                    <label for="timeInput" class="block text-sm font-medium text-slate-700 mb-1">Giờ</label>
+                    <input type="time" id="timeInput" step="60" class="block box-border min-w-0 w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-800 text-sm outline-none transition" aria-label="Chọn giờ">
+                </div>
+
+                <!-- Dòng 3: Ngày -->
+                <div>
+                    <label for="dateInput" class="block text-sm font-medium text-slate-700 mb-1">Ngày</label>
+                    <input type="date" id="dateInput" class="block box-border min-w-0 w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-800 text-sm outline-none transition" aria-label="Chọn ngày">
+                </div>
+
+                <!-- Dòng 4: Định dạng giờ và vị trí hiển thị dấu -->
+                <div class="settings-two-column">
+                    <div class="min-w-0">
+                        <label for="timeFormatSelect" class="block text-sm font-medium text-slate-700 mb-1">Định dạng</label>
+                        <select id="timeFormatSelect" class="block box-border min-w-0 w-full px-2 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white text-slate-800 text-sm outline-none transition">
+                            <option value="12-am-pm" selected>12 tiếng AM PM</option>
+                            <option value="12-sa-ch">12 tiếng SA CH</option>
+                            <option value="24">24 tiếng</option>
+                        </select>
+                    </div>
+                    <div class="min-w-0">
+                        <label for="positionSelect" class="block text-sm font-medium text-slate-700 mb-1">Hiển thị</label>
+                        <select id="positionSelect" class="block box-border min-w-0 w-full px-2 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white text-slate-800 text-sm outline-none transition">
+                            <option value="bottom-left">Dưới - Trái</option>
+                            <option value="bottom-right" selected>Dưới - Phải</option>
+                            <option value="top-left">Trên - Trái</option>
+                            <option value="top-right">Trên - Phải</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Kích thước Zoom chữ -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label for="zoomRange" class="text-sm font-medium text-slate-700">Cỡ chữ</label>
+                        <span id="zoomValue" class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">150%</span>
+                    </div>
+                    <input type="range" id="zoomRange" min="50" max="300" value="150" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <!-- Danh sách hiển thị đủ tất cả ảnh đã chọn -->
+        <section id="imageGallerySection" class="hidden bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 custom-shadow">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">Danh sách ảnh đã chọn</h2>
+                <span id="imageCountBadge" class="text-xs font-semibold text-blue-600"></span>
+            </div>
+            <div id="imageGalleryGrid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1"></div>
+            <p class="mt-3 text-xs text-slate-500">Chạm vào ảnh để xem trước và chỉnh dấu.</p>
+        </section>
+
+        <!-- Khu vực xem trước Canvas & Nút tải xuống -->
+        <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 custom-shadow flex flex-col items-center">
+            <div class="w-full flex items-center justify-between mb-4">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">XEM TRƯỚC</h2>
+                <span id="resolutionBadge" class="text-xs text-slate-400 font-mono">Chưa chọn ảnh</span>
+            </div>
+
+            <!-- Khung chứa Canvas -->
+            <div class="w-full bg-slate-900/5 border border-slate-200 rounded-xl p-2 sm:p-4 flex items-center justify-center min-h-[300px] max-h-[600px] overflow-auto relative">
+                <!-- Placeholder khi chưa có ảnh -->
+                <div id="canvasPlaceholder" class="text-center p-8 text-slate-400 flex flex-col items-center">
+                    <svg class="w-16 h-16 mb-3 stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="text-sm font-medium">Vui lòng tải ảnh lên hoặc chụp ảnh để bắt đầu</p>
+                </div>
+
+                <canvas id="watermarkCanvas" class="hidden max-w-full max-h-[550px] object-contain rounded-lg shadow-md"></canvas>
+            </div>
+
+            <!-- Nút Tải xuống -->
+            <button id="btnDownload" type="button" disabled class="mt-6 w-full sm:w-auto min-w-[260px] flex items-center justify-center space-x-3 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-emerald-500/20 transition-all duration-200 text-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                <span id="downloadButtonText">Tải xuống ảnh</span>
+            </button>
+        </section>
+
+    </main>
+
+    <script>
+        // Các phần tử DOM
+        const fileGallery = document.getElementById('fileGallery');
+        const fileCamera = document.getElementById('fileCamera');
+        const btnGallery = document.getElementById('btnGallery');
+        const btnCamera = document.getElementById('btnCamera');
+
+        const locationInput = document.getElementById('locationInput');
+
+        const LOCATION_STORAGE_KEY = 'watermark_saved_location';
+
+// Khôi phục vị trí đã lưu khi mở ứng dụng
+const savedLocation = localStorage.getItem(LOCATION_STORAGE_KEY);
+
+if (savedLocation !== null) {
+    locationInput.value = savedLocation;
+}
+
+// Tự động lưu mỗi khi người dùng nhập hoặc thay đổi vị trí
+locationInput.addEventListener('input', () => {
+    localStorage.setItem(LOCATION_STORAGE_KEY, locationInput.value);
+});
+
+        
+        const timeInput = document.getElementById('timeInput');
+        const timeFormatSelect = document.getElementById('timeFormatSelect');
+        const dateInput = document.getElementById('dateInput');
+        const positionSelect = document.getElementById('positionSelect');
+        const zoomRange = document.getElementById('zoomRange');
+        const zoomValue = document.getElementById('zoomValue');
+        const btnGetLocation = document.getElementById('btnGetLocation');
+
+        const canvas = document.getElementById('watermarkCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasPlaceholder = document.getElementById('canvasPlaceholder');
+        const btnDownload = document.getElementById('btnDownload');
+        const resolutionBadge = document.getElementById('resolutionBadge');
+        const imageGallerySection = document.getElementById('imageGallerySection');
+        const imageGalleryGrid = document.getElementById('imageGalleryGrid');
+        const imageCountBadge = document.getElementById('imageCountBadge');
+
+        let loadedImage = null; // Ảnh đang xem trước
+        let loadedImages = []; // Danh sách ảnh đã chọn để xử lý hàng loạt
+        let selectedImageIndex = 0; // Ảnh đang được xem trước
+        let customPosition = null; // Vị trí kéo thả tự do (tọa độ ảnh gốc)
+        let lastStampBounds = null;
+        let dragOffset = { x: 0, y: 0 };
+        let isDraggingStamp = false;
+        let downloadCounter = 1; // Biến đếm từ 1 đến 100
+
+        // Khởi tạo giờ/ngày theo định dạng picker của trình duyệt.
+        // Giá trị nội bộ: giờ HH:mm, ngày YYYY-MM-DD; khi đóng dấu sẽ định dạng theo kiểu Việt Nam.
+        function initDateTime() {
+            const now = new Date();
+            timeInput.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            dateInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        function formatTimeForStamp(value) {
+            if (!value) return '';
+            const parts = value.split(':');
+            if (parts.length < 2) return value;
+            let hours = Number(parts[0]);
+            const minutes = parts[1];
+
+            if (timeFormatSelect.value === '24') {
+                return `${String(hours).padStart(2, '0')}:${minutes}`;
+            }
+
+            const suffix = timeFormatSelect.value === '12-am-pm'
+                ? (hours >= 12 ? 'PM' : 'AM')
+                : (hours >= 12 ? 'CH' : 'SA');
+            hours = hours % 12 || 12;
+            return `${String(hours).padStart(2, '0')}:${minutes} ${suffix}`;
+        }
+
+        function formatDateForStamp(value) {
+            if (!value) return '';
+            const parts = value.split('-');
+            if (parts.length !== 3) return value;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        // Sự kiện click nút bấm nguồn ảnh
+        btnGallery.addEventListener('click', () => fileGallery.click());
+        btnCamera.addEventListener('click', () => fileCamera.click());
+
+        fileGallery.addEventListener('change', handleFileSelect);
+        fileCamera.addEventListener('change', handleFileSelect);
+
+        async function handleFileSelect(e) {
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
+            const imageFiles = files.filter(file => file.type.startsWith('image/'));
+            if (!imageFiles.length) {
+                alert('Vui lòng chọn file hình ảnh!');
+                e.target.value = '';
+                return;
+            }
+            if (imageFiles.length !== files.length) alert('Một số tệp không phải ảnh đã được bỏ qua.');
+
+            try {
+                const loaded = await Promise.all(imageFiles.map(file => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onerror = () => reject(new Error('Không đọc được tệp: ' + file.name));
+                    reader.onload = evt => {
+                        const img = new Image();
+                        img.onload = () => resolve({ img, name: file.name });
+                        img.onerror = () => reject(new Error('Ảnh không hợp lệ: ' + file.name));
+                        img.src = evt.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                })));
+                loadedImages = loaded;
+                selectedImageIndex = 0;
+                loadedImage = loadedImages[0].img;
+                customPosition = null;
+
+                const minDimension = Math.min(loadedImage.naturalWidth, loadedImage.naturalHeight);
+                zoomRange.max = minDimension > 2000 ? 500 : minDimension > 1000 ? 400 : 300;
+                canvas.classList.remove('hidden');
+                canvas.style.cursor = 'grab';
+                canvasPlaceholder.classList.add('hidden');
+                btnDownload.disabled = false;
+                document.getElementById('downloadButtonText').textContent =
+                    loadedImages.length > 1 ? `Tải xuống ${loadedImages.length} ảnh` : 'Tải xuống ảnh';
+                renderImageGallery();
+                updatePreviewInfo();
+                renderWatermark();
+            } catch (err) {
+                alert(err.message || 'Không thể tải ảnh.');
+            } finally {
+                e.target.value = '';
+            }
+        }
+
+        // Lấy vị trí từ trình duyệt
+        btnGetLocation.addEventListener('click', () => {
+            if (navigator.geolocation) {
+                btnGetLocation.classList.add('animate-spin', 'text-blue-600');
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        btnGetLocation.classList.remove('animate-spin', 'text-blue-600');
+                        const lat = pos.coords.latitude.toFixed(3);
+                        const lng = pos.coords.longitude.toFixed(3);
+                        locationInput.value = `Tọa độ: ${lat}, ${lng}`;
+                        renderWatermark();
+                    },
+                    (err) => {
+                        btnGetLocation.classList.remove('animate-spin', 'text-blue-600');
+                        alert('Không thể lấy vị trí. Vui lòng tự nhập địa điểm.');
+                    }
+                );
+            } else {
+                alert('Trình duyệt của bạn không hỗ trợ định vị.');
+            }
+        });
+
+        // Đăng ký sự kiện thay đổi input để render Real-time
+        [locationInput, timeInput, dateInput].forEach(element => {
+            element.addEventListener('input', renderWatermark);
+            element.addEventListener('change', renderWatermark);
+        });
+        positionSelect.addEventListener('change', () => {
+            customPosition = null; // Chọn góc sẽ quay về vị trí góc đã chọn
+            renderWatermark();
+        });
+        timeFormatSelect.addEventListener('change', renderWatermark);
+
+        zoomRange.addEventListener('input', (e) => {
+            zoomValue.textContent = `${e.target.value}%`;
+            renderWatermark();
+        });
+
+        /**
+         * Hàm vẽ Icon Ghim Vị Trí Zalo / Maps Badge
+         */
+        function drawLocationPin(ctx, x, y, size) {
+            const type = 'pin';
+            const cx = x + size / 2;
+            const cy = y + size / 2;
+            ctx.save();
+            ctx.shadowColor = 'rgba(0,0,0,0.6)';
+            ctx.shadowBlur = Math.max(4, size * 0.1);
+            ctx.lineWidth = Math.max(2, size * 0.07);
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+
+            if (type === 'target') {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath(); ctx.arc(cx, cy, size * 0.43, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#2563eb';
+                ctx.beginPath(); ctx.arc(cx, cy, size * 0.31, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx, cy, size * 0.11, 0, Math.PI * 2); ctx.fillStyle = '#2563eb'; ctx.fill();
+                ctx.beginPath(); ctx.moveTo(cx, y); ctx.lineTo(cx, y + size * 0.18); ctx.moveTo(cx, y + size * 0.82); ctx.lineTo(cx, y + size); ctx.moveTo(x, cy); ctx.lineTo(x + size * 0.18, cy); ctx.moveTo(x + size * 0.82, cy); ctx.lineTo(x + size, cy); ctx.stroke();
+            } else if (type === 'compass') {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath(); ctx.arc(cx, cy, size * 0.44, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#2563eb';
+                ctx.beginPath(); ctx.arc(cx, cy, size * 0.36, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx, y + size * 0.12); ctx.lineTo(cx + size * 0.16, cy + size * 0.12); ctx.lineTo(cx, cy + size * 0.03); ctx.closePath(); ctx.fillStyle = '#ef4444'; ctx.fill();
+                ctx.beginPath(); ctx.moveTo(cx, y + size * 0.12); ctx.lineTo(cx - size * 0.16, cy + size * 0.12); ctx.lineTo(cx, cy + size * 0.03); ctx.closePath(); ctx.fillStyle = '#2563eb'; ctx.fill();
+                ctx.beginPath(); ctx.arc(cx, cy, size * 0.045, 0, Math.PI * 2); ctx.fillStyle = '#2563eb'; ctx.fill();
+            } else {
+                ctx.beginPath();
+                const radius = size * 0.35;
+                ctx.arc(cx, y + radius, radius, Math.PI * 0.8, Math.PI * 0.2, false);
+                ctx.lineTo(cx, y + size);
+                ctx.closePath();
+                ctx.fillStyle = '#FFFFFF'; ctx.fill();
+                ctx.beginPath(); ctx.arc(cx, y + radius, radius * 0.4, 0, Math.PI * 2);
+                ctx.fillStyle = '#2563eb'; ctx.shadowBlur = 0; ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        /**
+         * Hàm Render Watermark chính
+         */
+        function renderWatermark() {
+            if (!loadedImage) return;
+
+            const width = loadedImage.naturalWidth;
+            const height = loadedImage.naturalHeight;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            // 1. Vẽ ảnh gốc lên Canvas
+            ctx.clearRect(0, 0, width, height);
+            ctx.drawImage(loadedImage, 0, 0, width, height);
+
+            // 2. Tính toán Font size căn cứ theo kích thước ảnh & Slider Zoom
+            const minDimension = Math.min(width, height);
+            const userZoom = parseFloat(zoomRange.value) / 100;
+            const baseFontSize = Math.max(16, Math.round(minDimension * 0.028 * userZoom));
+            
+            const line1Text = `${formatTimeForStamp(timeInput.value)}  ${formatDateForStamp(dateInput.value)}`.trim();
+            const line2Text = locationInput.value.trim();
+
+            const fontName = 'Arial, sans-serif';
+            const fontStyle = `bold ${baseFontSize}px ${fontName}`;
+            ctx.font = fontStyle;
+
+            const line1Width = ctx.measureText(line1Text).width;
+            const line2Width = ctx.measureText(line2Text).width;
+            const maxTextWidth = Math.max(line1Width, line2Width);
+
+            const lineHeight = baseFontSize * 1.35;
+            const totalTextHeight = lineHeight * 2;
+
+            const iconSize = totalTextHeight * 1.05;
+            const spacing = baseFontSize * 0.5;
+
+            const margin = Math.max(20, Math.round(minDimension * 0.035));
+
+            const position = positionSelect.value;
+            let startY;
+            let isLeft = position.includes('left');
+            const isTop = position.includes('top');
+            let iconX;
+
+            if (customPosition) {
+                // Khi kéo tự do, điểm kéo là góc trái của biểu tượng ghim.
+                iconX = Math.max(0, Math.min(width - iconSize, customPosition.x));
+                startY = Math.max(0, Math.min(height - totalTextHeight, customPosition.y));
+                isLeft = iconX < width / 2;
+            } else {
+                startY = isTop ? margin : height - margin - totalTextHeight;
+                iconX = isLeft ? margin : width - margin - iconSize;
+            }
+
+            let textX;
+            if (isLeft) {
+                textX = iconX + iconSize + spacing;
+            } else {
+                textX = iconX - spacing;
+            }
+
+            // Lưu vùng dấu để chỉ kéo khi người dùng chạm/nhấn vào dấu.
+            const groupLeft = isLeft ? iconX : iconX - spacing - maxTextWidth;
+            const groupRight = isLeft ? iconX + iconSize + spacing + maxTextWidth : iconX + iconSize;
+            lastStampBounds = {
+                left: Math.max(0, groupLeft - baseFontSize),
+                right: Math.min(width, groupRight + baseFontSize),
+                top: Math.max(0, startY - baseFontSize),
+                bottom: Math.min(height, startY + totalTextHeight + baseFontSize),
+                iconSize, totalTextHeight
+            };
+
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+            ctx.shadowBlur = Math.max(6, Math.round(baseFontSize * 0.25));
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.lineWidth = Math.max(1, Math.round(baseFontSize * 0.08));
+            ctx.font = fontStyle;
+
+            if (isLeft) {
+                ctx.textAlign = 'left';
+            } else {
+                ctx.textAlign = 'right';
+            }
+            ctx.textBaseline = 'top';
+
+            const line1Y = startY + (totalTextHeight - (lineHeight * 2)) / 2;
+            const line2Y = line1Y + lineHeight;
+
+            // Dòng 1: Giờ + Ngày
+            ctx.strokeText(line1Text, textX, line1Y);
+            ctx.fillText(line1Text, textX, line1Y);
+
+            // Dòng 2: Địa điểm
+            ctx.strokeText(line2Text, textX, line2Y);
+            ctx.fillText(line2Text, textX, line2Y);
+
+            ctx.restore();
+
+            // Vẽ Icon Ghim Vị Trí
+            const iconY = startY + (totalTextHeight - iconSize) / 2;
+            drawLocationPin(ctx, iconX, iconY, iconSize);
+        }
+
+        // Kéo dấu trực tiếp trên ảnh xem trước.
+        function canvasPointFromEvent(event) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (event.clientX - rect.left) * (canvas.width / rect.width),
+                y: (event.clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        canvas.style.touchAction = 'none';
+        canvas.style.cursor = 'default';
+
+        canvas.addEventListener('pointerdown', (event) => {
+            if (!loadedImage || !lastStampBounds) return;
+            const point = canvasPointFromEvent(event);
+            const b = lastStampBounds;
+            if (point.x >= b.left && point.x <= b.right && point.y >= b.top && point.y <= b.bottom) {
+                isDraggingStamp = true;
+                customPosition = customPosition || { x: (positionSelect.value.includes('left') ? Math.max(0, Math.min(canvas.width, canvas.width * 0.035)) : canvas.width - Math.max(20, Math.round(Math.min(canvas.width, canvas.height) * 0.035)) - b.iconSize), y: positionSelect.value.includes('top') ? Math.max(20, Math.round(Math.min(canvas.width, canvas.height) * 0.035)) : canvas.height - Math.max(20, Math.round(Math.min(canvas.width, canvas.height) * 0.035)) - b.totalTextHeight };
+                dragOffset = { x: point.x - customPosition.x, y: point.y - customPosition.y };
+                canvas.setPointerCapture(event.pointerId);
+                canvas.style.cursor = 'grabbing';
+                event.preventDefault();
+            }
+        });
+
+        canvas.addEventListener('pointermove', (event) => {
+            if (!isDraggingStamp || !loadedImage) return;
+            const point = canvasPointFromEvent(event);
+            customPosition = { x: point.x - dragOffset.x, y: point.y - dragOffset.y };
+            renderWatermark();
+        });
+
+        function stopStampDrag() {
+            if (!isDraggingStamp) return;
+            isDraggingStamp = false;
+            canvas.style.cursor = 'grab';
+        }
+        canvas.addEventListener('pointerup', stopStampDrag);
+        canvas.addEventListener('pointercancel', stopStampDrag);
+
+        // Tên file: IMG_ngaythangnam_giophutgiay_soNgauNhien.png
+        function generateFileName() {
+            const dateRaw = dateInput.value.replace(/[^0-9]/g, ''); // YYYYMMDD
+            const dateForFilename = dateRaw.length === 8
+                ? `${dateRaw.slice(6, 8)}${dateRaw.slice(4, 6)}${dateRaw.slice(0, 4)}`
+                : (() => {
+                    const now = new Date();
+                    return `${String(now.getDate()).padStart(2, '0')}${String(now.getMonth() + 1).padStart(2, '0')}${now.getFullYear()}`;
+                })();
+            const timeRaw = (timeInput.value || '00:00').replace(/[^0-9]/g, '').padStart(4, '0');
+            const seconds = String(new Date().getSeconds()).padStart(2, '0');
+            const randomNumber = Math.floor(Math.random() * 100) + 1;
+            return `IMG_${dateForFilename}_${timeRaw}${seconds}_${randomNumber}.png`;
+        }
+
+        function updatePreviewInfo() {
+            if (!loadedImage) return;
+            resolutionBadge.textContent = loadedImages.length > 1
+                ? `${loadedImage.naturalWidth} × ${loadedImage.naturalHeight} px • Ảnh ${selectedImageIndex + 1}/${loadedImages.length}`
+                : `${loadedImage.naturalWidth} × ${loadedImage.naturalHeight} px`;
+        }
+
+        function selectImage(index) {
+            if (!loadedImages[index]) return;
+            selectedImageIndex = index;
+            loadedImage = loadedImages[index].img;
+            customPosition = null;
+            const minDimension = Math.min(loadedImage.naturalWidth, loadedImage.naturalHeight);
+            zoomRange.max = minDimension > 2000 ? 500 : minDimension > 1000 ? 400 : 300;
+            canvas.classList.remove('hidden');
+            canvasPlaceholder.classList.add('hidden');
+            btnDownload.disabled = false;
+            updatePreviewInfo();
+            renderImageGallery();
+            renderWatermark();
+        }
+
+        // Danh sách thu gọn; chạm vào ảnh để đưa ảnh đó lên vùng xem trước.
+        function renderImageGallery() {
+            imageGalleryGrid.innerHTML = '';
+            if (!loadedImages.length) {
+                imageGallerySection.classList.add('hidden');
+                return;
+            }
+            imageGallerySection.classList.remove('hidden');
+            imageCountBadge.textContent = `${loadedImages.length} ảnh`;
+            loadedImages.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `min-w-0 overflow-hidden rounded-md border cursor-pointer ${index === selectedImageIndex ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50' : 'border-slate-200 bg-slate-50'}`;
+                card.title = `Chọn ảnh ${index + 1}: ${item.name}`;
+                card.addEventListener('click', () => selectImage(index));
+
+                const thumb = document.createElement('img');
+                thumb.src = item.img.src;
+                thumb.alt = item.name;
+                thumb.className = 'w-full h-10 sm:h-12 object-contain bg-slate-100';
+
+                const info = document.createElement('div');
+                info.className = 'p-1';
+                const name = document.createElement('div');
+                name.className = 'text-[9px] leading-tight text-slate-600 truncate mb-1';
+                name.textContent = `${index + 1}. ${item.name}`;
+                name.title = item.name;
+                const download = document.createElement('button');
+                download.type = 'button';
+                download.className = 'w-full rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-semibold py-1 px-1';
+                download.textContent = 'Tải ảnh';
+                download.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    downloadOneImage(index);
+                });
+                info.append(name, download);
+                card.append(thumb, info);
+                imageGalleryGrid.append(card);
+            });
+        }
+
+        // Đóng dấu và tải một ảnh riêng biệt, không nén ZIP.
+        async function downloadOneImage(index) {
+            if (!loadedImages[index]) return;
+            const originalImage = loadedImage;
+            const originalPosition = customPosition ? { ...customPosition } : null;
+            const originalWidth = originalImage ? originalImage.naturalWidth : 1;
+            const originalHeight = originalImage ? originalImage.naturalHeight : 1;
+            const relativePosition = originalPosition ? {
+                x: originalPosition.x / originalWidth,
+                y: originalPosition.y / originalHeight
+            } : null;
+            try {
+                const item = loadedImages[index];
+                loadedImage = item.img;
+                customPosition = relativePosition ? {
+                    x: relativePosition.x * item.img.naturalWidth,
+                    y: relativePosition.y * item.img.naturalHeight
+                } : null;
+                renderWatermark();
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                if (!blob) throw new Error('Không thể xử lý ảnh: ' + item.name);
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = generateFileName();
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 2000);
+            } catch (err) {
+                alert(err.message || 'Có lỗi khi xử lý ảnh.');
+            } finally {
+                loadedImage = originalImage;
+                customPosition = originalPosition;
+                if (loadedImage) renderWatermark();
+            }
+        }
+
+        // Nút tải ở cuối trang tải từng ảnh PNG riêng lẻ, không gộp ZIP.
+        // Trên iPhone/Safari, trình duyệt có thể yêu cầu xác nhận hoặc chặn các lượt tải tự động tiếp theo.
+        btnDownload.addEventListener('click', async () => {
+            if (!loadedImages.length) return;
+
+            const buttonText = document.getElementById('downloadButtonText');
+            const originalImage = loadedImage;
+            const originalPosition = customPosition ? { ...customPosition } : null;
+            const originalWidth = originalImage ? originalImage.naturalWidth : 1;
+            const originalHeight = originalImage ? originalImage.naturalHeight : 1;
+            const relativePosition = originalPosition ? {
+                x: originalPosition.x / originalWidth,
+                y: originalPosition.y / originalHeight
+            } : null;
+
+            btnDownload.disabled = true;
+            try {
+                for (let i = 0; i < loadedImages.length; i++) {
+                    buttonText.textContent = `Đang tải ảnh ${i + 1}/${loadedImages.length}...`;
+                    const item = loadedImages[i];
+                    loadedImage = item.img;
+                    customPosition = relativePosition ? {
+                        x: relativePosition.x * item.img.naturalWidth,
+                        y: relativePosition.y * item.img.naturalHeight
+                    } : null;
+
+                    renderWatermark();
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    if (!blob) throw new Error('Không thể xử lý ảnh: ' + item.name);
+
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = generateFileName();
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+                    // Nghỉ giữa các lượt tải để Safari có thời gian xử lý.
+                    if (i < loadedImages.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 900));
+                    }
+                }
+            } catch (err) {
+                alert(err.message || 'Có lỗi khi xử lý ảnh.');
+            } finally {
+                loadedImage = originalImage;
+                customPosition = originalPosition;
+                if (loadedImage) {
+                    updatePreviewInfo();
+                    renderImageGallery();
+                    renderWatermark();
+                }
+                buttonText.textContent = loadedImages.length > 1
+                    ? `Tải xuống ${loadedImages.length} ảnh`
+                    : 'Tải xuống ảnh';
+                btnDownload.disabled = false;
+            }
+        });
+
+        // Khởi tạo thời gian ban đầu
+        initDateTime();
+    </script>
+</body>
+</html>
