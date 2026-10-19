@@ -1,936 +1,5569 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ứng Dung Đóng Dấu Ảnh (Watermark)</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>Quản lý Chi tiêu</title>
 
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter & Roboto -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        /* Styling slider track & thumb */
-        input[type=range] {
-            accent-color: #2563eb;
-        }
-        .custom-shadow {
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-        }
-        /* Form cài đặt kiểu nhãn bên trái, ô nhập bên phải */
-        .stamp-settings-section {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #e2e8f0;
-        }
-        .stamp-settings-heading {
-            margin-bottom: 6px;
-            line-height: 1.25;
-        }
-        .stamp-settings-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-        }
-        .stamp-settings-list > div:not(.settings-two-column) {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            min-width: 0;
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
-            margin: 0;
-        }
-        .stamp-settings-list > div > label,
-        .stamp-settings-list > div:not(.settings-two-column) label {
-            flex: 0 0 30%;
-            width: 30%;
-            min-width: 72px;
-            margin: 0;
-            color: #475569;
-            font-size: 14px;
-            line-height: 1.3;
-            font-weight: 400;
-        }
-        .stamp-settings-list .relative {
-            flex: 1 1 auto;
-            width: 70%;
-            min-width: 0;
-        }
-        #locationInput, #timeInput, #dateInput, #timeFormatSelect, #positionSelect {
-            box-sizing: border-box;
-            display: block;
-            width: 100%;
-            min-width: 0;
-            max-width: 100%;
-            height: 38px;
-            margin: 0;
-            border: 0;
-            border-radius: 0;
-            border-bottom: 1px solid #cbd5e1;
-            background-color: #fff;
-            color: #334155;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-            font-size: 16px !important; /* iOS: >=16px để tránh tự zoom khi chạm ô nhập */
-            line-height: normal;
-            vertical-align: middle;
-            box-shadow: none;
-        }
-        #locationInput { padding: 0 34px 0 8px; }
-        #timeInput, #dateInput {
-            padding: 0 8px;
-            text-align: right;
-            -webkit-appearance: auto;
-            appearance: auto;
-            align-self: center;
-        }
-        /* Căn phần giá trị giờ/ngày vào giữa chiều cao ô trên Safari iPhone */
-        #timeInput::-webkit-date-and-time-value,
-        #dateInput::-webkit-date-and-time-value {
-            text-align: right;
-            min-height: 1em;
-            line-height: normal;
-            padding: 0;
-            margin: 0;
-        }
-        #timeFormatSelect, #positionSelect {
-            padding: 0 24px 0 8px;
-            text-align: right;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-        #locationInput:focus, #timeInput:focus, #dateInput:focus,
-        #timeFormatSelect:focus, #positionSelect:focus {
-            outline: none;
-            border-bottom: 2px solid #2563eb;
-        }
-        .settings-two-column {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            min-width: 0;
-            gap: 0;
-        }
-        .settings-two-column > div {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            min-width: 0;
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .settings-two-column label {
-            flex: 0 0 30%;
-            width: 30%;
-            min-width: 72px;
-            margin: 0;
-            font-size: 14px;
-            line-height: 1.3;
-            color: #475569;
-            font-weight: 400;
-        }
-        .stamp-settings-list p {
-            display: block;
-            padding: 8px 0;
-            margin: 0;
-            font-size: 12px;
-            line-height: 1.35;
-        }
-        .stamp-settings-list input[type="range"] { margin-top: 3px; }
-        @media (max-width: 430px) {
-            .stamp-settings-list > div:not(.settings-two-column),
-            .settings-two-column > div { gap: 8px; }
-            .stamp-settings-list > div > label,
-            .stamp-settings-list > div:not(.settings-two-column) label,
-            .settings-two-column label { flex-basis: 28%; width: 28%; min-width: 66px; font-size: 13px; }
-            #locationInput, #timeInput, #dateInput, #timeFormatSelect, #positionSelect {
-                font-size: 16px !important; /* Ngăn Safari iOS phóng to khi nhập liệu */
-            }
-        }
-        /* Bảng tùy chỉnh dấu */
-        #stampModal { position: fixed; inset: 0; z-index: 50; }
-        #stampModal.hidden { display: none; }
-        .stamp-modal-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.45); }
-        .stamp-modal-box {
-            position: absolute;
-            left: 50%;
-            top: 12px;
-            transform: translateX(-50%);
-            width: min(92%, 440px);
-            max-height: calc(100% - 24px);
-            display: flex;
-            flex-direction: column;
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.35);
-            overflow: hidden;
-        }
-        .stamp-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 8px 16px; border-bottom: 1px solid #e2e8f0; }
-        .stamp-modal-body { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 16px 8px; }
-        .stamp-modal-body .stamp-settings-section { margin-top: 0; padding-top: 0; border-top: 0; }
-        .stamp-modal-footer { padding: 10px 16px 14px; border-top: 1px solid #e2e8f0; }
-    </style>
-</head>
-<body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
+  <link rel="apple-touch-icon" href="IMG_0670.jpeg">
+  <link rel="manifest" href="manifest.json">
 
-    <main class="max-w-5xl mx-auto px-4 mt-4 space-y-6">
+  <meta name="theme-color" content="#ff7292">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="chi tiêu">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-        <!-- Chọn ảnh và tùy chỉnh dấu trong cùng một khung -->
-        <section class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 custom-shadow text-sm">
-            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-3">Chọn ảnh</h2>
-            <div class="grid grid-cols-2 gap-2">
-                <!-- Inputs ẩn -->
-                <input type="file" id="fileGallery" accept="image/*" multiple class="hidden">
-                <input type="file" id="fileCamera" accept="image/*" capture="environment" class="hidden">
+  <style>
+    :root {
+      --bg: #f2f2f7;
+      --card: #ffffff;
+      --text: #1c1c1e;
+      --muted: #8e8e93;
+      --primary: #007aff;
+      --danger: #ff3b30;
+      --success: #34c759;
+      --warning: #ff9500;
+      --shadow: 0 4px 16px rgba(0,0,0,0.06);
+      --radius: 14px;
+      --pad: 16px;
+      --gap: 12px;
+      --container-max: 600px;
+    }
 
-                <button id="btnGallery" type="button" class="flex min-w-0 items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm py-2.5 px-2 rounded-xl transition duration-200 shadow-lg shadow-blue-500/20 cursor-pointer">
-                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <span class="whitespace-nowrap">Tải ảnh từ máy</span>
-                </button>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
 
-                <button id="btnCamera" type="button" class="flex min-w-0 items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-sm py-2.5 px-2 rounded-xl transition duration-200 shadow-lg shadow-emerald-500/20 cursor-pointer">
-                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span class="whitespace-nowrap">Chụp ảnh</span>
-                </button>
-            </div>
+    input, button, select, textarea, canvas {
+      max-width: 100%;
+      display: block;
+    }
 
-            <!-- Nút mở bảng tùy chỉnh dấu -->
-            <button id="btnOpenStampSettings" type="button" aria-haspopup="dialog" aria-controls="stampModal"
-                class="mt-2 w-full flex items-center justify-between gap-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold text-sm py-2.5 px-4 rounded-xl border border-slate-200 transition duration-200 cursor-pointer">
-                <span class="flex items-center gap-2">
-                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-                    </svg>
-                    Tùy chỉnh dấu
-                </span>
-                <svg class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </button>
-        </section>
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
 
-        <!-- Danh sách hiển thị đủ tất cả ảnh đã chọn -->
-        <section id="imageGallerySection" class="hidden bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 custom-shadow">
-            <div class="flex items-center justify-between gap-3 mb-3">
-                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">Danh sách ảnh đã chọn</h2>
-                <span id="imageCountBadge" class="text-xs font-semibold text-blue-600"></span>
-            </div>
-            <div id="imageGalleryGrid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1"></div>
-            <p class="mt-3 text-xs text-slate-500">Chạm vào ảnh để xem trước và chỉnh dấu.</p>
-        </section>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        <!-- Khu vực xem trước Canvas & Nút tải xuống -->
-        <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 custom-shadow flex flex-col items-center">
-            <div class="w-full flex items-center justify-between mb-4">
-                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">XEM TRƯỚC</h2>
-                <span id="resolutionBadge" class="text-xs text-slate-400 font-mono">Chưa chọn ảnh</span>
-            </div>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding-top: 60px;
+      padding-bottom: 80px;
+    }
 
-            <!-- Khung chứa Canvas -->
-            <div class="w-full bg-slate-900/5 border border-slate-200 rounded-xl p-2 sm:p-4 flex items-center justify-center min-h-[300px] max-h-[600px] overflow-auto relative">
-                <!-- Placeholder khi chưa có ảnh -->
-                <div id="canvasPlaceholder" class="text-center p-8 text-slate-400 flex flex-col items-center">
-                    <svg class="w-16 h-16 mb-3 stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <p class="text-sm font-medium">Vui lòng tải ảnh lên hoặc chụp ảnh để bắt đầu</p>
-                </div>
+    @supports(padding: env(safe-area-inset-top)) {
+      body {
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+      }
+    }
 
-                <canvas id="watermarkCanvas" class="hidden max-w-full max-h-[550px] object-contain rounded-lg shadow-md"></canvas>
-            </div>
+    /* TAB BAR */
 
-            <!-- Nút Tải xuống -->
-            <button id="btnDownload" type="button" disabled class="mt-6 w-full sm:w-auto min-w-[260px] flex items-center justify-center space-x-3 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-emerald-500/20 transition-all duration-200 text-lg">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                </svg>
-                <span id="downloadButtonText">Tải xuống ảnh</span>
-            </button>
-        </section>
+    .tab-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #e5e5ea;
+      border-bottom: 1px solid #d1d1d6;
+      display: flex;
+      align-items: center;
+      z-index: 99;
+      padding-top: env(safe-area-inset-top, 0px);
+    }
 
-    </main>
+    .tab-divider {
+      width: 1px;
+      height: 28px;
+      background-color: #c7c7cc;
+    }
 
-    <!-- Bảng tùy chỉnh dấu -->
-    <div id="stampModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stampModalTitle">
-        <div id="stampModalBackdrop" class="stamp-modal-backdrop"></div>
-        <div id="stampModalBox" class="stamp-modal-box">
-            <div class="stamp-modal-header">
-                <h3 id="stampModalTitle" class="text-base font-semibold text-slate-800">Tùy chỉnh dấu</h3>
-                <button id="btnCloseStampSettings" type="button" aria-label="Đóng" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <div class="stamp-modal-body">
-            <div class="stamp-settings-section">
-            <div class="stamp-settings-list">
-                <!-- Dòng 1: Vị trí / Địa điểm -->
-                <div>
-                    <label for="locationInput" class="block text-sm font-medium text-slate-700 mb-1">Vị trí</label>
-                    <div class="relative rounded-md shadow-sm">
-                        <input type="text" id="locationInput" value="Ninh Bình, Việt Nam" class="w-full box-border px-3.5 py-2.5 pr-11 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 text-sm outline-none transition" placeholder="Nhập tên địa điểm...">
-                        <button id="btnGetLocation" type="button" title="Lấy vị trí hiện tại" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-blue-600 rounded-lg transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 00-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        </button>
-                    </div>
-                </div>
+    .tab-item {
+      flex: 1;
+      height: 100%;
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      background: #e5e5ea;
+      opacity: 0.7;
+      transition: background 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+    }
 
-                <!-- Dòng 2: Giờ -->
-                <div>
-                    <label for="timeInput" class="block text-sm font-medium text-slate-700 mb-1">Giờ</label>
-                    <input type="time" id="timeInput" step="60" class="block box-border min-w-0 w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-800 text-sm outline-none transition" aria-label="Chọn giờ">
-                </div>
+    .tab-item.active {
+      background: #ffffff;
+      color: var(--primary);
+      font-weight: 600;
+      opacity: 1;
+    }
 
-                <!-- Dòng 3: Ngày -->
-                <div>
-                    <label for="dateInput" class="block text-sm font-medium text-slate-700 mb-1">Ngày</label>
-                    <input type="date" id="dateInput" class="block box-border min-w-0 w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-800 text-sm outline-none transition" aria-label="Chọn ngày">
-                </div>
+    .tab-item .icon {
+      font-size: 18px;
+    }
 
-                <!-- Dòng 4: Định dạng giờ và vị trí hiển thị dấu -->
-                <div class="settings-two-column">
-                    <div class="min-w-0">
-                        <label for="timeFormatSelect" class="block text-sm font-medium text-slate-700 mb-1">Định dạng</label>
-                        <select id="timeFormatSelect" class="block box-border min-w-0 w-full px-2 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white text-slate-800 text-sm outline-none transition">
-                            <option value="12-am-pm" selected>12 tiếng AM PM</option>
-                            <option value="12-sa-ch">12 tiếng SA CH</option>
-                            <option value="24">24 tiếng</option>
-                        </select>
-                    </div>
-                    <div class="min-w-0">
-                        <label for="positionSelect" class="block text-sm font-medium text-slate-700 mb-1">Hiển thị</label>
-                        <select id="positionSelect" class="block box-border min-w-0 w-full px-2 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white text-slate-800 text-sm outline-none transition">
-                            <option value="bottom-left">Dưới - Trái</option>
-                            <option value="bottom-right" selected>Dưới - Phải</option>
-                            <option value="top-left">Trên - Trái</option>
-                            <option value="top-right">Trên - Phải</option>
-                        </select>
-                    </div>
-                </div>
+    .container {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 16px;
+    }
 
-                <!-- Kích thước Zoom chữ -->
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label for="zoomRange" class="text-sm font-medium text-slate-700">Cỡ chữ</label>
-                        <span id="zoomValue" class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">150%</span>
-                    </div>
-                    <input type="range" id="zoomRange" min="50" max="300" value="150" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                </div>
-            </div>
-            </div>
-            </div>
-            <div class="stamp-modal-footer">
-                <button id="btnDoneStampSettings" type="button" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm py-2.5 rounded-xl transition">Xong</button>
-            </div>
-        </div>
-    </div>
+    /* HEADER */
 
-    <script>
-        // Các phần tử DOM
-        const fileGallery = document.getElementById('fileGallery');
-        const fileCamera = document.getElementById('fileCamera');
-        const btnGallery = document.getElementById('btnGallery');
-        const btnCamera = document.getElementById('btnCamera');
+    .sticky-header {
+      position: sticky;
+      top: 60px;
+      z-index: 10;
+      background: var(--bg);
+      padding: 12px 0 8px;
+      margin: 0;
+    }
 
-        const locationInput = document.getElementById('locationInput');
+    .sticky-header .header-card {
+      background: var(--card);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
 
-        const LOCATION_STORAGE_KEY = 'watermark_saved_location';
+    .sticky-header h2 {
+      font-size: 18px;
+      margin: 0;
+    }
 
-// Khôi phục vị trí đã lưu khi mở ứng dụng
-const savedLocation = localStorage.getItem(LOCATION_STORAGE_KEY);
+    .budget-limit-info {
+      font-style: italic;
+      font-size: 13px;
+      margin-top: 4px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+      white-space: pre-line;
+    }
 
-if (savedLocation !== null) {
-    locationInput.value = savedLocation;
+    .budget-safe {
+      color: var(--success);
+    }
+
+    .budget-warning {
+      color: var(--warning);
+    }
+
+    .budget-danger {
+      color: var(--danger);
+    }
+
+    h2 {
+      font-size: 16px;
+      margin: 0 0 12px;
+    }
+
+    .card {
+      background: var(--card);
+      padding: var(--pad);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: var(--gap);
+      overflow: hidden;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input,
+    select,
+    button {
+      width: 100%;
+      min-height: 44px;
+      font-size: 16px;
+      border-radius: 10px;
+    }
+
+    input,
+    select {
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      border: 1px solid #e3e3e8;
+      background: #fafafa;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+    }
+
+    button {
+      padding: 10px 12px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .05s ease;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+
+    /* FAB */
+
+    /* FAB Liquid Glass */
+      .fab {
+          position: fixed;
+          right: 20px;
+          bottom: 20px;
+          width: 76px;
+          height: 76px;
+          padding: 0;
+          border: 1px solid rgba(255,255,255,.95);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          isolation: isolate;
+          appearance: none;
+          -webkit-appearance: none;
+          -webkit-tap-highlight-color: transparent;
+          cursor: pointer;
+          z-index: 90;
+          user-select: none;
+          background: radial-gradient( ellipse at 30% 17%, rgba(255,255,255,.98) 0%, rgba(255,255,255,.45) 13%, transparent 38% ), radial-gradient( ellipse at 65% 78%, rgba(255,105,174,.72) 0%, rgba(255,165,207,.52) 40%, transparent 75% ), linear-gradient( 145deg, rgba(255,255,255,.92), rgba(255,206,229,.80) 48%, rgba(255,151,198,.85) );
+          box-shadow: 0 12px 28px rgba(226,91,153,.20), 0 4px 9px rgba(226,91,153,.12), inset 0 2px 3px rgba(255,255,255,.98), inset 0 -3px 7px rgba(215,75,140,.13);
+          transition: transform .18s ease, box-shadow .18s ease;
+      }
+
+          .fab::before {
+              content: "";
+              position: absolute;
+              inset: 2px;
+              border-radius: inherit;
+              border: 1px solid rgba(255,255,255,.70);
+              box-shadow: inset 0 0 5px rgba(255,255,255,.48), 0 0 2px rgba(255,255,255,.8);
+          }
+
+          .fab::after {
+              content: "";
+              position: absolute;
+              width: 27px;
+              height: 10px;
+              top: 12px;
+              left: 12px;
+              border-radius: 50%;
+              background: rgba(255,255,255,.84);
+              filter: blur(3px);
+              transform: rotate(-38deg);
+          }
+
+          .fab:active {
+              transform: scale(.93);
+              box-shadow: 0 5px 12px rgba(226,91,153,.18), inset 0 3px 8px rgba(215,75,140,.16);
+          }
+
+          .fab-plus {
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  display: block;
 }
 
-// Tự động lưu mỗi khi người dùng nhập hoặc thay đổi vị trí
-locationInput.addEventListener('input', () => {
-    localStorage.setItem(LOCATION_STORAGE_KEY, locationInput.value);
-});
+.fab-plus::before,
+.fab-plus::after {
+  content: "";
+  position: absolute;
 
-        
-        const timeInput = document.getElementById('timeInput');
-        const timeFormatSelect = document.getElementById('timeFormatSelect');
-        const dateInput = document.getElementById('dateInput');
-        const positionSelect = document.getElementById('positionSelect');
-        const zoomRange = document.getElementById('zoomRange');
-        const zoomValue = document.getElementById('zoomValue');
-        const btnGetLocation = document.getElementById('btnGetLocation');
+  top: 50%;
+  left: 50%;
 
-        const canvas = document.getElementById('watermarkCanvas');
-        const ctx = canvas.getContext('2d');
-        const canvasPlaceholder = document.getElementById('canvasPlaceholder');
-        const btnDownload = document.getElementById('btnDownload');
-        const resolutionBadge = document.getElementById('resolutionBadge');
-        const imageGallerySection = document.getElementById('imageGallerySection');
-        const imageGalleryGrid = document.getElementById('imageGalleryGrid');
-        const imageCountBadge = document.getElementById('imageCountBadge');
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #fffaff 100%
+  );
 
-        let loadedImage = null; // Ảnh đang xem trước
-        let loadedImages = []; // Danh sách ảnh đã chọn để xử lý hàng loạt
-        let selectedImageIndex = 0; // Ảnh đang được xem trước
-        let customPosition = null; // Vị trí kéo thả tự do (tọa độ ảnh gốc)
-        let lastStampBounds = null;
-        let dragOffset = { x: 0, y: 0 };
-        let isDraggingStamp = false;
-        let downloadCounter = 1; // Biến đếm từ 1 đến 100
+  border-radius: 999px;
 
-        // Khởi tạo giờ/ngày theo định dạng picker của trình duyệt.
-        // Giá trị nội bộ: giờ HH:mm, ngày YYYY-MM-DD; khi đóng dấu sẽ định dạng theo kiểu Việt Nam.
-        function initDateTime() {
-            const now = new Date();
-            timeInput.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            dateInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-        }
+  box-shadow:
+    0 1px 2px rgba(194,73,130,.13),
+    0 0 5px rgba(255,255,255,.50);
 
-        function formatTimeForStamp(value) {
-            if (!value) return '';
-            const parts = value.split(':');
-            if (parts.length < 2) return value;
-            let hours = Number(parts[0]);
-            const minutes = parts[1];
+  transform: translate(-50%, -50%);
+}
 
-            if (timeFormatSelect.value === '24') {
-                return `${String(hours).padStart(2, '0')}:${minutes}`;
-            }
+              .fab-plus::before {
+                  width: 30px;
+                  height: 5px;
+              }
 
-            const suffix = timeFormatSelect.value === '12-am-pm'
-                ? (hours >= 12 ? 'PM' : 'AM')
-                : (hours >= 12 ? 'CH' : 'SA');
-            hours = hours % 12 || 12;
-            return `${String(hours).padStart(2, '0')}:${minutes} ${suffix}`;
-        }
+              .fab-plus::after {
+                  width: 5px;
+                  height: 30px;
+              }
 
-        function formatDateForStamp(value) {
-            if (!value) return '';
-            const parts = value.split('-');
-            if (parts.length !== 3) return value;
-            return `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
+      /* MODAL */
 
-        // Sự kiện click nút bấm nguồn ảnh
-        btnGallery.addEventListener('click', () => fileGallery.click());
-        btnCamera.addEventListener('click', () => fileCamera.click());
+      .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.4);
+          display: none;
+          align-items: flex-end;
+          justify-content: center;
+          z-index: 1000;
+      }
 
-        fileGallery.addEventListener('change', handleFileSelect);
-        fileCamera.addEventListener('change', handleFileSelect);
+          .modal-overlay.active {
+              display: flex;
+          }
 
-        async function handleFileSelect(e) {
-            const files = Array.from(e.target.files || []);
-            if (!files.length) return;
-            const imageFiles = files.filter(file => file.type.startsWith('image/'));
-            if (!imageFiles.length) {
-                alert('Vui lòng chọn file hình ảnh!');
-                e.target.value = '';
-                return;
-            }
-            if (imageFiles.length !== files.length) alert('Một số tệp không phải ảnh đã được bỏ qua.');
+      .modal-card {
+          background: var(--card);
+          width: 100%;
+          max-width: var(--container-max);
+          padding: 20px;
+          border-radius: 20px 20px 0 0;
+          box-shadow: var(--shadow);
+          animation: slideUp 0.2s ease-out;
+      }
 
-            try {
-                const loaded = await Promise.all(imageFiles.map(file => new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onerror = () => reject(new Error('Không đọc được tệp: ' + file.name));
-                    reader.onload = evt => {
-                        const img = new Image();
-                        img.onload = () => resolve({ img, name: file.name });
-                        img.onerror = () => reject(new Error('Ảnh không hợp lệ: ' + file.name));
-                        img.src = evt.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                })));
-                loadedImages = loaded;
-                selectedImageIndex = 0;
-                loadedImage = loadedImages[0].img;
-                customPosition = null;
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
 
-                const minDimension = Math.min(loadedImage.naturalWidth, loadedImage.naturalHeight);
-                zoomRange.max = minDimension > 2000 ? 500 : minDimension > 1000 ? 400 : 300;
-                canvas.classList.remove('hidden');
-                canvas.style.cursor = 'grab';
-                canvasPlaceholder.classList.add('hidden');
-                btnDownload.disabled = false;
-                document.getElementById('downloadButtonText').textContent =
-                    loadedImages.length > 1 ? `Tải xuống ${loadedImages.length} ảnh` : 'Tải xuống ảnh';
-                renderImageGallery();
-                updatePreviewInfo();
-                renderWatermark();
-            } catch (err) {
-                alert(err.message || 'Không thể tải ảnh.');
-            } finally {
-                e.target.value = '';
-            }
-        }
+      to {
+        transform: translateY(0);
+      }
+    }
 
-        // Lấy vị trí từ trình duyệt
-        btnGetLocation.addEventListener('click', () => {
-            if (navigator.geolocation) {
-                btnGetLocation.classList.add('animate-spin', 'text-blue-600');
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        btnGetLocation.classList.remove('animate-spin', 'text-blue-600');
-                        const lat = pos.coords.latitude.toFixed(3);
-                        const lng = pos.coords.longitude.toFixed(3);
-                        locationInput.value = `Tọa độ: ${lat}, ${lng}`;
-                        renderWatermark();
-                    },
-                    (err) => {
-                        btnGetLocation.classList.remove('animate-spin', 'text-blue-600');
-                        alert('Không thể lấy vị trí. Vui lòng tự nhập địa điểm.');
-                    }
-                );
-            } else {
-                alert('Trình duyệt của bạn không hỗ trợ định vị.');
-            }
+    /* EXPENSE LIST */
+
+    .expense-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #efeff4;
+      position: relative;
+    }
+
+    .expense-item:last-child {
+      border-bottom: none;
+    }
+
+    .expense-info .title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
+    .expense-info .note {
+      font-size: 13px;
+      font-style: italic;
+      font-weight: normal;
+      color: #555;
+      margin-bottom: 2px;
+    }
+
+    .expense-info .sub-today {
+      font-size: 12px;
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .expense-info .sub-old {
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .expense-amount {
+      font-weight: 700;
+      color: var(--danger);
+      font-size: 15px;
+      text-align: right;
+    }
+
+    /* MENU 3 CHẤM */
+
+    .more-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      width: 32px;
+      height: 32px;
+      min-height: unset;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .more-btn:hover {
+      background: #e5e5ea;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: 40px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: none;
+      flex-direction: column;
+      z-index: 100;
+      overflow: hidden;
+      min-width: 110px;
+    }
+
+    .dropdown-menu.active {
+      display: flex;
+    }
+
+    .dropdown-item {
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text);
+      cursor: pointer;
+      background: none;
+      border: none;
+      text-align: left;
+      border-bottom: 1px solid #f2f2f7;
+      min-height: unset;
+      font-weight: normal;
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-item.danger {
+      color: var(--danger);
+    }
+
+    .dropdown-item:hover {
+      background: #f2f2f7;
+    }
+
+    .chart-scroll-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .summary-num {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--danger);
+      margin: 4px 0 12px;
+    }
+
+    /* SETTINGS */
+
+    .category-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #efeff4;
+    }
+
+    .category-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .category-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .btn-delete-cat {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 13px;
+      cursor: pointer;
+      width: auto;
+      min-height: unset;
+      padding: 4px 8px;
+    }
+
+    /* ===== PASSWORD ===== */
+    .password-list-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .password-list-heading h2 {
+      margin: 0;
+      flex: 0 0 auto;
+      font-size: 16px;
+    }
+    .password-search {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      min-height: 36px;
+      height: 36px;
+      margin: 0;
+      padding: 7px 10px;
+      border: 1px solid #e3e3e8;
+      border-radius: 10px;
+      background: #f2f2f7;
+      font-size: 14px;
+    }
+    @media (max-width: 380px) {
+      .password-list-heading { gap: 7px; }
+      .password-list-heading h2 { font-size: 14px; }
+      .password-search { font-size: 13px; padding-left: 8px; padding-right: 8px; }
+    }
+    .password-form-grid {
+      display: grid;
+      gap: 0;
+    }
+
+    .password-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #efeff4;
+    }
+
+    .password-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .password-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .password-app {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 3px;
+      word-break: break-word;
+    }
+
+    .password-account,
+    .password-note,
+    .password-value {
+      font-size: 13px;
+      color: var(--muted);
+      word-break: break-word;
+      margin-top: 2px;
+    }
+
+    .password-value {
+      color: var(--text);
+      letter-spacing: 1px;
+    }
+
+    .password-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 3px;
+      flex: 0 0 auto;
+      flex-wrap: nowrap;
+      position: relative;
+    }
+
+    .password-copy-menu {
+      position: fixed;
+      z-index: 2147483000;
+      min-width: 156px;
+      max-width: calc(100vw - 16px);
+      padding: 4px;
+      border: 1px solid rgba(60,60,67,.14);
+      border-radius: 12px;
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 8px 28px rgba(0,0,0,.16);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .password-copy-menu button {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #1c1c1e;
+      text-align: left;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .password-copy-menu button:active { background: #f2f2f7; }
+
+    .password-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 29px;
+      min-width: 29px;
+      min-height: 29px;
+      height: 29px;
+      padding: 0;
+      border: 0;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      background: #f2f2f7;
+      color: #3a3a3c;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .password-action-btn:active { background: #e5e5ea; }
+
+    .password-action-btn.password-eye-btn svg,
+    .password-input-toggle svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .password-action-btn.password-eye-btn {
+      background: transparent;
+      color: #636366;
+    }
+    .password-action-btn.password-eye-btn:active { background: #e5e5ea; }
+
+    .password-action-btn.delete {
+      background: #ffe5e3;
+      color: var(--danger);
+    }
+
+    .password-copy-hidden {
+      display: none;
+    }
+
+    .password-copy-hidden.visible {
+      display: inline-flex;
+    }
+
+    .password-copy-inline {
+      display: inline-flex;
+    }
+
+    .password-copy-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+      margin-top: 7px;
+      letter-spacing: normal;
+    }
+
+
+    .password-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .password-input-wrap input {
+      width: 100%;
+      padding-right: 42px;
+    }
+
+    .password-input-toggle {
+      position: absolute;
+      right: 6px;
+      top: 22px;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .password-input-toggle:hover {
+      background: #e5e5ea;
+      color: var(--text);
+    }
+
+    .password-empty {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 14px 0;
+    }
+
+
+    /* PASSWORD: cửa sổ nổi thêm / sửa */
+    .pw-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.45);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+    }
+    .pw-modal-overlay.active { display: flex; }
+
+    .pw-modal-card {
+      width: 100%;
+      max-width: 400px;
+      max-height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px 20px 18px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.35);
+      animation: pwPop .22s cubic-bezier(.2, .9, .3, 1.15);
+    }
+    @keyframes pwPop {
+      from { opacity: 0; transform: scale(.92) translateY(10px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .pw-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .pw-modal-icon {
+      flex: 0 0 auto;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #e8f2ff, #f3e9ff);
+    }
+    .pw-modal-header h2 {
+      flex: 1 1 auto;
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+      color: var(--text);
+    }
+    .pw-modal-close {
+      flex: 0 0 auto;
+      width: 32px;
+      height: 32px;
+      min-height: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #f2f2f7;
+      color: #8e8e93;
+    }
+    .pw-modal-close:hover { background: #e5e5ea; color: var(--text); }
+    .pw-modal-close svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+    }
+
+    .pw-field { margin-bottom: 14px; }
+    .pw-field label {
+      display: block;
+      margin: 0 0 6px 2px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      color: var(--muted);
+    }
+    .pw-field input {
+      width: 100%;
+      min-height: 48px;
+      margin: 0;
+      padding: 11px 14px;
+      border: 1.5px solid transparent;
+      border-radius: 12px;
+      background: #f2f2f7;
+      color: var(--text);
+      font-size: 16px; /* >=16px để iOS không tự phóng to khi nhập */
+      transition: border-color .15s, background .15s, box-shadow .15s;
+    }
+    .pw-field input::placeholder { color: #a1a1a6; opacity: 1; }
+    .pw-field input:focus {
+      background: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
+    }
+    #passwordModal .password-input-wrap { display: block; }
+    #passwordModal .password-input-wrap input { padding-right: 48px; }
+    #passwordModal .password-input-toggle {
+      top: 50%;
+      right: 8px;
+      width: 34px;
+      height: 34px;
+      min-height: 0;
+    }
+
+    .pw-modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .pw-modal-actions button {
+      min-height: 48px;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+    #passwordCancelEditButton { background: #f2f2f7; color: #3a3a3c; }
+    #passwordSaveButton { box-shadow: 0 6px 16px -6px rgba(0, 122, 255, 0.6); }
+
+    /* ===== BÁO CÁO THEO THỜI GIAN ===== */
+
+    .custom-report-selectors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .custom-report-result {
+      border-top: 1px solid #efeff4;
+      padding-top: 14px;
+    }
+
+    .custom-report-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .custom-report-total {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--danger);
+      margin: 4px 0 16px;
+    }
+
+    .custom-report-item {
+      margin-bottom: 14px;
+    }
+
+    .custom-report-item-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .custom-report-cat {
+      font-weight: 600;
+      min-width: 0;
+    }
+
+    .custom-report-percent {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .custom-report-amount {
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .custom-report-bar-bg {
+      height: 7px;
+      background: #e5e5ea;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .custom-report-bar {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    .custom-report-empty {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    @media (max-width: 420px) {
+      .custom-report-item-header {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .custom-report-amount {
+        grid-column: 1 / -1;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TAB BAR -->
+
+  <div class="tab-bar">
+
+    <div class="tab-item active" onclick="switchTab('record', this)">
+      <span class="icon">📝</span>
+      <span>Ghi chép</span>
+    </div>
+
+    <div class="tab-divider"></div>
+
+    <div class="tab-item" onclick="switchTab('report', this)">
+      <span class="icon">📊</span>
+      <span>Báo cáo</span>
+    </div>
+
+    <div class="tab-divider"></div>
+
+    <div class="tab-item" onclick="switchTab('password', this)">
+      <span class="icon">🔐</span>
+      <span>Password</span>
+    </div>
+
+    <div class="tab-divider"></div>
+
+    <div class="tab-item" onclick="switchTab('photo', this)">
+      <span class="icon">🖼️</span>
+      <span>Ảnh</span>
+    </div>
+
+    <div class="tab-divider"></div>
+
+    <div class="tab-item" onclick="switchTab('settings', this)">
+      <span class="icon">⚙️</span>
+      <span>Cài đặt</span>
+    </div>
+
+  </div>
+
+  <div class="container">
+
+    <!-- TAB ẢNH: giao diện nằm trong photo.html -->
+    <div id="tab-photo" class="tab-content" style="padding-top: 8px;">
+      <iframe id="photoAppFrame" src="photo.html" title="Ứng dụng đóng dấu ảnh"
+        style="display:block;width:100%;height:75vh;min-height:700px;border:0;border-radius:14px;background:#f3f4f6;"
+        allow="camera; geolocation"
+        allowfullscreen></iframe>
+    </div>
+
+    <!-- =====================================================
+         TAB 1: GHI CHÉP
+         ===================================================== -->
+
+    <div id="tab-record" class="tab-content active">
+
+      <div class="sticky-header">
+
+        <div class="header-card">
+
+          <h2>📋 Chi tiêu</h2>
+
+          <div id="budgetStatus" class="budget-limit-info">
+            Hạn mức tháng: 14.000.000 VND
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card" style="margin-top: 4px;">
+        <div id="recentExpenseList"></div>
+      </div>
+
+      <button type="button"
+              class="fab"
+              onclick="openModal()"
+              aria-label="Thêm">
+          <span class="fab-plus"></span>
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         TAB 2: BÁO CÁO
+         ===================================================== -->
+
+    <div id="tab-report" class="tab-content" style="padding-top: 12px;">
+
+      <!-- TUẦN NÀY -->
+
+      <div class="card">
+
+        <h2>
+          📊 Báo cáo Tuần này
+          <span
+            id="labelWeekRange"
+            style="font-size:13px;color:var(--muted);font-weight:normal;"
+          ></span>
+        </h2>
+
+        <div class="summary-num" id="totalWeek">
+          0 VND
+        </div>
+
+        <canvas
+          id="pieChartWeek"
+          style="max-height:220px;width:100%;"
+        ></canvas>
+
+        <div
+          id="breakdownWeek"
+          style="margin-top:16px;"
+        ></div>
+
+      </div>
+
+
+      <!-- THÁNG NÀY -->
+
+      <div class="card">
+
+        <h2>
+          📈 Báo cáo Tháng này
+          <span
+            id="labelMonthRange"
+            style="font-size:13px;color:var(--muted);font-weight:normal;"
+          ></span>
+        </h2>
+
+        <div class="summary-num" id="totalMonth">
+          0 VND
+        </div>
+
+        <canvas
+          id="pieChartMonth"
+          style="max-height:220px;width:100%;"
+        ></canvas>
+
+        <div
+          id="breakdownMonth"
+          style="margin-top:16px;"
+        ></div>
+
+      </div>
+
+
+      <!-- THÁNG TRƯỚC -->
+
+      <div class="card">
+
+        <h2>
+          📉 Báo cáo Tháng trước
+          <span
+            id="labelLastMonthRange"
+            style="font-size:13px;color:var(--muted);font-weight:normal;"
+          ></span>
+        </h2>
+
+        <div class="summary-num" id="totalLastMonth">
+          0 VND
+        </div>
+
+        <canvas
+          id="pieChartLastMonth"
+          style="max-height:220px;width:100%;"
+        ></canvas>
+
+        <div
+          id="breakdownLastMonth"
+          style="margin-top:16px;"
+        ></div>
+
+      </div>
+
+
+      <!-- NĂM NAY -->
+
+      <div class="card">
+
+        <h2>📅 Báo cáo Năm nay</h2>
+
+        <div class="summary-num" id="totalYear">
+          0 VND
+        </div>
+
+        <div class="chart-scroll-wrapper">
+
+          <canvas
+            id="barChartYear"
+            style="height:220px;"
+          ></canvas>
+
+        </div>
+
+      </div>
+
+
+      <!-- 5 NĂM GẦN NHẤT -->
+
+      <div class="card">
+
+        <h2>
+          📆 Báo cáo 5 năm gần nhất
+
+          <span
+            id="label5YearsRange"
+            style="font-size:13px;color:var(--muted);font-weight:normal;"
+          ></span>
+
+        </h2>
+
+        <div class="summary-num" id="total5Years">
+          0 VND
+        </div>
+
+        <div class="chart-scroll-wrapper">
+
+          <canvas
+            id="barChart5Years"
+            style="height:220px;"
+          ></canvas>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           BÁO CÁO THEO THỜI GIAN
+           ================================================= -->
+
+      <div class="card">
+
+        <h2>🔎 Báo cáo theo thời gian</h2>
+
+        <div class="custom-report-selectors">
+
+          <!-- CHỌN THÁNG -->
+
+          <div>
+
+            <label for="customReportMonth">
+              Tháng
+            </label>
+
+            <select
+              id="customReportMonth"
+              onchange="renderCustomReport()"
+            >
+
+              <option value="0">
+                Năm
+              </option>
+
+              <option value="1">
+                Tháng 1
+              </option>
+
+              <option value="2">
+                Tháng 2
+              </option>
+
+              <option value="3">
+                Tháng 3
+              </option>
+
+              <option value="4">
+                Tháng 4
+              </option>
+
+              <option value="5">
+                Tháng 5
+              </option>
+
+              <option value="6">
+                Tháng 6
+              </option>
+
+              <option value="7">
+                Tháng 7
+              </option>
+
+              <option value="8">
+                Tháng 8
+              </option>
+
+              <option value="9">
+                Tháng 9
+              </option>
+
+              <option value="10">
+                Tháng 10
+              </option>
+
+              <option value="11">
+                Tháng 11
+              </option>
+
+              <option value="12">
+                Tháng 12
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- CHỌN NĂM -->
+
+          <div>
+
+            <label for="customReportYear">
+              Năm
+            </label>
+
+            <select
+              id="customReportYear"
+              onchange="renderCustomReport()"
+            ></select>
+
+          </div>
+
+        </div>
+
+
+        <!-- KẾT QUẢ -->
+
+        <div
+          id="customReportResult"
+          class="custom-report-result"
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TAB 3: PASSWORD
+         ===================================================== -->
+
+    <div
+      id="tab-password"
+      class="tab-content"
+      style="padding-top:12px;"
+    >
+
+      <div class="card" id="passwordAddCard">
+
+        <!-- Nút mở cửa sổ thêm mới -->
+        <button
+          id="passwordOpenFormButton"
+          class="btn-primary"
+          type="button"
+          onclick="openPasswordForm()"
+        >
+          + Thêm mới
+        </button>
+
+      </div>
+
+      <div class="card">
+
+        <div class="password-list-heading">
+          <h2>📋 Danh sách Password</h2>
+          <input
+            type="search"
+            id="passwordSearchInput"
+            class="password-search"
+            placeholder="🔍 Tìm kiếm..."
+            aria-label="Tìm kiếm danh sách Password"
+            autocomplete="off"
+            oninput="renderPasswordList()"
+          >
+        </div>
+
+        <div id="passwordList"></div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TAB 4: CÀI ĐẶT
+         ===================================================== -->
+
+    <div
+      id="tab-settings"
+      class="tab-content"
+      style="padding-top:12px;"
+    >
+
+      <!-- DANH MỤC -->
+
+      <div class="card">
+
+        <h2>🏷️ Quản lý Danh mục</h2>
+
+        <div id="settingsCategoryList"></div>
+
+        <button
+          class="btn-primary"
+          onclick="openAddCategoryModal()"
+          style="margin-top:12px;"
+        >
+          + Thêm danh mục mới
+        </button>
+
+      </div>
+
+
+      <!-- HẠN MỨC -->
+
+      <div class="card">
+
+        <h2>🎯 Hạn mức chi tiêu tháng</h2>
+
+        <label for="monthlyBudgetInput">
+          Số tiền hạn mức (VND)
+        </label>
+
+        <input
+          type="text"
+          id="monthlyBudgetInput"
+          inputmode="numeric"
+          placeholder="14.000.000"
+        >
+
+        <button
+          class="btn-success"
+          onclick="saveMonthlyBudget()"
+        >
+          Lưu hạn mức
+        </button>
+
+      </div>
+
+
+      <!-- SAO LƯU -->
+
+      <div class="card">
+
+        <h2>🗂️ Sao lưu & Phục hồi</h2>
+
+        <button
+          class="btn-primary"
+          onclick="exportData()"
+          style="margin-bottom:10px;"
+        >
+          📤 Xuất dữ liệu (.json)
+        </button>
+
+        <input
+          type="file"
+          id="importFile"
+          accept=".json"
+          style="display:none"
+          onchange="importData(event)"
+        >
+
+        <button
+          class="btn-success"
+          onclick="document.getElementById('importFile').click()"
+        >
+          📥 Phục hồi dữ liệu
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       MODAL THÊM / SỬA KHOẢN CHI
+       ===================================================== -->
+
+  <div
+    class="modal-overlay"
+    id="expenseModal"
+    onclick="closeModalOnOverlay(event)"
+  >
+
+    <div class="modal-card">
+
+      <h2
+        id="modalTitle"
+        style="margin-bottom:16px;"
+      >
+        Thêm khoản chi mới
+      </h2>
+
+      <input
+        type="hidden"
+        id="editId"
+      >
+
+
+      <label for="expCategory">
+        Danh mục
+      </label>
+
+      <select id="expCategory"></select>
+
+
+      <label for="expAmount">
+        Số tiền (VND)
+      </label>
+
+      <input
+        type="text"
+        id="expAmount"
+        inputmode="numeric"
+        placeholder="0"
+      >
+
+
+      <label for="expNote">
+        Ghi chú
+      </label>
+
+      <input
+        type="text"
+        id="expNote"
+        placeholder="Ghi chú..."
+      >
+
+
+      <label for="expDateTime">
+        Ngày & Giờ
+      </label>
+
+      <input
+        type="datetime-local"
+        id="expDateTime"
+      >
+
+
+      <div
+        class="grid-2"
+        style="margin-top:8px;"
+      >
+
+        <button
+          type="button"
+          style="background:#e5e5ea;color:#333;"
+          onclick="closeModal()"
+        >
+          Hủy
+        </button>
+
+        <button
+          type="button"
+          class="btn-primary"
+          onclick="saveExpense()"
+        >
+          Lưu khoản chi
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       MODAL THÊM / SỬA PASSWORD
+       ===================================================== -->
+
+  <div
+    class="pw-modal-overlay"
+    id="passwordModal"
+    onclick="closePasswordModalOnOverlay(event)"
+    onkeydown="passwordModalKeydown(event)"
+  >
+
+    <div
+      class="pw-modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="passwordModalTitle"
+    >
+
+      <div class="pw-modal-header">
+
+        <div class="pw-modal-icon" aria-hidden="true">🔐</div>
+
+        <h2 id="passwordModalTitle">Thêm Password mới</h2>
+
+        <button
+          type="button"
+          class="pw-modal-close"
+          onclick="cancelPasswordEdit()"
+          aria-label="Đóng"
+          title="Đóng"
+        ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+
+      </div>
+
+      <div class="pw-field">
+        <label for="passwordAppInput">Tên ứng dụng</label>
+        <input
+          type="text"
+          id="passwordAppInput"
+          placeholder="Nhập tên ứng dụng, trang web..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="pw-field">
+        <label for="passwordAccountInput">Tài khoản</label>
+        <input
+          type="text"
+          id="passwordAccountInput"
+          placeholder="Tên tài khoản..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="pw-field">
+        <label for="passwordValueInput">Mật khẩu</label>
+        <div class="password-input-wrap">
+          <input
+            type="password"
+            id="passwordValueInput"
+            placeholder="Nhập mật khẩu..."
+            autocomplete="new-password"
+          >
+          <button
+            type="button"
+            class="password-input-toggle"
+            onclick="togglePasswordInputVisibility()"
+            aria-label="Hiện mật khẩu"
+            title="Hiện mật khẩu"
+          ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+      </div>
+
+      <div class="pw-field">
+        <label for="passwordNoteInput">Ghi chú</label>
+        <input
+          type="text"
+          id="passwordNoteInput"
+          placeholder="Thêm ghi chú..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="pw-modal-actions">
+
+        <button
+          id="passwordCancelEditButton"
+          type="button"
+          onclick="cancelPasswordEdit()"
+        >
+          Hủy
+        </button>
+
+        <button
+          id="passwordSaveButton"
+          class="btn-primary"
+          type="button"
+          onclick="savePasswordItem()"
+        >
+          + Thêm
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       MODAL THÊM DANH MỤC
+       ===================================================== -->
+
+  <div
+    class="modal-overlay"
+    id="addCategoryModal"
+    onclick="closeAddCatModalOnOverlay(event)"
+  >
+
+    <div class="modal-card">
+
+      <h2 style="margin-bottom:16px;">
+        Thêm danh mục mới
+      </h2>
+
+
+      <label for="newCatName">
+        Tên danh mục
+      </label>
+
+      <input
+        type="text"
+        id="newCatName"
+        placeholder="Nhập tên danh mục (có thể bao gồm icon)..."
+      >
+
+
+      <label for="newCatColor">
+        Màu đại diện
+      </label>
+
+      <input
+        type="color"
+        id="newCatColor"
+        value="#007aff"
+        style="height:44px;padding:2px;cursor:pointer;"
+      >
+
+
+      <div
+        class="grid-2"
+        style="margin-top:8px;"
+      >
+
+        <button
+          type="button"
+          style="background:#e5e5ea;color:#333;"
+          onclick="closeAddCategoryModal()"
+        >
+          Hủy
+        </button>
+
+        <button
+          type="button"
+          class="btn-primary"
+          onclick="saveNewCategory()"
+        >
+          Thêm danh mục
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    /* =====================================================
+       DANH MỤC MẶC ĐỊNH
+       ===================================================== */
+
+    const DEFAULT_CATEGORIES = [
+
+      {
+        name: "⛽ Đổ xăng",
+        color: "#ff9500",
+        isDefault: true
+      },
+
+      {
+        name: "🌐 Cước thoại Internet",
+        color: "#30b0c7",
+        isDefault: true
+      },
+
+      {
+        name: "⚡ Điện Nước",
+        color: "#007aff",
+        isDefault: true
+      },
+
+      {
+        name: "🏥 Khám chữa bệnh",
+        color: "#ff3b30",
+        isDefault: true
+      },
+
+      {
+        name: "🎓 Tiền Học",
+        color: "#af52de",
+        isDefault: true
+      },
+
+      {
+        name: "🍜 Ăn Uống",
+        color: "#ffcc00",
+        isDefault: true
+      },
+
+      {
+        name: "✈️ Du lịch",
+        color: "#5856d6",
+        isDefault: true
+      },
+
+      {
+        name: "🛒 Mua Sắm",
+        color: "#34c759",
+        isDefault: true
+      },
+
+      {
+        name: "🔧 Sửa xe",
+        color: "#a2845e",
+        isDefault: true
+      },
+
+      {
+        name: "✉️ Đám hiếu hỉ",
+        color: "#a52a2a",
+        isDefault: true
+      },
+      
+      {
+        name: "💇‍♀️ Làm đẹp",
+        color: "#ff2d95",
+        isDefault: true
+      },
+
+      {
+        name: "‼️ Chưa phân loại ",
+        color: "#8e8e93",
+        isDefault: true
+      }
+
+    ];
+
+
+    let categoriesList = [];
+
+    let expenses = [];
+
+    let passwordItems = [];
+
+    let editingPasswordId = null;
+
+    let monthlyBudget = 14000000;
+
+
+    /* =====================================================
+       UTILS
+       ===================================================== */
+
+    function getNowForInput() {
+
+      const now = new Date();
+
+      const yr = now.getFullYear();
+
+      const mo = String(
+        now.getMonth() + 1
+      ).padStart(2, '0');
+
+      const da = String(
+        now.getDate()
+      ).padStart(2, '0');
+
+      const hr = String(
+        now.getHours()
+      ).padStart(2, '0');
+
+      const mi = String(
+        now.getMinutes()
+      ).padStart(2, '0');
+
+      return `${yr}-${mo}-${da}T${hr}:${mi}`;
+
+    }
+
+
+    function formatDisplayDateTime(dtStr) {
+
+      if (!dtStr) {
+        return {
+          text: '',
+          isToday: false
+        };
+      }
+
+      const d = new Date(dtStr);
+
+      if (isNaN(d.getTime())) {
+        return {
+          text: dtStr,
+          isToday: false
+        };
+      }
+
+      const now = new Date();
+
+      const isToday =
+        d.getFullYear() === now.getFullYear() &&
+        d.getMonth() === now.getMonth() &&
+        d.getDate() === now.getDate();
+
+      const hr = String(
+        d.getHours()
+      ).padStart(2, '0');
+
+      const mi = String(
+        d.getMinutes()
+      ).padStart(2, '0');
+
+
+      if (isToday) {
+
+        return {
+          text: `Hôm nay ${hr}:${mi}`,
+          isToday: true
+        };
+
+      }
+
+
+      const da = String(
+        d.getDate()
+      ).padStart(2, '0');
+
+      const mo = String(
+        d.getMonth() + 1
+      ).padStart(2, '0');
+
+      const yr = d.getFullYear();
+
+
+      return {
+        text: `${da}/${mo}/${yr} ${hr}:${mi}`,
+        isToday: false
+      };
+
+    }
+
+
+    function formatNum(n) {
+
+      return (Number(n) || 0)
+        .toString()
+        .replace(
+          /\B(?=(\d{3})+(?!\d))/g,
+          "."
+        );
+
+    }
+
+
+    function parseNum(str) {
+
+      return Number(
+        (str || "")
+          .toString()
+          .replace(/\./g, "")
+      ) || 0;
+
+    }
+
+    /* =====================================================
+       CHUẨN HÓA DỮ LIỆU
+       ===================================================== */
+
+    function safeColor(c, fallback = '#8e8e93') {
+
+      return (
+        typeof c === 'string' &&
+        /^#[0-9a-f]{3,8}$/i.test(c.trim())
+      )
+        ? c.trim()
+        : fallback;
+
+    }
+
+
+    function getFallbackCategoryName() {
+
+      const c =
+        categoriesList.find(
+          x => x.name.includes("Chưa phân loại")
+        );
+
+      if (c) return c.name;
+
+      return categoriesList[0]
+        ? categoriesList[0].name
+        : "";
+
+    }
+
+
+    function formatShortMoney(v) {
+
+      if (v >= 999500) {
+        return (v / 1e6).toFixed(1) + 'M';
+      }
+
+      if (v >= 1000) {
+        return Math.round(v / 1e3) + 'k';
+      }
+
+      return String(Math.round(v));
+
+    }
+
+
+    function normalizeCategories(list) {
+
+      const defaultColors = {};
+
+      DEFAULT_CATEGORIES.forEach(
+        c => defaultColors[c.name] = c.color
+      );
+
+      const seen = new Set();
+
+      const result = [];
+
+      (Array.isArray(list) ? list : []).forEach(raw => {
+
+        if (
+          !raw ||
+          typeof raw.name !== 'string' ||
+          !raw.name.trim()
+        ) return;
+
+        if (seen.has(raw.name)) return;
+
+        seen.add(raw.name);
+
+        const isDefault = raw.isDefault === true;
+
+        const color =
+          (isDefault && defaultColors[raw.name])
+            ? defaultColors[raw.name]
+            : safeColor(raw.color);
+
+        result.push({
+          ...raw,
+          name: raw.name,
+          color,
+          isDefault
         });
 
-        // Đăng ký sự kiện thay đổi input để render Real-time
-        [locationInput, timeInput, dateInput].forEach(element => {
-            element.addEventListener('input', renderWatermark);
-            element.addEventListener('change', renderWatermark);
-        });
-        positionSelect.addEventListener('change', () => {
-            customPosition = null; // Chọn góc sẽ quay về vị trí góc đã chọn
-            renderWatermark();
-        });
-        timeFormatSelect.addEventListener('change', renderWatermark);
+      });
 
-        zoomRange.addEventListener('input', (e) => {
-            zoomValue.textContent = `${e.target.value}%`;
-            renderWatermark();
-        });
+      if (!result.length) {
+        return DEFAULT_CATEGORIES.map(c => ({ ...c }));
+      }
 
-        /**
-         * Hàm vẽ Icon Ghim Vị Trí Zalo / Maps Badge
-         */
-        function drawLocationPin(ctx, x, y, size) {
-            const type = 'pin';
-            const cx = x + size / 2;
-            const cy = y + size / 2;
-            ctx.save();
-            ctx.shadowColor = 'rgba(0,0,0,0.6)';
-            ctx.shadowBlur = Math.max(4, size * 0.1);
-            ctx.lineWidth = Math.max(2, size * 0.07);
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
+      if (!result.some(c => c.name.includes("Chưa phân loại"))) {
 
-            if (type === 'target') {
-                ctx.fillStyle = '#FFFFFF';
-                ctx.beginPath(); ctx.arc(cx, cy, size * 0.43, 0, Math.PI * 2); ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#2563eb';
-                ctx.beginPath(); ctx.arc(cx, cy, size * 0.31, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(cx, cy, size * 0.11, 0, Math.PI * 2); ctx.fillStyle = '#2563eb'; ctx.fill();
-                ctx.beginPath(); ctx.moveTo(cx, y); ctx.lineTo(cx, y + size * 0.18); ctx.moveTo(cx, y + size * 0.82); ctx.lineTo(cx, y + size); ctx.moveTo(x, cy); ctx.lineTo(x + size * 0.18, cy); ctx.moveTo(x + size * 0.82, cy); ctx.lineTo(x + size, cy); ctx.stroke();
-            } else if (type === 'compass') {
-                ctx.fillStyle = '#FFFFFF';
-                ctx.beginPath(); ctx.arc(cx, cy, size * 0.44, 0, Math.PI * 2); ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#2563eb';
-                ctx.beginPath(); ctx.arc(cx, cy, size * 0.36, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(cx, y + size * 0.12); ctx.lineTo(cx + size * 0.16, cy + size * 0.12); ctx.lineTo(cx, cy + size * 0.03); ctx.closePath(); ctx.fillStyle = '#ef4444'; ctx.fill();
-                ctx.beginPath(); ctx.moveTo(cx, y + size * 0.12); ctx.lineTo(cx - size * 0.16, cy + size * 0.12); ctx.lineTo(cx, cy + size * 0.03); ctx.closePath(); ctx.fillStyle = '#2563eb'; ctx.fill();
-                ctx.beginPath(); ctx.arc(cx, cy, size * 0.045, 0, Math.PI * 2); ctx.fillStyle = '#2563eb'; ctx.fill();
-            } else {
-                ctx.beginPath();
-                const radius = size * 0.35;
-                ctx.arc(cx, y + radius, radius, Math.PI * 0.8, Math.PI * 0.2, false);
-                ctx.lineTo(cx, y + size);
-                ctx.closePath();
-                ctx.fillStyle = '#FFFFFF'; ctx.fill();
-                ctx.beginPath(); ctx.arc(cx, y + radius, radius * 0.4, 0, Math.PI * 2);
-                ctx.fillStyle = '#2563eb'; ctx.shadowBlur = 0; ctx.fill();
-            }
-            ctx.restore();
+        const def =
+          DEFAULT_CATEGORIES.find(
+            c => c.name.includes("Chưa phân loại")
+          );
+
+        result.push({ ...def });
+
+      }
+
+      return result;
+
+    }
+
+
+    function normalizeExpenses(list) {
+
+      if (!Array.isArray(list)) return [];
+
+      const usedIds = new Set();
+
+      let seq = 0;
+
+      const result = [];
+
+      list.forEach(raw => {
+
+        if (!raw || typeof raw !== 'object') return;
+
+        const amount = Number(
+          typeof raw.amount === 'string'
+            ? raw.amount.replace(/[.,\s]/g, '')
+            : raw.amount
+        );
+
+        if (!Number.isFinite(amount) || amount <= 0) return;
+
+        let id = Number(raw.id);
+
+        if (!Number.isFinite(id) || usedIds.has(id)) {
+
+          id = Date.now() + (++seq);
+
+          while (usedIds.has(id)) id++;
+
         }
 
-        /**
-         * Hàm Render Watermark chính
-         */
-        function renderWatermark() {
-            if (!loadedImage) return;
+        usedIds.add(id);
 
-            const width = loadedImage.naturalWidth;
-            const height = loadedImage.naturalHeight;
+        let datetime =
+          typeof raw.datetime === 'string'
+            ? raw.datetime
+            : '';
 
-            canvas.width = width;
-            canvas.height = height;
-
-            // 1. Vẽ ảnh gốc lên Canvas
-            ctx.clearRect(0, 0, width, height);
-            ctx.drawImage(loadedImage, 0, 0, width, height);
-
-            // 2. Tính toán Font size căn cứ theo kích thước ảnh & Slider Zoom
-            const minDimension = Math.min(width, height);
-            const userZoom = parseFloat(zoomRange.value) / 100;
-            const baseFontSize = Math.max(16, Math.round(minDimension * 0.028 * userZoom));
-            
-            const line1Text = `${formatTimeForStamp(timeInput.value)}  ${formatDateForStamp(dateInput.value)}`.trim();
-            const line2Text = locationInput.value.trim();
-
-            const fontName = 'Arial, sans-serif';
-            const fontStyle = `bold ${baseFontSize}px ${fontName}`;
-            ctx.font = fontStyle;
-
-            const line1Width = ctx.measureText(line1Text).width;
-            const line2Width = ctx.measureText(line2Text).width;
-            const maxTextWidth = Math.max(line1Width, line2Width);
-
-            const lineHeight = baseFontSize * 1.35;
-            const totalTextHeight = lineHeight * 2;
-
-            const iconSize = totalTextHeight * 1.05;
-            const spacing = baseFontSize * 0.5;
-
-            const margin = Math.max(20, Math.round(minDimension * 0.035));
-
-            const position = positionSelect.value;
-            let startY;
-            let isLeft = position.includes('left');
-            const isTop = position.includes('top');
-            let iconX;
-
-            if (customPosition) {
-                // Khi kéo tự do, điểm kéo là góc trái của biểu tượng ghim.
-                iconX = Math.max(0, Math.min(width - iconSize, customPosition.x));
-                startY = Math.max(0, Math.min(height - totalTextHeight, customPosition.y));
-                isLeft = iconX < width / 2;
-            } else {
-                startY = isTop ? margin : height - margin - totalTextHeight;
-                iconX = isLeft ? margin : width - margin - iconSize;
-            }
-
-            let textX;
-            if (isLeft) {
-                textX = iconX + iconSize + spacing;
-            } else {
-                textX = iconX - spacing;
-            }
-
-            // Lưu vùng dấu để chỉ kéo khi người dùng chạm/nhấn vào dấu.
-            const groupLeft = isLeft ? iconX : iconX - spacing - maxTextWidth;
-            const groupRight = isLeft ? iconX + iconSize + spacing + maxTextWidth : iconX + iconSize;
-            lastStampBounds = {
-                left: Math.max(0, groupLeft - baseFontSize),
-                right: Math.min(width, groupRight + baseFontSize),
-                top: Math.max(0, startY - baseFontSize),
-                bottom: Math.min(height, startY + totalTextHeight + baseFontSize),
-                iconSize, totalTextHeight
-            };
-
-            ctx.save();
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-            ctx.shadowBlur = Math.max(6, Math.round(baseFontSize * 0.25));
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-
-            ctx.fillStyle = '#FFFFFF';
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
-            ctx.lineWidth = Math.max(1, Math.round(baseFontSize * 0.08));
-            ctx.font = fontStyle;
-
-            if (isLeft) {
-                ctx.textAlign = 'left';
-            } else {
-                ctx.textAlign = 'right';
-            }
-            ctx.textBaseline = 'top';
-
-            const line1Y = startY + (totalTextHeight - (lineHeight * 2)) / 2;
-            const line2Y = line1Y + lineHeight;
-
-            // Dòng 1: Giờ + Ngày
-            ctx.strokeText(line1Text, textX, line1Y);
-            ctx.fillText(line1Text, textX, line1Y);
-
-            // Dòng 2: Địa điểm
-            ctx.strokeText(line2Text, textX, line2Y);
-            ctx.fillText(line2Text, textX, line2Y);
-
-            ctx.restore();
-
-            // Vẽ Icon Ghim Vị Trí
-            const iconY = startY + (totalTextHeight - iconSize) / 2;
-            drawLocationPin(ctx, iconX, iconY, iconSize);
+        if (!datetime || isNaN(new Date(datetime).getTime())) {
+          datetime = getNowForInput();
         }
 
-        // Kéo dấu trực tiếp trên ảnh xem trước.
-        function canvasPointFromEvent(event) {
-            const rect = canvas.getBoundingClientRect();
+        result.push({
+          ...raw,
+          id,
+          amount: Math.round(amount),
+          category:
+            typeof raw.category === 'string'
+              ? raw.category
+              : '',
+          note:
+            typeof raw.note === 'string'
+              ? raw.note
+              : '',
+          datetime
+        });
+
+      });
+
+      return result;
+
+    }
+
+
+
+    /* =====================================================
+       INPUT ĐỊNH DẠNG TIỀN
+       ===================================================== */
+
+    const expAmountInput =
+      document.getElementById('expAmount');
+
+
+    expAmountInput.addEventListener(
+      'input',
+      () => {
+
+        let v =
+          expAmountInput.value
+            .replace(/\D/g, "");
+
+        expAmountInput.value =
+          v ? formatNum(v) : "";
+
+      }
+    );
+
+
+    const budgetInput =
+      document.getElementById('monthlyBudgetInput');
+
+
+    budgetInput.addEventListener(
+      'input',
+      () => {
+
+        let v =
+          budgetInput.value
+            .replace(/\D/g, "");
+
+        budgetInput.value =
+          v ? formatNum(v) : "";
+
+      }
+    );
+
+
+    /* =====================================================
+       LOCAL STORAGE
+       ===================================================== */
+
+    function saveData() {
+
+      sortedExpensesCache = null;
+
+      try {
+
+        localStorage.setItem(
+          "expenses_data_v5",
+          JSON.stringify(expenses)
+        );
+
+        localStorage.setItem(
+          "categories_data_v5",
+          JSON.stringify(categoriesList)
+        );
+
+        localStorage.setItem(
+          "monthly_budget_v5",
+          monthlyBudget.toString()
+        );
+
+        localStorage.setItem(
+          "password_data_v1",
+          JSON.stringify(passwordItems)
+        );
+
+        return true;
+
+      } catch (err) {
+
+        console.error("Không lưu được dữ liệu:", err);
+
+        alert(
+          "Không lưu được dữ liệu (bộ nhớ trình duyệt đầy hoặc bị chặn). " +
+          "Hãy xuất file sao lưu ngay để tránh mất dữ liệu!"
+        );
+
+        return false;
+
+      }
+
+    }
+
+
+    function loadData() {
+
+      sortedExpensesCache = null;
+
+      try {
+
+        expenses =
+          JSON.parse(
+            localStorage.getItem(
+              "expenses_data_v5"
+            )
+          ) || [];
+
+      } catch {
+
+        expenses = [];
+
+      }
+
+
+      try {
+
+        categoriesList =
+          JSON.parse(
+            localStorage.getItem(
+              "categories_data_v5"
+            )
+          ) || DEFAULT_CATEGORIES;
+
+      } catch {
+
+        categoriesList =
+          [...DEFAULT_CATEGORIES];
+
+      }
+
+
+      monthlyBudget =
+        Number(
+          localStorage.getItem(
+            "monthly_budget_v5"
+          )
+        ) || 14000000;
+
+
+      try {
+
+        passwordItems =
+          JSON.parse(
+            localStorage.getItem(
+              "password_data_v1"
+            )
+          ) || [];
+
+        if (!Array.isArray(passwordItems)) {
+          passwordItems = [];
+        }
+
+      } catch {
+
+        passwordItems = [];
+
+      }
+
+
+      categoriesList =
+        normalizeCategories(categoriesList);
+
+
+      expenses =
+        normalizeExpenses(expenses);
+
+
+      categoriesList =
+        categoriesList.map(c => {
+
+          if (c.name === "📦 Khác") {
+
             return {
-                x: (event.clientX - rect.left) * (canvas.width / rect.width),
-                y: (event.clientY - rect.top) * (canvas.height / rect.height)
+              ...c,
+              name: "🔖 Khác"
             };
-        }
 
-        canvas.style.touchAction = 'none';
-        canvas.style.cursor = 'default';
+          }
 
-        canvas.addEventListener('pointerdown', (event) => {
-            if (!loadedImage || !lastStampBounds) return;
-            const point = canvasPointFromEvent(event);
-            const b = lastStampBounds;
-            if (point.x >= b.left && point.x <= b.right && point.y >= b.top && point.y <= b.bottom) {
-                isDraggingStamp = true;
-                customPosition = customPosition || { x: (positionSelect.value.includes('left') ? Math.max(0, Math.min(canvas.width, canvas.width * 0.035)) : canvas.width - Math.max(20, Math.round(Math.min(canvas.width, canvas.height) * 0.035)) - b.iconSize), y: positionSelect.value.includes('top') ? Math.max(20, Math.round(Math.min(canvas.width, canvas.height) * 0.035)) : canvas.height - Math.max(20, Math.round(Math.min(canvas.width, canvas.height) * 0.035)) - b.totalTextHeight };
-                dragOffset = { x: point.x - customPosition.x, y: point.y - customPosition.y };
-                canvas.setPointerCapture(event.pointerId);
-                canvas.style.cursor = 'grabbing';
-                event.preventDefault();
-            }
+          return c;
+
         });
 
-        canvas.addEventListener('pointermove', (event) => {
-            if (!isDraggingStamp || !loadedImage) return;
-            const point = canvasPointFromEvent(event);
-            customPosition = { x: point.x - dragOffset.x, y: point.y - dragOffset.y };
-            renderWatermark();
+
+      expenses =
+        expenses.map(e => {
+
+          if (e.category === "📦 Khác") {
+
+            return {
+              ...e,
+              category: "🔖 Khác"
+            };
+
+          }
+
+          return e;
+
         });
 
-        function stopStampDrag() {
-            if (!isDraggingStamp) return;
-            isDraggingStamp = false;
-            canvas.style.cursor = 'grab';
-        }
-        canvas.addEventListener('pointerup', stopStampDrag);
-        canvas.addEventListener('pointercancel', stopStampDrag);
 
-        // Tên file: IMG_ngaythangnam_giophutgiay_soNgauNhien.png
-        function generateFileName() {
-            const dateRaw = dateInput.value.replace(/[^0-9]/g, ''); // YYYYMMDD
-            const dateForFilename = dateRaw.length === 8
-                ? `${dateRaw.slice(6, 8)}${dateRaw.slice(4, 6)}${dateRaw.slice(0, 4)}`
-                : (() => {
-                    const now = new Date();
-                    return `${String(now.getDate()).padStart(2, '0')}${String(now.getMonth() + 1).padStart(2, '0')}${now.getFullYear()}`;
-                })();
-            const timeRaw = (timeInput.value || '00:00').replace(/[^0-9]/g, '').padStart(4, '0');
-            const seconds = String(new Date().getSeconds()).padStart(2, '0');
-            const randomNumber = Math.floor(Math.random() * 100) + 1;
-            return `IMG_${dateForFilename}_${timeRaw}${seconds}_${randomNumber}.png`;
+      updateCategoryDropdown();
+
+    }
+
+
+    function updateCategoryDropdown() {
+
+      const selectEl =
+        document.getElementById(
+          'expCategory'
+        );
+
+
+      selectEl.innerHTML =
+        categoriesList
+          .map(c =>
+            `<option value="${escapeHTML(c.name)}">${escapeHTML(c.name)}</option>`
+          )
+          .join('');
+
+    }
+
+
+    /* =====================================================
+       CHUYỂN TAB
+       ===================================================== */
+
+    function switchTab(tabName, el) {
+
+      document
+        .querySelectorAll('.tab-content')
+        .forEach(tc =>
+          tc.classList.remove('active')
+        );
+
+
+      document
+        .querySelectorAll('.tab-item')
+        .forEach(ti =>
+          ti.classList.remove('active')
+        );
+
+
+      document
+        .getElementById(
+          'tab-' + tabName
+        )
+        .classList.add('active');
+
+
+      el.classList.add('active');
+
+
+      if (tabName === 'report') {
+
+        renderReport();
+
+        renderCustomReport();
+
+      }
+
+      else if (tabName === 'password') {
+
+        renderPasswordList();
+
+      }
+
+      else if (tabName === 'settings') {
+
+        renderSettings();
+
+      }
+
+      else {
+
+        renderRecords();
+
+      }
+
+    }
+
+
+    /* =====================================================
+       MODAL THÊM / SỬA
+       ===================================================== */
+
+    function openModal(id = null) {
+
+      closeAllDropdowns();
+
+      updateCategoryDropdown();
+
+
+      const selectEl =
+        document.getElementById(
+          'expCategory'
+        );
+
+
+      if (id) {
+
+        const item =
+          expenses.find(
+            e => e.id === id
+          );
+
+
+        if (!item) return;
+
+
+        document.getElementById(
+          'modalTitle'
+        ).innerText =
+          "Sửa khoản chi";
+
+
+        document.getElementById(
+          'editId'
+        ).value =
+          item.id;
+
+
+        selectEl.value =
+          categoriesList.some(c => c.name === item.category)
+            ? item.category
+            : getFallbackCategoryName();
+
+
+        document.getElementById(
+          'expAmount'
+        ).value =
+          formatNum(item.amount);
+
+
+        document.getElementById(
+          'expNote'
+        ).value =
+          item.note || "";
+
+
+        document.getElementById(
+          'expDateTime'
+        ).value =
+          item.datetime ||
+          getNowForInput();
+
+      }
+
+      else {
+
+        document.getElementById(
+          'modalTitle'
+        ).innerText =
+          "Thêm khoản chi mới";
+
+
+        document.getElementById(
+          'editId'
+        ).value = "";
+
+
+        const otherCat =
+          categoriesList.find(
+            c =>
+              c.name.includes(
+                "Chưa phân loại"
+              )
+          );
+
+
+        if (otherCat) {
+
+          selectEl.value =
+            otherCat.name;
+
         }
 
-        function updatePreviewInfo() {
-            if (!loadedImage) return;
-            resolutionBadge.textContent = loadedImages.length > 1
-                ? `${loadedImage.naturalWidth} × ${loadedImage.naturalHeight} px • Ảnh ${selectedImageIndex + 1}/${loadedImages.length}`
-                : `${loadedImage.naturalWidth} × ${loadedImage.naturalHeight} px`;
+        else if (
+          categoriesList.length > 0
+        ) {
+
+          selectEl.value =
+            categoriesList[0].name;
+
         }
 
-        function selectImage(index) {
-            if (!loadedImages[index]) return;
-            selectedImageIndex = index;
-            loadedImage = loadedImages[index].img;
-            customPosition = null;
-            const minDimension = Math.min(loadedImage.naturalWidth, loadedImage.naturalHeight);
-            zoomRange.max = minDimension > 2000 ? 500 : minDimension > 1000 ? 400 : 300;
-            canvas.classList.remove('hidden');
-            canvasPlaceholder.classList.add('hidden');
-            btnDownload.disabled = false;
-            updatePreviewInfo();
-            renderImageGallery();
-            renderWatermark();
+
+        document.getElementById(
+          'expAmount'
+        ).value = "";
+
+
+        document.getElementById(
+          'expNote'
+        ).value = "";
+
+
+        document.getElementById(
+          'expDateTime'
+        ).value =
+          getNowForInput();
+
+      }
+
+
+      document
+        .getElementById(
+          'expenseModal'
+        )
+        .classList.add('active');
+
+
+      setTimeout(
+        () =>
+          document
+            .getElementById(
+              'expAmount'
+            )
+            .focus(),
+        100
+      );
+
+    }
+
+
+    function closeModal() {
+
+      document
+        .getElementById(
+          'expenseModal'
+        )
+        .classList.remove('active');
+
+    }
+
+
+    function closeModalOnOverlay(e) {
+
+      if (
+        e.target.classList.contains(
+          'modal-overlay'
+        )
+      ) {
+
+        closeModal();
+
+      }
+
+    }
+
+
+    /* =====================================================
+       LƯU KHOẢN CHI
+       ===================================================== */
+
+    function saveExpense() {
+
+      const editId =
+        document.getElementById(
+          'editId'
+        ).value;
+
+
+      const amount =
+        parseNum(
+          document.getElementById(
+            'expAmount'
+          ).value
+        );
+
+
+      const category =
+        document.getElementById(
+          'expCategory'
+        ).value || getFallbackCategoryName();
+
+
+      const note =
+        document.getElementById(
+          'expNote'
+        ).value.trim();
+
+
+      const datetime =
+        document.getElementById(
+          'expDateTime'
+        ).value ||
+        getNowForInput();
+
+
+      if (amount <= 0) {
+
+        alert(
+          "Vui lòng nhập số tiền hợp lệ!"
+        );
+
+        return;
+
+      }
+
+
+      if (editId) {
+
+        const idx =
+          expenses.findIndex(
+            e => e.id == editId
+          );
+
+
+        if (idx !== -1) {
+
+          expenses[idx] = {
+            ...expenses[idx],
+            amount,
+            category,
+            note,
+            datetime
+          };
+
         }
 
-        // Danh sách thu gọn; chạm vào ảnh để đưa ảnh đó lên vùng xem trước.
-        function renderImageGallery() {
-            imageGalleryGrid.innerHTML = '';
-            if (!loadedImages.length) {
-                imageGallerySection.classList.add('hidden');
-                return;
+      }
+
+      else {
+
+        expenses.unshift({
+
+          id: Date.now(),
+
+          amount,
+
+          category,
+
+          note,
+
+          datetime
+
+        });
+
+      }
+
+
+      saveData();
+
+      closeModal();
+
+      renderRecords();
+
+    }
+
+
+    function deleteExpense(id) {
+
+      closeAllDropdowns();
+
+
+      if (
+        confirm(
+          "Xóa khoản chi này?"
+        )
+      ) {
+
+        expenses =
+          expenses.filter(
+            e => e.id !== id
+          );
+
+
+        saveData();
+
+        renderRecords();
+
+      }
+
+    }
+
+
+    /* =====================================================
+       MENU 3 CHẤM
+       ===================================================== */
+
+    function toggleDropdown(e, id) {
+
+      e.stopPropagation();
+
+
+      const currentMenu =
+        document.getElementById(
+          `dropdown-${id}`
+        );
+
+
+      const isVisible =
+        currentMenu.classList.contains(
+          'active'
+        );
+
+
+      closeAllDropdowns();
+
+
+      if (!isVisible) {
+
+        currentMenu.classList.add(
+          'active'
+        );
+
+      }
+
+    }
+
+
+    function closeAllDropdowns() {
+
+      document
+        .querySelectorAll(
+          '.dropdown-menu'
+        )
+        .forEach(
+          m =>
+            m.classList.remove(
+              'active'
+            )
+        );
+
+    }
+
+
+    document.addEventListener(
+      'click',
+      closeAllDropdowns
+    );
+
+
+    /* =====================================================
+       HẠN MỨC
+       ===================================================== */
+
+    function updateBudgetStatus() {
+
+      const now = new Date();
+
+      const currentYear =
+        now.getFullYear();
+
+      const currentMonth =
+        now.getMonth();
+
+
+      const currentMonthTotal =
+        expenses.reduce(
+          (sum, e) => {
+
+            const d =
+              new Date(e.datetime);
+
+
+            if (
+              d.getFullYear() ===
+                currentYear &&
+              d.getMonth() ===
+                currentMonth
+            ) {
+
+              return sum + e.amount;
+
             }
-            imageGallerySection.classList.remove('hidden');
-            imageCountBadge.textContent = `${loadedImages.length} ảnh`;
-            loadedImages.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = `min-w-0 overflow-hidden rounded-md border cursor-pointer ${index === selectedImageIndex ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50' : 'border-slate-200 bg-slate-50'}`;
-                card.title = `Chọn ảnh ${index + 1}: ${item.name}`;
-                card.addEventListener('click', () => selectImage(index));
 
-                const thumb = document.createElement('img');
-                thumb.src = item.img.src;
-                thumb.alt = item.name;
-                thumb.className = 'w-full h-10 sm:h-12 object-contain bg-slate-100';
 
-                const info = document.createElement('div');
-                info.className = 'p-1';
-                const name = document.createElement('div');
-                name.className = 'text-[9px] leading-tight text-slate-600 truncate mb-1';
-                name.textContent = `${index + 1}. ${item.name}`;
-                name.title = item.name;
-                const download = document.createElement('button');
-                download.type = 'button';
-                download.className = 'w-full rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-semibold py-1 px-1';
-                download.textContent = 'Tải ảnh';
-                download.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    downloadOneImage(index);
-                });
-                info.append(name, download);
-                card.append(thumb, info);
-                imageGalleryGrid.append(card);
+            return sum;
+
+          },
+          0
+        );
+
+
+      const statusEl =
+        document.getElementById(
+          'budgetStatus'
+        );
+
+
+      statusEl.className =
+        'budget-limit-info';
+
+
+      const textBase =
+        `Hạn mức tháng: ${formatNum(monthlyBudget)} VND\n` +
+        `(Đã chi: ${formatNum(currentMonthTotal)} VND)`;
+
+
+      const warnLimit =
+        monthlyBudget * 0.8;
+
+
+      if (
+        currentMonthTotal <
+        warnLimit
+      ) {
+
+        statusEl.classList.add(
+          'budget-safe'
+        );
+
+        statusEl.innerText =
+          textBase;
+
+      }
+
+      else if (
+        currentMonthTotal <=
+        monthlyBudget
+      ) {
+
+        statusEl.classList.add(
+          'budget-warning'
+        );
+
+        statusEl.innerText =
+          `${textBase} - Chú ý chi tiêu!`;
+
+      }
+
+      else {
+
+        statusEl.classList.add(
+          'budget-danger'
+        );
+
+        statusEl.innerText =
+          `${textBase} - Vượt hạn mức!`;
+
+      }
+
+    }
+
+
+    /* =====================================================
+       GHI CHÉP
+       ===================================================== */
+
+    // Phân trang tự động cho danh sách ghi chép
+    let recordsVisibleCount = 100;
+    const RECORDS_PAGE_SIZE = 100;
+    // Cache danh sách đã sắp xếp; làm mới khi dữ liệu được lưu/nạp.
+    let sortedExpensesCache = null;
+
+    function renderRecords() {
+
+      updateBudgetStatus();
+
+
+      const recentListEl =
+        document.getElementById(
+          'recentExpenseList'
+        );
+
+
+      if (!expenses.length) {
+        recordsVisibleCount = 100;
+
+        recentListEl.innerHTML = `
+          <p
+            style="
+              color:var(--muted);
+              font-size:13px;
+              text-align:center;
+              padding:12px 0;
+            "
+          >
+            Chưa có khoản chi nào.
+            Bấm nút + để thêm mới.
+          </p>
+        `;
+
+        return;
+
+      }
+
+
+      if (!sortedExpensesCache) {
+        sortedExpensesCache = [...expenses].sort(
+          (a, b) => new Date(b.datetime) - new Date(a.datetime)
+        );
+      }
+      const sortedExpenses = sortedExpensesCache;
+
+
+      const visibleExpenses =
+        sortedExpenses.slice(0, recordsVisibleCount);
+
+      recentListEl.innerHTML =
+        visibleExpenses
+          .map(item => {
+
+            const dtInfo =
+              formatDisplayDateTime(
+                item.datetime
+              );
+
+
+            const subClass =
+              dtInfo.isToday
+                ? 'sub-today'
+                : 'sub-old';
+
+
+            return `
+
+              <div class="expense-item">
+
+                <div class="expense-info">
+
+                  <div class="title">
+                    ${escapeHTML(item.category)}
+                  </div>
+
+                  ${
+                    item.note
+                      ? `
+                        <div class="note">
+                          ${escapeHTML(item.note)}
+                        </div>
+                      `
+                      : ''
+                  }
+
+                  <div class="${subClass}">
+                    ${escapeHTML(dtInfo.text)}
+                  </div>
+
+                </div>
+
+
+                <div
+                  style="
+                    display:flex;
+                    align-items:center;
+                    gap:8px;
+                  "
+                >
+
+                  <div class="expense-amount">
+                    -${formatNum(item.amount)} đ
+                  </div>
+
+
+                  <button
+                    class="more-btn"
+                    onclick="toggleDropdown(event, ${item.id})"
+                  >
+                    ⋮
+                  </button>
+
+
+                  <div
+                    class="dropdown-menu"
+                    id="dropdown-${item.id}"
+                  >
+
+                    <button
+                      class="dropdown-item"
+                      onclick="openModal(${item.id})"
+                    >
+                      ✏️ Sửa
+                    </button>
+
+                    <button
+                      class="dropdown-item danger"
+                      onclick="deleteExpense(${item.id})"
+                    >
+                      🗑️ Xóa
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            `;
+
+          })
+          .join('');
+
+      // Chỉ báo số mục đã hiển thị và tổng số mục
+      const remaining = sortedExpenses.length - visibleExpenses.length;
+      const loadMoreEl = document.getElementById('recordsLoadMore');
+      if (loadMoreEl) loadMoreEl.remove();
+
+      if (remaining > 0) {
+        const indicator = document.createElement('div');
+        indicator.id = 'recordsLoadMore';
+        indicator.style.cssText = 'text-align:center;color:var(--muted);font-size:13px;padding:14px 8px;';
+        indicator.textContent = `Đã hiển thị ${visibleExpenses.length.toLocaleString('vi-VN')} / ${sortedExpenses.length.toLocaleString('vi-VN')} mục · Kéo xuống để xem thêm`;
+        recentListEl.appendChild(indicator);
+      } else if (sortedExpenses.length > 100) {
+        const indicator = document.createElement('div');
+        indicator.id = 'recordsLoadMore';
+        indicator.style.cssText = 'text-align:center;color:var(--muted);font-size:13px;padding:14px 8px;';
+        indicator.textContent = `Đã hiển thị tất cả ${sortedExpenses.length.toLocaleString('vi-VN')} mục`;
+        recentListEl.appendChild(indicator);
+      }
+
+    }
+
+    // Tự tải thêm 100 mục khi người dùng cuộn gần cuối trang
+    window.addEventListener('scroll', () => {
+      const recordTab = document.getElementById('tab-record');
+      if (!recordTab || !recordTab.classList.contains('active')) return;
+
+      const nearBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 500;
+
+      if (nearBottom && recordsVisibleCount < expenses.length) {
+        recordsVisibleCount += RECORDS_PAGE_SIZE;
+        renderRecords();
+      }
+    }, { passive: true });
+
+
+    /* =====================================================
+       BÁO CÁO
+       ===================================================== */
+
+    function renderReport() {
+
+      const now = new Date();
+
+
+      /* TUẦN */
+
+      const startOfWeek =
+        new Date(now);
+
+
+      const day =
+        now.getDay() || 7;
+
+
+      startOfWeek.setDate(
+        now.getDate() -
+        day +
+        1
+      );
+
+
+      startOfWeek.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+
+      const endOfWeek =
+        new Date(startOfWeek);
+
+
+      endOfWeek.setDate(
+        startOfWeek.getDate() +
+        6
+      );
+
+
+      endOfWeek.setHours(
+        23,
+        59,
+        59,
+        999
+      );
+
+
+      document.getElementById(
+        'labelWeekRange'
+      ).innerText =
+        `(${startOfWeek.getDate()}/${startOfWeek.getMonth()+1} -> ${endOfWeek.getDate()}/${endOfWeek.getMonth()+1})`;
+
+
+      const weekExpenses =
+        expenses.filter(e => {
+
+          const d =
+            new Date(e.datetime);
+
+          return (
+            d >= startOfWeek &&
+            d <= endOfWeek
+          );
+
+        });
+
+
+      renderPieSection(
+        weekExpenses,
+        'totalWeek',
+        'breakdownWeek',
+        'pieChartWeek'
+      );
+
+
+      /* THÁNG NÀY */
+
+      const currentYear =
+        now.getFullYear();
+
+      const currentMonth =
+        now.getMonth();
+
+
+      const startOfMonth =
+        new Date(
+          currentYear,
+          currentMonth,
+          1
+        );
+
+
+      const endOfMonth =
+        new Date(
+          currentYear,
+          currentMonth + 1,
+          0,
+          23,
+          59,
+          59,
+          999
+        );
+
+
+      document.getElementById(
+        'labelMonthRange'
+      ).innerText =
+        `(${startOfMonth.getDate()}/${startOfMonth.getMonth()+1} -> ${endOfMonth.getDate()}/${endOfMonth.getMonth()+1})`;
+
+
+      const monthExpenses =
+        expenses.filter(e => {
+
+          const d =
+            new Date(e.datetime);
+
+          return (
+            d >= startOfMonth &&
+            d <= endOfMonth
+          );
+
+        });
+
+
+      renderPieSection(
+        monthExpenses,
+        'totalMonth',
+        'breakdownMonth',
+        'pieChartMonth'
+      );
+
+
+      /* THÁNG TRƯỚC */
+
+      const startOfLastMonth =
+        new Date(
+          currentYear,
+          currentMonth - 1,
+          1
+        );
+
+
+      const endOfLastMonth =
+        new Date(
+          currentYear,
+          currentMonth,
+          0,
+          23,
+          59,
+          59,
+          999
+        );
+
+
+      document.getElementById(
+        'labelLastMonthRange'
+      ).innerText =
+        `(${startOfLastMonth.getDate()}/${startOfLastMonth.getMonth()+1} -> ${endOfLastMonth.getDate()}/${endOfLastMonth.getMonth()+1})`;
+
+
+      const lastMonthExpenses =
+        expenses.filter(e => {
+
+          const d =
+            new Date(e.datetime);
+
+          return (
+            d >= startOfLastMonth &&
+            d <= endOfLastMonth
+          );
+
+        });
+
+
+      renderPieSection(
+        lastMonthExpenses,
+        'totalLastMonth',
+        'breakdownLastMonth',
+        'pieChartLastMonth'
+      );
+
+
+      /* NĂM NAY */
+
+      const monthlyTotals =
+        Array(12).fill(0);
+
+
+      expenses.forEach(e => {
+
+        const d =
+          new Date(e.datetime);
+
+
+        if (
+          d.getFullYear() ===
+          currentYear
+        ) {
+
+          monthlyTotals[
+            d.getMonth()
+          ] += e.amount;
+
+        }
+
+      });
+
+
+      const totalYear =
+        monthlyTotals.reduce(
+          (a, b) => a + b,
+          0
+        );
+
+
+      document.getElementById(
+        'totalYear'
+      ).innerText =
+        `${formatNum(totalYear)} VND`;
+
+
+      const yearLabels = [
+        'T1',
+        'T2',
+        'T3',
+        'T4',
+        'T5',
+        'T6',
+        'T7',
+        'T8',
+        'T9',
+        'T10',
+        'T11',
+        'T12'
+      ];
+
+
+      drawBarChart(
+        'barChartYear',
+        yearLabels,
+        monthlyTotals,
+        42
+      );
+
+
+      /* 5 NĂM */
+
+      const fiveYearLabels = [];
+
+      const fiveYearTotals = [];
+
+
+      for (
+        let i = 4;
+        i >= 0;
+        i--
+      ) {
+
+        fiveYearLabels.push(
+          (
+            currentYear - i
+          ).toString()
+        );
+
+        fiveYearTotals.push(0);
+
+      }
+
+
+      document.getElementById(
+        'label5YearsRange'
+      ).innerText =
+        `(${fiveYearLabels[0]} - ${fiveYearLabels[4]})`;
+
+
+      expenses.forEach(e => {
+
+        const d =
+          new Date(e.datetime);
+
+        const yr =
+          d.getFullYear();
+
+
+        const idx =
+          fiveYearLabels.indexOf(
+            yr.toString()
+          );
+
+
+        if (idx !== -1) {
+
+          fiveYearTotals[idx] +=
+            e.amount;
+
+        }
+
+      });
+
+
+      const total5Years =
+        fiveYearTotals.reduce(
+          (a, b) => a + b,
+          0
+        );
+
+
+      document.getElementById(
+        'total5Years'
+      ).innerText =
+        `${formatNum(total5Years)} VND`;
+
+
+      drawBarChart(
+        'barChart5Years',
+        fiveYearLabels,
+        fiveYearTotals,
+        60
+      );
+
+    }
+
+
+    /* =====================================================
+       BÁO CÁO PIE
+       ===================================================== */
+
+    function renderPieSection(
+      expenseList,
+      totalElId,
+      breakdownElId,
+      chartCanvasId
+    ) {
+
+      const total =
+        expenseList.reduce(
+          (sum, e) =>
+            sum + e.amount,
+          0
+        );
+
+
+      document.getElementById(
+        totalElId
+      ).innerText =
+        `${formatNum(total)} VND`;
+
+
+      const catTotals = {};
+
+
+      categoriesList.forEach(
+        c =>
+          catTotals[c.name] = 0
+      );
+
+
+      expenseList.forEach(e => {
+
+        if (
+          catTotals[e.category] !==
+          undefined
+        ) {
+
+          catTotals[e.category] +=
+            e.amount;
+
+        }
+
+        else {
+
+          const fallbackKey =
+            getFallbackCategoryName();
+
+
+          if (!catTotals[fallbackKey]) {
+            catTotals[fallbackKey] = 0;
+          }
+
+
+          catTotals[fallbackKey] +=
+            e.amount;
+
+        }
+
+      });
+
+
+      const breakdownList =
+        categoriesList
+          .map(c => ({
+
+            cat: c.name,
+
+            color: c.color,
+
+            amt:
+              catTotals[c.name] || 0,
+
+            pct:
+              total > 0
+                ? (
+                    (
+                      catTotals[c.name] ||
+                      0
+                    ) /
+                    total
+                  ) *
+                  100
+                : 0
+
+          }))
+          .filter(
+            item =>
+              item.amt > 0
+          )
+          .sort(
+            (a, b) =>
+              b.pct - a.pct
+          );
+
+
+      document.getElementById(
+        breakdownElId
+      ).innerHTML =
+        breakdownList
+          .map(item => `
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                font-size:13px;
+                margin-bottom:6px;
+              "
+            >
+
+              <span>
+
+                <span
+                  style="
+                    color:${item.color};
+                    font-weight:bold;
+                  "
+                >
+                  ●
+                </span>
+
+                ${escapeHTML(item.cat)}
+                (${item.pct.toFixed(1)}%)
+
+              </span>
+
+              <b>
+                ${formatNum(item.amt)} VND
+              </b>
+
+            </div>
+
+          `)
+          .join('');
+
+
+      const pieData =
+        categoriesList.map(
+          c =>
+            catTotals[c.name] || 0
+        );
+
+
+      const pieColors =
+        categoriesList.map(
+          c => c.color
+        );
+
+
+      drawPieChart(
+        chartCanvasId,
+        pieData,
+        pieColors,
+        total
+      );
+
+    }
+
+
+    /* =====================================================
+       BIỂU ĐỒ TRÒN
+       ===================================================== */
+
+    function drawPieChart(
+      canvasId,
+      dataArr,
+      colorsArr,
+      total
+    ) {
+
+      const canvas =
+        document.getElementById(
+          canvasId
+        );
+
+
+      const ctx =
+        canvas.getContext('2d');
+
+
+      const dpr =
+        window.devicePixelRatio || 1;
+
+
+      const w =
+        Math.round(
+          canvas.getBoundingClientRect().width
+        ) ||
+        Math.max(
+          (canvas.parentElement.clientWidth || 332) - 32,
+          200
+        );
+
+
+      const h = 220;
+
+
+      canvas.width =
+        w * dpr;
+
+
+      canvas.height =
+        h * dpr;
+
+
+      canvas.style.height =
+        h + "px";
+
+
+      ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+      );
+
+
+      ctx.clearRect(
+        0,
+        0,
+        w,
+        h
+      );
+
+
+      const cx =
+        w / 2;
+
+
+      const cy =
+        h / 2;
+
+
+      const radius =
+        Math.min(w, h) / 2 - 16;
+
+
+      if (total <= 0) {
+
+        ctx.fillStyle =
+          '#8e8e93';
+
+
+        ctx.font =
+          '14px -apple-system, sans-serif';
+
+
+        ctx.textAlign =
+          'center';
+
+
+        ctx.fillText(
+          'Chưa có chi tiêu trong khoảng thời gian này',
+          cx,
+          cy
+        );
+
+
+        return;
+
+      }
+
+
+      let startAngle =
+        -Math.PI / 2;
+
+
+      dataArr.forEach(
+        (val, i) => {
+
+          if (val <= 0) return;
+
+
+          const sliceAngle =
+            (val / total) *
+            2 *
+            Math.PI;
+
+
+          const endAngle =
+            startAngle +
+            sliceAngle;
+
+
+          ctx.beginPath();
+
+
+          ctx.moveTo(
+            cx,
+            cy
+          );
+
+
+          ctx.arc(
+            cx,
+            cy,
+            radius,
+            startAngle,
+            endAngle
+          );
+
+
+          ctx.closePath();
+
+
+          ctx.fillStyle =
+            colorsArr[i] ||
+            '#8e8e93';
+
+
+          ctx.fill();
+
+
+          startAngle =
+            endAngle;
+
+        }
+      );
+
+
+      ctx.beginPath();
+
+
+      ctx.arc(
+        cx,
+        cy,
+        radius * 0.55,
+        0,
+        Math.PI * 2
+      );
+
+
+      ctx.fillStyle =
+        '#ffffff';
+
+
+      ctx.fill();
+
+    }
+
+
+    /* =====================================================
+       BIỂU ĐỒ CỘT
+       ===================================================== */
+
+    function drawBarChart(
+      canvasId,
+      labels,
+      values,
+      columnStepWidth = 40
+    ) {
+
+      const canvas =
+        document.getElementById(
+          canvasId
+        );
+
+
+      const ctx =
+        canvas.getContext('2d');
+
+
+      const dpr =
+        window.devicePixelRatio || 1;
+
+
+      const parentWidth =
+        canvas.parentElement
+          .clientWidth || 300;
+
+
+      const minChartWidth =
+        labels.length *
+        columnStepWidth;
+
+
+      const w =
+        Math.max(
+          parentWidth,
+          minChartWidth
+        );
+
+
+      const h = 220;
+
+
+      canvas.width =
+        w * dpr;
+
+
+      canvas.height =
+        h * dpr;
+
+
+      canvas.style.width =
+        w + "px";
+
+
+      canvas.style.height =
+        h + "px";
+
+
+      ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+      );
+
+
+      ctx.clearRect(
+        0,
+        0,
+        w,
+        h
+      );
+
+
+      const maxVal =
+        Math.max(
+          ...values,
+          1
+        );
+
+
+      const paddingLeft = 15;
+
+      const paddingRight = 15;
+
+      const paddingBottom = 30;
+
+
+      const chartWidth =
+        w -
+        paddingLeft -
+        paddingRight;
+
+
+      const chartHeight =
+        h -
+        paddingBottom -
+        25;
+
+
+      const barWidth =
+        Math.min(
+          28,
+          (
+            chartWidth /
+            labels.length
+          ) * 0.55
+        );
+
+
+      labels.forEach(
+        (lbl, i) => {
+
+          const val =
+            values[i];
+
+
+          const barH =
+            (val / maxVal) *
+            chartHeight;
+
+
+          const slotWidth =
+            chartWidth /
+            labels.length;
+
+
+          const x =
+            paddingLeft +
+            (i * slotWidth) +
+            (
+              (
+                slotWidth -
+                barWidth
+              ) / 2
+            );
+
+
+          const y =
+            h -
+            paddingBottom -
+            barH;
+
+
+          ctx.fillStyle =
+            val > 0
+              ? '#007aff'
+              : '#e5e5ea';
+
+
+          const renderH =
+            val > 0
+              ? Math.max(
+                  barH,
+                  4
+                )
+              : 2;
+
+
+          const renderY =
+            val > 0
+              ? y
+              : h -
+                paddingBottom -
+                2;
+
+
+          ctx.beginPath();
+
+
+          if (
+            typeof ctx.roundRect ===
+            'function'
+          ) {
+
+            ctx.roundRect(
+              x,
+              renderY,
+              barWidth,
+              renderH,
+              [4, 4, 0, 0]
+            );
+
+          }
+
+          else {
+
+            ctx.rect(
+              x,
+              renderY,
+              barWidth,
+              renderH
+            );
+
+          }
+
+
+          ctx.fill();
+
+
+          ctx.fillStyle =
+            '#1c1c1e';
+
+
+          ctx.font =
+            '11px -apple-system, sans-serif';
+
+
+          ctx.textAlign =
+            'center';
+
+
+          ctx.fillText(
+            lbl,
+            x +
+              barWidth / 2,
+            h - 8
+          );
+
+
+          if (val > 0) {
+
+            ctx.fillStyle =
+              '#8e8e93';
+
+
+            ctx.font =
+              '9px -apple-system, sans-serif';
+
+
+            const displayVal =
+              formatShortMoney(val);
+
+
+            ctx.fillText(
+              displayVal,
+              x +
+                barWidth / 2,
+              renderY - 5
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+
+    /* =====================================================
+       BÁO CÁO TÙY CHỌN THÁNG / NĂM
+       ===================================================== */
+
+    function initCustomReportYearSelect() {
+
+      const yearSelect =
+        document.getElementById(
+          'customReportYear'
+        );
+
+
+      if (!yearSelect) return;
+
+
+      const currentYear =
+        new Date().getFullYear();
+
+
+      yearSelect.innerHTML = '';
+
+
+      /*
+       * 10 năm gần nhất:
+       *
+       * Ví dụ năm 2026:
+       * 2026
+       * 2025
+       * 2024
+       * ...
+       * 2017
+       */
+
+      for (
+        let i = 0;
+        i < 10;
+        i++
+      ) {
+
+        const year =
+          currentYear - i;
+
+
+        const option =
+          document.createElement(
+            'option'
+          );
+
+
+        option.value =
+          year;
+
+
+        option.textContent =
+          year;
+
+
+        yearSelect.appendChild(
+          option
+        );
+
+      }
+
+
+      yearSelect.value =
+        currentYear;
+
+
+      const monthSelect =
+        document.getElementById(
+          'customReportMonth'
+        );
+
+
+      if (monthSelect) {
+
+        /*
+         * 0 = cả năm
+         *
+         * Khi mở lần đầu:
+         * mặc định xem cả năm hiện tại.
+         */
+
+        monthSelect.value =
+          "0";
+
+      }
+
+
+      renderCustomReport();
+
+    }
+
+
+    function renderCustomReport() {
+
+      const monthSelect =
+        document.getElementById(
+          'customReportMonth'
+        );
+
+
+      const yearSelect =
+        document.getElementById(
+          'customReportYear'
+        );
+
+
+      const resultEl =
+        document.getElementById(
+          'customReportResult'
+        );
+
+
+      if (
+        !monthSelect ||
+        !yearSelect ||
+        !resultEl
+      ) {
+
+        return;
+
+      }
+
+
+      const selectedMonth =
+        Number(
+          monthSelect.value
+        );
+
+
+      const selectedYear =
+        Number(
+          yearSelect.value
+        );
+
+
+      let filteredExpenses = [];
+
+
+      /* ================================================
+         NẾU CHỌN "NĂM"
+         => LẤY TOÀN BỘ KHOẢN CHI CỦA NĂM
+         ================================================ */
+
+      if (
+        selectedMonth === 0
+      ) {
+
+        filteredExpenses =
+          expenses.filter(e => {
+
+            const d =
+              new Date(
+                e.datetime
+              );
+
+
+            return (
+              !isNaN(
+                d.getTime()
+              ) &&
+              d.getFullYear() ===
+                selectedYear
+            );
+
+          });
+
+      }
+
+
+      /* ================================================
+         NẾU CHỌN THÁNG
+         => CHỈ LẤY THÁNG ĐÓ CỦA NĂM ĐÃ CHỌN
+         ================================================ */
+
+      else {
+
+        const monthIndex =
+          selectedMonth - 1;
+
+
+        filteredExpenses =
+          expenses.filter(e => {
+
+            const d =
+              new Date(
+                e.datetime
+              );
+
+
+            return (
+              !isNaN(
+                d.getTime()
+              ) &&
+              d.getFullYear() ===
+                selectedYear &&
+              d.getMonth() ===
+                monthIndex
+            );
+
+          });
+
+      }
+
+
+      /* ================================================
+         TỔNG CHI
+         ================================================ */
+
+      const total =
+        filteredExpenses.reduce(
+          (sum, e) =>
+            sum +
+            Number(
+              e.amount || 0
+            ),
+          0
+        );
+
+
+      /* ================================================
+         TIÊU ĐỀ
+         ================================================ */
+
+      let reportTitle;
+
+
+      if (
+        selectedMonth === 0
+      ) {
+
+        reportTitle =
+          `Báo cáo năm ${selectedYear}`;
+
+      }
+
+      else {
+
+        reportTitle =
+          `Báo cáo tháng ${selectedMonth}/${selectedYear}`;
+
+      }
+
+
+      /* ================================================
+         KHÔNG CÓ DỮ LIỆU
+         ================================================ */
+
+      if (total <= 0) {
+
+        resultEl.innerHTML = `
+
+          <div class="custom-report-title">
+            ${reportTitle}
+          </div>
+
+          <div class="custom-report-empty">
+            Chưa có khoản chi nào trong
+            khoảng thời gian này.
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+
+      /* ================================================
+         TỔNG THEO DANH MỤC
+         ================================================ */
+
+      const categoryTotals = {};
+
+
+      filteredExpenses.forEach(e => {
+
+        let categoryName =
+          e.category;
+
+
+        /*
+         * Nếu danh mục của khoản chi
+         * không còn tồn tại trong danh mục hiện tại
+         * thì đưa về "Chưa phân loại".
+         */
+
+        const categoryExists =
+          categoriesList.some(
+            c =>
+              c.name ===
+              categoryName
+          );
+
+
+        if (!categoryExists) {
+
+          categoryName =
+            getFallbackCategoryName();
+
+        }
+
+
+        if (
+          !categoryTotals[
+            categoryName
+          ]
+        ) {
+
+          categoryTotals[
+            categoryName
+          ] = 0;
+
+        }
+
+
+        categoryTotals[
+          categoryName
+        ] +=
+          Number(
+            e.amount || 0
+          );
+
+      });
+
+
+      /* ================================================
+         TẠO DANH SÁCH BÁO CÁO
+         ================================================ */
+
+      const reportItems =
+        Object.entries(
+          categoryTotals
+        )
+
+        .map(
+          ([category, amount]) => {
+
+            const categoryObj =
+              categoriesList.find(
+                c =>
+                  c.name ===
+                  category
+              );
+
+
+            const color =
+              categoryObj
+                ? categoryObj.color
+                : "#8e8e93";
+
+
+            const percentage =
+              (
+                amount /
+                total
+              ) * 100;
+
+
+            return {
+
+              category,
+
+              amount,
+
+              percentage,
+
+              color
+
+            };
+
+          }
+        )
+
+        .sort(
+          (a, b) =>
+            b.amount -
+            a.amount
+        );
+
+
+      /* ================================================
+         HIỂN THỊ CHI TIẾT
+         ================================================ */
+
+      const itemsHTML =
+        reportItems
+          .map(
+            item => `
+
+              <div class="custom-report-item">
+
+                <div class="custom-report-item-header">
+
+                  <div class="custom-report-cat">
+
+                    <span
+                      style="
+                        color:${item.color};
+                        font-size:16px;
+                      "
+                    >
+                      ●
+                    </span>
+
+                    ${escapeHTML(item.category)}
+
+                  </div>
+
+
+                  <div class="custom-report-percent">
+
+                    ${item.percentage.toFixed(1)}%
+
+                  </div>
+
+
+                  <div class="custom-report-amount">
+
+                    ${formatNum(item.amount)}
+                    VND
+
+                  </div>
+
+                </div>
+
+
+              </div>
+
+            `
+          )
+          .join('');
+
+
+      /* ================================================
+         ĐƯA RA MÀN HÌNH
+         ================================================ */
+
+      resultEl.innerHTML = `
+
+        <div class="custom-report-title">
+          ${reportTitle}
+        </div>
+
+        <div class="custom-report-total">
+          ${formatNum(total)} VND
+        </div>
+
+        ${itemsHTML}
+
+      `;
+
+    }
+
+
+    /* =====================================================
+       PASSWORD
+       ===================================================== */
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+
+    function clearPasswordForm() {
+
+      document.getElementById('passwordAppInput').value = "";
+      document.getElementById('passwordAccountInput').value = "";
+      document.getElementById('passwordValueInput').value = "";
+      document.getElementById('passwordNoteInput').value = "";
+
+      editingPasswordId = null;
+
+      document.getElementById('passwordSaveButton').innerText = "+ Thêm";
+
+      hidePasswordForm();
+
+    }
+
+
+    /* Mở cửa sổ nổi thêm/sửa */
+    function showPasswordForm() {
+
+      document.getElementById('passwordModalTitle').textContent =
+        editingPasswordId !== null
+          ? "Sửa Password"
+          : "Thêm Password mới";
+
+      document.getElementById('passwordModal').classList.add('active');
+
+      document.body.style.overflow = "hidden";
+
+      setTimeout(() => {
+        document.getElementById('passwordAppInput').focus();
+      }, 60);
+
+    }
+
+
+    /* Đóng cửa sổ nổi */
+    function hidePasswordForm() {
+
+      document.getElementById('passwordModal').classList.remove('active');
+
+      document.body.style.overflow = "";
+
+      const input = document.getElementById('passwordValueInput');
+
+      if (input && input.type === 'text') {
+        togglePasswordInputVisibility();
+      }
+
+    }
+
+
+    function openPasswordForm() {
+
+      clearPasswordFields();
+
+      editingPasswordId = null;
+
+      document.getElementById('passwordSaveButton').innerText = "+ Thêm";
+
+      showPasswordForm();
+
+    }
+
+
+    function clearPasswordFields() {
+
+      document.getElementById('passwordAppInput').value = "";
+      document.getElementById('passwordAccountInput').value = "";
+      document.getElementById('passwordValueInput').value = "";
+      document.getElementById('passwordNoteInput').value = "";
+
+    }
+
+
+    function closePasswordModalOnOverlay(event) {
+
+      if (event.target.id === 'passwordModal') {
+        cancelPasswordEdit();
+      }
+
+    }
+
+
+    function passwordModalKeydown(event) {
+
+      if (event.key === 'Escape') {
+        cancelPasswordEdit();
+      }
+
+      else if (
+        event.key === 'Enter' &&
+        event.target.tagName === 'INPUT'
+      ) {
+        event.preventDefault();
+        savePasswordItem();
+      }
+
+    }
+
+
+    function savePasswordItem() {
+
+      const app =
+        document.getElementById('passwordAppInput').value.trim();
+
+      const account =
+        document.getElementById('passwordAccountInput').value.trim();
+
+      const password =
+        document.getElementById('passwordValueInput').value;
+
+      const note =
+        document.getElementById('passwordNoteInput').value.trim();
+
+
+      if (!app) {
+
+        alert("Vui lòng nhập tên ứng dụng!");
+
+        document.getElementById('passwordAppInput').focus();
+
+        return;
+
+      }
+
+
+      if (!account) {
+
+        alert("Vui lòng nhập tài khoản!");
+
+        document.getElementById('passwordAccountInput').focus();
+
+        return;
+
+      }
+
+
+      if (!password) {
+
+        alert("Vui lòng nhập mật khẩu!");
+
+        document.getElementById('passwordValueInput').focus();
+
+        return;
+
+      }
+
+
+      if (editingPasswordId !== null) {
+
+        const idx =
+          passwordItems.findIndex(
+            item => item.id === editingPasswordId
+          );
+
+        if (idx !== -1) {
+
+          passwordItems[idx] = {
+            ...passwordItems[idx],
+            app,
+            account,
+            password,
+            note
+          };
+
+        }
+
+      }
+
+      else {
+
+        passwordItems.unshift({
+
+          id: Date.now(),
+
+          app,
+
+          account,
+
+          password,
+
+          note
+
+        });
+
+      }
+
+
+      saveData();
+
+      clearPasswordForm();
+
+      renderPasswordList();
+
+    }
+
+
+    function renderPasswordList() {
+
+      const listEl =
+        document.getElementById('passwordList');
+
+      if (!listEl) return;
+
+
+      if (!passwordItems.length) {
+        listEl.innerHTML = `
+          <div class="password-empty">
+            Chưa có thông tin Password nào.
+          </div>
+        `;
+        return;
+      }
+
+      const searchInput = document.getElementById('passwordSearchInput');
+      const keyword = (searchInput ? searchInput.value : '').trim().toLocaleLowerCase('vi');
+      const filteredItems = passwordItems.filter(item => {
+        const searchableText = [item.app, item.account, item.note]
+          .map(value => String(value || ''))
+          .join(' ')
+          .toLocaleLowerCase('vi');
+        return searchableText.includes(keyword);
+      });
+
+      if (!filteredItems.length) {
+        listEl.innerHTML = `
+          <div class="password-empty">
+            Không tìm thấy Password phù hợp.
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML =
+        filteredItems.map(item => `
+
+          <div class="password-list-item">
+
+            <div class="password-info">
+
+              <div class="password-app">
+                ${escapeHTML(item.app)}
+              </div>
+
+              <div class="password-account">
+                👤 ${escapeHTML(item.account)}
+              </div>
+
+              <div class="password-value">
+                🔑 <span id="password-display-${item.id}" data-visible="false">••••••••</span>
+              </div>
+
+              ${
+                item.note
+                  ? `
+                    <div class="password-note">
+                      📝 ${escapeHTML(item.note)}
+                    </div>
+                  `
+                  : ''
+              }
+
+            </div>
+
+            <div class="password-actions">
+
+              <button
+                type="button"
+                class="password-action-btn password-copy-inline"
+                onclick="showPasswordCopyMenu(${item.id}, this)"
+                aria-label="Copy"
+                title="Copy"
+              >📋</button>
+
+              <button
+                type="button"
+                class="password-action-btn password-eye-btn"
+                onclick="togglePasswordVisibility(${item.id}, this)"
+                aria-label="Hiện mật khẩu"
+                title="Hiện/ẩn mật khẩu"
+              ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+
+              <button
+                type="button"
+                class="password-action-btn"
+                onclick="editPasswordItem(${item.id})"
+                aria-label="Sửa"
+                title="Sửa"
+              >✏️</button>
+
+              <button
+                type="button"
+                class="password-action-btn delete"
+                onclick="deletePasswordItem(${item.id})"
+                aria-label="Xóa"
+                title="Xóa"
+              >🗑️</button>
+
+            </div>
+
+          </div>
+
+        `).join('');
+
+    }
+
+
+    function passwordEyeIcon(visible) {
+      if (visible) {
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16.5 16.5 0 0 1-3.1 3.9"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8"/></svg>';
+      }
+      return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    }
+
+
+    function togglePasswordVisibility(id, button) {
+
+      const item =
+        passwordItems.find(
+          entry => entry.id === id
+        );
+
+      const display =
+        document.getElementById(`password-display-${id}`);
+
+      if (!item || !display) return;
+
+      const isVisible = display.dataset.visible === 'true';
+
+      if (isVisible) {
+        display.textContent = '••••••••';
+        display.dataset.visible = 'false';
+        button.innerHTML = passwordEyeIcon(false);
+        button.setAttribute('aria-label', 'Hiện mật khẩu');
+        button.title = 'Hiện mật khẩu';
+      } else {
+        display.textContent = item.password || '';
+        display.dataset.visible = 'true';
+        button.innerHTML = passwordEyeIcon(true);
+        button.setAttribute('aria-label', 'Ẩn mật khẩu');
+        button.title = 'Ẩn mật khẩu';
+      }
+    }
+
+
+
+    function showPasswordCopyMenu(id, button) {
+      const existing = document.querySelector('.password-copy-menu');
+      if (existing && existing.dataset.passwordId === String(id)) {
+        existing.remove();
+        return;
+      }
+      document.querySelectorAll('.password-copy-menu').forEach(menu => menu.remove());
+      const item = passwordItems.find(entry => entry.id === id);
+      const display = document.getElementById(`password-display-${id}`);
+      if (!item || !display) return;
+
+      const menu = document.createElement('div');
+      menu.className = 'password-copy-menu';
+      menu.dataset.passwordId = String(id);
+      menu.innerHTML = `<button type="button" onclick="copyPasswordAccount(${id}); this.closest('.password-copy-menu').remove();"><span>👤</span><span>Copy tài khoản</span></button>`;
+      if (display.dataset.visible === 'true') {
+        menu.insertAdjacentHTML('beforeend', `<button type="button" onclick="copyPasswordField(${id}); this.closest('.password-copy-menu').remove();"><span>🔑</span><span>Copy mật khẩu</span></button>`);
+      }
+      document.body.appendChild(menu);
+
+      // Measure after attaching to body, then position within the visible viewport.
+      const rect = button.getBoundingClientRect();
+      const margin = 8;
+      const menuRect = menu.getBoundingClientRect();
+      let left = rect.right - menuRect.width;
+      left = Math.max(margin, Math.min(left, window.innerWidth - menuRect.width - margin));
+      let top = rect.bottom + 6;
+      if (top + menuRect.height > window.innerHeight - margin) top = rect.top - menuRect.height - 6;
+      top = Math.max(margin, Math.min(top, window.innerHeight - menuRect.height - margin));
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
+
+      const closeOnOutside = event => {
+        if (!menu.contains(event.target) && event.target !== button) closeMenu();
+      };
+      const closeOnEscape = event => { if (event.key === 'Escape') closeMenu(); };
+      const closeMenu = () => {
+        menu.remove();
+        document.removeEventListener('pointerdown', closeOnOutside, true);
+        document.removeEventListener('keydown', closeOnEscape);
+        window.removeEventListener('resize', closeMenu);
+        window.removeEventListener('scroll', closeMenu, true);
+      };
+      setTimeout(() => document.addEventListener('pointerdown', closeOnOutside, true), 0);
+      document.addEventListener('keydown', closeOnEscape);
+      window.addEventListener('resize', closeMenu, { once: true });
+      window.addEventListener('scroll', closeMenu, { once: true, capture: true });
+    }
+
+    async function copyPasswordAccount(id) {
+      const item = passwordItems.find(entry => entry.id === id);
+      if (!item) return;
+      await copyPasswordText(item.account || '', 'Tài khoản');
+    }
+
+
+    async function copyPasswordField(id) {
+      const item = passwordItems.find(entry => entry.id === id);
+      const display = document.getElementById(`password-display-${id}`);
+      if (!item || !display || display.dataset.visible !== 'true') {
+        alert('Vui lòng bấm nút mắt để hiện mật khẩu trước.');
+        return;
+      }
+      await copyPasswordText(item.password || '', 'Mật khẩu');
+    }
+
+
+    async function copyPasswordText(value, label) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(value);
+        } else {
+          const temp = document.createElement('textarea');
+          temp.value = value;
+          temp.setAttribute('readonly', '');
+          temp.style.position = 'fixed';
+          temp.style.opacity = '0';
+          document.body.appendChild(temp);
+          temp.select();
+          const copied = document.execCommand('copy');
+          temp.remove();
+          if (!copied) throw new Error('Copy không thành công');
+        }
+       // alert('Đã copy ' + label.toLowerCase() + ' vào clipboard.');
+      } catch (error) {
+        alert('Không thể copy tự động. Vui lòng thử lại trên HTTPS hoặc trình duyệt hỗ trợ clipboard.');
+      }
+    }
+
+
+    function togglePasswordInputVisibility() {
+
+      const input =
+        document.getElementById('passwordValueInput');
+
+      const button =
+        document.querySelector('.password-input-toggle');
+
+      if (!input || !button) return;
+
+      const isVisible = input.type === 'text';
+
+      input.type = isVisible ? 'password' : 'text';
+      button.innerHTML = passwordEyeIcon(!isVisible);
+      button.title = isVisible ? 'Hiện mật khẩu' : 'Ẩn mật khẩu';
+      button.setAttribute(
+        'aria-label',
+        isVisible ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'
+      );
+    }
+
+
+    function editPasswordItem(id) {
+
+      const item =
+        passwordItems.find(
+          entry => entry.id === id
+        );
+
+      if (!item) return;
+
+
+      editingPasswordId = id;
+
+      document.getElementById('passwordAppInput').value =
+        item.app || "";
+
+      document.getElementById('passwordAccountInput').value =
+        item.account || "";
+
+      document.getElementById('passwordValueInput').value =
+        item.password || "";
+
+      document.getElementById('passwordNoteInput').value =
+        item.note || "";
+
+
+      document.getElementById('passwordSaveButton').innerText =
+        "Lưu thay đổi";
+
+      showPasswordForm();
+
+    }
+
+
+    function cancelPasswordEdit() {
+
+      clearPasswordForm();
+
+    }
+
+
+    function deletePasswordItem(id) {
+
+      const item =
+        passwordItems.find(
+          entry => entry.id === id
+        );
+
+      if (!item) return;
+
+
+      if (
+        confirm(
+          `Xóa Password của "${item.app}"?`
+        )
+      ) {
+
+        passwordItems =
+          passwordItems.filter(
+            entry => entry.id !== id
+          );
+
+        if (editingPasswordId === id) {
+          clearPasswordForm();
+        }
+
+        saveData();
+
+        renderPasswordList();
+
+      }
+
+    }
+
+
+    /* =====================================================
+       CÀI ĐẶT
+       ===================================================== */
+
+    function renderSettings() {
+
+      const listEl =
+        document.getElementById(
+          'settingsCategoryList'
+        );
+
+
+      listEl.innerHTML =
+        categoriesList
+          .map(
+            (c, idx) => `
+
+              <div class="category-list-item">
+
+                <div class="category-tag">
+
+                  <span
+                    class="color-dot"
+                    style="
+                      background-color:${c.color}
+                    "
+                  ></span>
+
+                  <span>
+                    ${escapeHTML(c.name)}
+                  </span>
+
+                </div>
+
+
+                ${
+                  !c.isDefault
+                    ? `
+                      <button
+                        class="btn-delete-cat"
+                        onclick="deleteCategory(${idx})"
+                      >
+                        🗑️ Xóa
+                      </button>
+                    `
+                    : ''
+                }
+
+              </div>
+
+            `
+          )
+          .join('');
+
+
+      document.getElementById(
+        'monthlyBudgetInput'
+      ).value =
+        formatNum(
+          monthlyBudget
+        );
+
+    }
+
+
+    function openAddCategoryModal() {
+
+      document.getElementById(
+        'newCatName'
+      ).value = "";
+
+
+      document.getElementById(
+        'newCatColor'
+      ).value =
+        "#007aff";
+
+
+      document
+        .getElementById(
+          'addCategoryModal'
+        )
+        .classList.add(
+          'active'
+        );
+
+    }
+
+
+    function closeAddCategoryModal() {
+
+      document
+        .getElementById(
+          'addCategoryModal'
+        )
+        .classList.remove(
+          'active'
+        );
+
+    }
+
+
+    function closeAddCatModalOnOverlay(e) {
+
+      if (
+        e.target.classList.contains(
+          'modal-overlay'
+        )
+      ) {
+
+        closeAddCategoryModal();
+
+      }
+
+    }
+
+
+    function saveNewCategory() {
+
+      const name =
+        document.getElementById(
+          'newCatName'
+        ).value.trim();
+
+
+      const color =
+        document.getElementById(
+          'newCatColor'
+        ).value;
+
+
+      if (!name) {
+
+        alert(
+          "Vui lòng nhập tên danh mục!"
+        );
+
+        return;
+
+      }
+
+
+      if (
+        categoriesList.some(
+          c =>
+            c.name.toLowerCase() ===
+            name.toLowerCase()
+        )
+      ) {
+
+        alert(
+          "Danh mục này đã tồn tại!"
+        );
+
+        return;
+
+      }
+
+
+      categoriesList.push({
+
+        name,
+
+        color,
+
+        isDefault: false
+
+      });
+
+
+      saveData();
+
+      closeAddCategoryModal();
+
+      renderSettings();
+
+      updateCategoryDropdown();
+
+    }
+
+
+    function deleteCategory(index) {
+
+      const catName =
+        categoriesList[index].name;
+
+
+      if (
+        confirm(
+          `Bạn chắc chắn muốn xóa danh mục "${catName}"?`
+        )
+      ) {
+
+        categoriesList.splice(
+          index,
+          1
+        );
+
+
+        saveData();
+
+        renderSettings();
+
+        updateCategoryDropdown();
+
+      }
+
+    }
+
+
+    function saveMonthlyBudget() {
+
+      const val =
+        parseNum(
+          document.getElementById(
+            'monthlyBudgetInput'
+          ).value
+        );
+
+
+      if (val <= 0) {
+
+        alert(
+          "Vui lòng nhập hạn mức hợp lệ!"
+        );
+
+        return;
+
+      }
+
+
+      monthlyBudget =
+        val;
+
+
+      saveData();
+
+
+      alert(
+        "Đã cập nhật hạn mức chi tiêu tháng!"
+      );
+
+
+      updateBudgetStatus();
+
+    }
+
+
+    /* =====================================================
+       BACKUP & RESTORE
+       ===================================================== */
+
+    async function exportData() {
+
+      const backupObj = {
+
+        expenses,
+
+        categories:
+          categoriesList,
+
+        monthlyBudget,
+
+        passwords:
+          passwordItems,
+
+        exportedAt:
+          new Date().toISOString()
+
+      };
+
+
+      const json =
+        JSON.stringify(
+          backupObj,
+          null,
+          2
+        );
+
+
+      const d = new Date();
+
+      const pad =
+        n => String(n).padStart(2, '0');
+
+      const fileName =
+        `ChiTieu_Backup_${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
+
+
+      // Trên điện thoại: mở bảng chia sẻ để lưu vào Tệp / gửi đi (đáng tin cậy hơn tải blob).
+      const isMobile =
+        /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+        (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
+
+      if (isMobile && navigator.canShare) {
+
+        try {
+
+          const file =
+            new File(
+              [json],
+              fileName,
+              { type: "application/json" }
+            );
+
+          if (navigator.canShare({ files: [file] })) {
+
+            await navigator.share({
+              files: [file],
+              title: "Sao lưu chi tiêu"
             });
+
+            return;
+
+          }
+
         }
 
-        // Đóng dấu và tải một ảnh riêng biệt, không nén ZIP.
-        async function downloadOneImage(index) {
-            if (!loadedImages[index]) return;
-            const originalImage = loadedImage;
-            const originalPosition = customPosition ? { ...customPosition } : null;
-            const originalWidth = originalImage ? originalImage.naturalWidth : 1;
-            const originalHeight = originalImage ? originalImage.naturalHeight : 1;
-            const relativePosition = originalPosition ? {
-                x: originalPosition.x / originalWidth,
-                y: originalPosition.y / originalHeight
-            } : null;
-            try {
-                const item = loadedImages[index];
-                loadedImage = item.img;
-                customPosition = relativePosition ? {
-                    x: relativePosition.x * item.img.naturalWidth,
-                    y: relativePosition.y * item.img.naturalHeight
-                } : null;
-                renderWatermark();
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                if (!blob) throw new Error('Không thể xử lý ảnh: ' + item.name);
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = generateFileName();
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                setTimeout(() => URL.revokeObjectURL(url), 2000);
-            } catch (err) {
-                alert(err.message || 'Có lỗi khi xử lý ảnh.');
-            } finally {
-                loadedImage = originalImage;
-                customPosition = originalPosition;
-                if (loadedImage) renderWatermark();
+        catch (err) {
+
+          // Người dùng tự hủy bảng chia sẻ thì thôi.
+          if (err && err.name === 'AbortError') return;
+
+        }
+
+      }
+
+
+      // Máy tính / trình duyệt không hỗ trợ chia sẻ: tải file xuống.
+      const blob =
+        new Blob(
+          [json],
+          { type: "application/json" }
+        );
+
+      const url =
+        URL.createObjectURL(blob);
+
+      const a =
+        document.createElement("a");
+
+      a.href = url;
+
+      a.download = fileName;
+
+      a.style.display = "none";
+
+      document.body.appendChild(a);
+
+      a.click();
+
+      setTimeout(() => {
+
+        a.remove();
+
+        URL.revokeObjectURL(url);
+
+      }, 1500);
+
+    }
+
+
+    function importData(e) {
+
+      const input = e.target;
+
+      const file = input.files[0];
+
+      if (!file) return;
+
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        function(evt) {
+
+          try {
+
+            const data =
+              JSON.parse(
+                evt.target.result
+              );
+
+
+            const isArrayFormat =
+              Array.isArray(data);
+
+
+            if (
+              !isArrayFormat &&
+              (
+                !data ||
+                typeof data !== 'object' ||
+                !Array.isArray(data.expenses)
+              )
+            ) {
+
+              throw new Error("Sai cấu trúc file");
+
             }
-        }
 
-        // Nút tải ở cuối trang tải từng ảnh PNG riêng lẻ, không gộp ZIP.
-        // Trên iPhone/Safari, trình duyệt có thể yêu cầu xác nhận hoặc chặn các lượt tải tự động tiếp theo.
-        btnDownload.addEventListener('click', async () => {
-            if (!loadedImages.length) return;
 
-            const buttonText = document.getElementById('downloadButtonText');
-            const originalImage = loadedImage;
-            const originalPosition = customPosition ? { ...customPosition } : null;
-            const originalWidth = originalImage ? originalImage.naturalWidth : 1;
-            const originalHeight = originalImage ? originalImage.naturalHeight : 1;
-            const relativePosition = originalPosition ? {
-                x: originalPosition.x / originalWidth,
-                y: originalPosition.y / originalHeight
-            } : null;
+            const rawExpenses =
+              isArrayFormat
+                ? data
+                : data.expenses;
 
-            btnDownload.disabled = true;
-            try {
-                for (let i = 0; i < loadedImages.length; i++) {
-                    buttonText.textContent = `Đang tải ảnh ${i + 1}/${loadedImages.length}...`;
-                    const item = loadedImages[i];
-                    loadedImage = item.img;
-                    customPosition = relativePosition ? {
-                        x: relativePosition.x * item.img.naturalWidth,
-                        y: relativePosition.y * item.img.naturalHeight
-                    } : null;
 
-                    renderWatermark();
-                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                    if (!blob) throw new Error('Không thể xử lý ảnh: ' + item.name);
+            const newExpenses =
+              normalizeExpenses(rawExpenses);
 
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = generateFileName();
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                    setTimeout(() => URL.revokeObjectURL(url), 5000);
 
-                    // Nghỉ giữa các lượt tải để Safari có thời gian xử lý.
-                    if (i < loadedImages.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 900));
-                    }
-                }
-            } catch (err) {
-                alert(err.message || 'Có lỗi khi xử lý ảnh.');
-            } finally {
-                loadedImage = originalImage;
-                customPosition = originalPosition;
-                if (loadedImage) {
-                    updatePreviewInfo();
-                    renderImageGallery();
-                    renderWatermark();
-                }
-                buttonText.textContent = loadedImages.length > 1
-                    ? `Tải xuống ${loadedImages.length} ảnh`
-                    : 'Tải xuống ảnh';
-                btnDownload.disabled = false;
+            const skipped =
+              rawExpenses.length -
+              newExpenses.length;
+
+
+            const newCategories =
+              (!isArrayFormat && Array.isArray(data.categories))
+                ? normalizeCategories(data.categories)
+                : normalizeCategories(categoriesList);
+
+
+            const msg =
+              `Sẽ nhập ${newExpenses.length} khoản chi` +
+              (
+                skipped > 0
+                  ? ` (bỏ qua ${skipped} mục không hợp lệ)`
+                  : ''
+              ) +
+              `.\nDữ liệu chi tiêu hiện tại sẽ bị ghi đè. Bạn chắc chắn chứ?`;
+
+
+            if (!confirm(msg)) return;
+
+
+            expenses =
+              newExpenses;
+
+            categoriesList =
+              newCategories;
+
+
+            if (!isArrayFormat) {
+
+              const b =
+                Number(data.monthlyBudget);
+
+              if (Number.isFinite(b) && b > 0) {
+
+                monthlyBudget =
+                  Math.round(b);
+
+              }
+
+              if (Array.isArray(data.passwords)) {
+
+                passwordItems =
+                  data.passwords;
+
+              }
+
             }
-        });
 
-        // ===== Bảng tùy chỉnh dấu =====
-        const stampModal = document.getElementById('stampModal');
-        const stampModalBox = document.getElementById('stampModalBox');
-        const btnOpenStampSettings = document.getElementById('btnOpenStampSettings');
 
-        // Khi chạy trong iframe (tab Ảnh của index.html), iframe cao bằng cả nội dung
-        // nên phải đặt bảng vào đúng vùng người dùng đang nhìn thấy trên màn hình.
-        function positionStampModal() {
-            let top = 12;
-            let maxHeight = window.innerHeight - 24;
-            try {
-                const frameEl = window.frameElement;
-                if (frameEl) {
-                    const r = frameEl.getBoundingClientRect();
-                    const bar = window.parent.document.querySelector('.tab-bar');
-                    const barBottom = bar ? bar.getBoundingClientRect().bottom : 0;
-                    const visTop = Math.max(0, barBottom - r.top);
-                    const visBottom = Math.min(window.innerHeight, window.parent.innerHeight - r.top);
-                    top = visTop + 12;
-                    maxHeight = Math.max(240, visBottom - visTop - 24);
-                }
-            } catch (_) {}
-            stampModalBox.style.top = top + 'px';
-            stampModalBox.style.maxHeight = maxHeight + 'px';
+            recordsVisibleCount =
+              RECORDS_PAGE_SIZE;
+
+
+            saveData();
+
+            updateCategoryDropdown();
+
+            renderRecords();
+
+            renderReport();
+
+            renderPasswordList();
+
+            renderSettings();
+
+            initCustomReportYearSelect();
+
+
+            alert(
+              "Phục hồi dữ liệu thành công!"
+            );
+
+          }
+
+          catch (err) {
+
+            console.error(err);
+
+            alert(
+              "File không hợp lệ!"
+            );
+
+          }
+
+          finally {
+
+            // Cho phép chọn lại cùng một file lần sau.
+            input.value = "";
+
+          }
+
+        };
+
+
+      reader.readAsText(
+        file
+      );
+
+    }
+
+
+    /* Vẽ lại báo cáo khi xoay màn hình / đổi kích thước */
+
+    let reportResizeTimer = null;
+
+    window.addEventListener('resize', () => {
+
+      clearTimeout(reportResizeTimer);
+
+      reportResizeTimer = setTimeout(() => {
+
+        const t = document.getElementById('tab-report');
+
+        if (t && t.classList.contains('active')) {
+          renderReport();
         }
 
-        function openStampSettings() {
-            stampModal.classList.remove('hidden');
-            positionStampModal();
-            try { window.parent.addEventListener('scroll', positionStampModal, { passive: true }); } catch (_) {}
-            window.addEventListener('resize', positionStampModal);
-        }
+      }, 150);
 
-        function closeStampSettings() {
-            stampModal.classList.add('hidden');
-            try { window.parent.removeEventListener('scroll', positionStampModal); } catch (_) {}
-            window.removeEventListener('resize', positionStampModal);
-            btnOpenStampSettings.focus({ preventScroll: true });
-        }
+    });
 
-        btnOpenStampSettings.addEventListener('click', openStampSettings);
-        document.getElementById('btnCloseStampSettings').addEventListener('click', closeStampSettings);
-        document.getElementById('btnDoneStampSettings').addEventListener('click', closeStampSettings);
-        document.getElementById('stampModalBackdrop').addEventListener('click', closeStampSettings);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !stampModal.classList.contains('hidden')) closeStampSettings();
-        });
 
-        // Khởi tạo thời gian ban đầu
-        initDateTime();
-    </script>
+    /* =====================================================
+       KHỞI TẠO
+       ===================================================== */
+
+    window.onload =
+      function() {
+
+        loadData();
+
+        renderRecords();
+
+        renderPasswordList();
+
+        initCustomReportYearSelect();
+
+      };
+
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+          .catch(error => {
+            console.error("Không đăng ký được Service Worker:", error);
+          });
+      });
+    }
+  </script>
+  
+<script>
+  // Tab Ảnh nằm trong photo.html; ở đây chỉ tự co giãn chiều cao khung iframe.
+  (function () {
+    const frame = document.getElementById('photoAppFrame');
+    if (!frame) return;
+    function resizePhotoFrame() {
+      try {
+        const doc = frame.contentDocument;
+        if (!doc) return;
+        const h = Math.max(
+          doc.documentElement ? doc.documentElement.scrollHeight : 0,
+          doc.body ? doc.body.scrollHeight : 0,
+          700
+        );
+        frame.style.height = h + 'px';
+      } catch (_) {}
+    }
+    frame.addEventListener('load', function () {
+      resizePhotoFrame();
+      setTimeout(resizePhotoFrame, 300);
+      setTimeout(resizePhotoFrame, 1000);
+    });
+    window.addEventListener('resize', resizePhotoFrame);
+  })();
+</script>
+
 </body>
 </html>
