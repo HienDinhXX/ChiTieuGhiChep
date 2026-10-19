@@ -768,104 +768,135 @@
     }
 
 
-    /* PASSWORD: bố cục hàng ngang tối giản theo mẫu */
-    #tab-password .password-form-grid {
-      display: grid;
-      grid-template-columns: minmax(92px, 30%) minmax(0, 1fr);
+    /* PASSWORD: cửa sổ nổi thêm / sửa */
+    .pw-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      display: none;
       align-items: center;
-      column-gap: 10px;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.45);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
     }
-    #tab-password .password-form-grid > label {
-      margin: 0;
-      min-height: 44px;
+    .pw-modal-overlay.active { display: flex; }
+
+    .pw-modal-card {
+      width: 100%;
+      max-width: 400px;
+      max-height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px 20px 18px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.35);
+      animation: pwPop .22s cubic-bezier(.2, .9, .3, 1.15);
+    }
+    @keyframes pwPop {
+      from { opacity: 0; transform: scale(.92) translateY(10px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .pw-modal-header {
       display: flex;
       align-items: center;
-      color: #555;
-      font-size: 14px;
+      gap: 12px;
+      margin-bottom: 18px;
     }
-    #tab-password .password-form-grid > input,
-    #tab-password .password-form-grid > .password-input-wrap {
-      width: 100%;
-      min-width: 0;
+    .pw-modal-icon {
+      flex: 0 0 auto;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #e8f2ff, #f3e9ff);
+    }
+    .pw-modal-header h2 {
+      flex: 1 1 auto;
       margin: 0;
-      min-height: 44px;
-      border: 0;
-      border-bottom: 1px solid #e5e5ea;
-      border-radius: 0;
-      background: transparent;
-      box-shadow: none;
-    }
-    #tab-password .password-form-grid > input {
-      padding: 8px 0;
-      text-align: right;
-      font-size: 14px;
+      font-size: 18px;
+      line-height: 1.25;
       color: var(--text);
     }
-    #tab-password .password-form-grid > input::placeholder {
-      color: #a1a1a6;
-      opacity: 1;
-      text-align: right;
-    }
-    #tab-password .password-form-grid > input:focus {
-      border-bottom-color: var(--primary);
-      background: transparent;
-      box-shadow: none;
-    }
-    #tab-password .password-form-grid > .password-input-wrap {
+    .pw-modal-close {
+      flex: 0 0 auto;
+      width: 32px;
+      height: 32px;
+      min-height: 0;
+      padding: 0;
       display: flex;
       align-items: center;
-      position: relative;
+      justify-content: center;
+      border-radius: 50%;
+      background: #f2f2f7;
+      color: #8e8e93;
     }
-    #tab-password .password-input-wrap input {
-      min-width: 0;
+    .pw-modal-close:hover { background: #e5e5ea; color: var(--text); }
+    .pw-modal-close svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+    }
+
+    .pw-field { margin-bottom: 14px; }
+    .pw-field label {
+      display: block;
+      margin: 0 0 6px 2px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      color: var(--muted);
+    }
+    .pw-field input {
       width: 100%;
-      min-height: 42px;
+      min-height: 48px;
       margin: 0;
-      padding: 8px 34px 8px 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      box-shadow: none;
-      text-align: right;
-      font-size: 14px;
+      padding: 11px 14px;
+      border: 1.5px solid transparent;
+      border-radius: 12px;
+      background: #f2f2f7;
+      color: var(--text);
+      font-size: 16px; /* >=16px để iOS không tự phóng to khi nhập */
+      transition: border-color .15s, background .15s, box-shadow .15s;
     }
-    #tab-password .password-input-wrap input::placeholder {
-      color: #a1a1a6;
-      text-align: right;
-      opacity: 1;
+    .pw-field input::placeholder { color: #a1a1a6; opacity: 1; }
+    .pw-field input:focus {
+      background: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
     }
-    #tab-password .password-input-wrap input:focus {
-      border: 0;
-      background: transparent;
-      box-shadow: none;
-    }
-    #tab-password .password-input-toggle {
-      right: 0;
+    #passwordModal .password-input-wrap { display: block; }
+    #passwordModal .password-input-wrap input { padding-right: 48px; }
+    #passwordModal .password-input-toggle {
       top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 30px;
+      right: 8px;
+      width: 34px;
+      height: 34px;
+      min-height: 0;
     }
-    #tab-password #passwordSaveButton,
-    #tab-password #passwordCancelEditButton {
-      grid-column: 1 / -1;
+
+    .pw-modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 10px;
+      margin-top: 20px;
     }
-    #tab-password #passwordSaveButton {
-      margin-top: 12px;
-      border-radius: 10px;
+    .pw-modal-actions button {
+      min-height: 48px;
+      border-radius: 12px;
+      font-size: 16px;
     }
-    #tab-password #passwordCancelEditButton {
-      margin-top: 0 !important;
-    }
-    @media (max-width: 380px) {
-      #tab-password .password-form-grid {
-        grid-template-columns: minmax(78px, 28%) minmax(0, 1fr);
-        column-gap: 8px;
-      }
-      #tab-password .password-form-grid > label { font-size: 13px; }
-      #tab-password .password-form-grid > input,
-      #tab-password .password-input-wrap input { font-size: 13px; }
-    }
+    #passwordCancelEditButton { background: #f2f2f7; color: #3a3a3c; }
+    #passwordSaveButton { box-shadow: 0 6px 16px -6px rgba(0, 122, 255, 0.6); }
 
     /* ===== BÁO CÁO THEO THỜI GIAN ===== */
 
@@ -1307,67 +1338,17 @@
       style="padding-top:12px;"
     >
 
-      <div class="card">
+      <div class="card" id="passwordAddCard">
 
-        <div class="password-form-grid">
-
-          <label for="passwordAppInput">Tên ứng dụng</label>
-          <input
-            type="text"
-            id="passwordAppInput"
-            placeholder="Nhập tên ứng dụng, trang web..."
-          >
-
-          <label for="passwordAccountInput">Tài khoản</label>
-          <input
-            type="text"
-            id="passwordAccountInput"
-            placeholder="Tên tài khoản..."
-          >
-
-          <label for="passwordValueInput">Mật khẩu</label>
-          <div class="password-input-wrap">
-            <input
-              type="password"
-              id="passwordValueInput"
-              placeholder="Nhập mật khẩu..."
-              autocomplete="new-password"
-            >
-            <button
-              type="button"
-              class="password-input-toggle"
-              onclick="togglePasswordInputVisibility()"
-              aria-label="Hiện mật khẩu"
-              title="Hiện mật khẩu"
-            ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
-          </div>
-
-          <label for="passwordNoteInput">Ghi chú</label>
-          <input
-            type="text"
-            id="passwordNoteInput"
-            placeholder="Thêm ghi chú..."
-          >
-
-          <button
-            id="passwordSaveButton"
-            class="btn-primary"
-            type="button"
-            onclick="savePasswordItem()"
-          >
-            + Thêm
-          </button>
-
-          <button
-            id="passwordCancelEditButton"
-            type="button"
-            onclick="cancelPasswordEdit()"
-            style="display:none;background:#e5e5ea;color:#333;margin-top:8px;"
-          >
-            Hủy sửa
-          </button>
-
-        </div>
+        <!-- Nút mở cửa sổ thêm mới -->
+        <button
+          id="passwordOpenFormButton"
+          class="btn-primary"
+          type="button"
+          onclick="openPasswordForm()"
+        >
+          + Thêm mới
+        </button>
 
       </div>
 
@@ -1569,6 +1550,115 @@
           onclick="saveExpense()"
         >
           Lưu khoản chi
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       MODAL THÊM / SỬA PASSWORD
+       ===================================================== -->
+
+  <div
+    class="pw-modal-overlay"
+    id="passwordModal"
+    onclick="closePasswordModalOnOverlay(event)"
+    onkeydown="passwordModalKeydown(event)"
+  >
+
+    <div
+      class="pw-modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="passwordModalTitle"
+    >
+
+      <div class="pw-modal-header">
+
+        <div class="pw-modal-icon" aria-hidden="true">🔐</div>
+
+        <h2 id="passwordModalTitle">Thêm Password mới</h2>
+
+        <button
+          type="button"
+          class="pw-modal-close"
+          onclick="cancelPasswordEdit()"
+          aria-label="Đóng"
+          title="Đóng"
+        ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+
+      </div>
+
+      <div class="pw-field">
+        <label for="passwordAppInput">Tên ứng dụng</label>
+        <input
+          type="text"
+          id="passwordAppInput"
+          placeholder="Nhập tên ứng dụng, trang web..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="pw-field">
+        <label for="passwordAccountInput">Tài khoản</label>
+        <input
+          type="text"
+          id="passwordAccountInput"
+          placeholder="Tên tài khoản..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="pw-field">
+        <label for="passwordValueInput">Mật khẩu</label>
+        <div class="password-input-wrap">
+          <input
+            type="password"
+            id="passwordValueInput"
+            placeholder="Nhập mật khẩu..."
+            autocomplete="new-password"
+          >
+          <button
+            type="button"
+            class="password-input-toggle"
+            onclick="togglePasswordInputVisibility()"
+            aria-label="Hiện mật khẩu"
+            title="Hiện mật khẩu"
+          ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+      </div>
+
+      <div class="pw-field">
+        <label for="passwordNoteInput">Ghi chú</label>
+        <input
+          type="text"
+          id="passwordNoteInput"
+          placeholder="Thêm ghi chú..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="pw-modal-actions">
+
+        <button
+          id="passwordCancelEditButton"
+          type="button"
+          onclick="cancelPasswordEdit()"
+        >
+          Hủy
+        </button>
+
+        <button
+          id="passwordSaveButton"
+          class="btn-primary"
+          type="button"
+          onclick="savePasswordItem()"
+        >
+          + Thêm
         </button>
 
       </div>
@@ -4179,7 +4269,91 @@
 
       document.getElementById('passwordSaveButton').innerText = "+ Thêm";
 
-      document.getElementById('passwordCancelEditButton').style.display = "none";
+      hidePasswordForm();
+
+    }
+
+
+    /* Mở cửa sổ nổi thêm/sửa */
+    function showPasswordForm() {
+
+      document.getElementById('passwordModalTitle').textContent =
+        editingPasswordId !== null
+          ? "Sửa Password"
+          : "Thêm Password mới";
+
+      document.getElementById('passwordModal').classList.add('active');
+
+      document.body.style.overflow = "hidden";
+
+      setTimeout(() => {
+        document.getElementById('passwordAppInput').focus();
+      }, 60);
+
+    }
+
+
+    /* Đóng cửa sổ nổi */
+    function hidePasswordForm() {
+
+      document.getElementById('passwordModal').classList.remove('active');
+
+      document.body.style.overflow = "";
+
+      const input = document.getElementById('passwordValueInput');
+
+      if (input && input.type === 'text') {
+        togglePasswordInputVisibility();
+      }
+
+    }
+
+
+    function openPasswordForm() {
+
+      clearPasswordFields();
+
+      editingPasswordId = null;
+
+      document.getElementById('passwordSaveButton').innerText = "+ Thêm";
+
+      showPasswordForm();
+
+    }
+
+
+    function clearPasswordFields() {
+
+      document.getElementById('passwordAppInput').value = "";
+      document.getElementById('passwordAccountInput').value = "";
+      document.getElementById('passwordValueInput').value = "";
+      document.getElementById('passwordNoteInput').value = "";
+
+    }
+
+
+    function closePasswordModalOnOverlay(event) {
+
+      if (event.target.id === 'passwordModal') {
+        cancelPasswordEdit();
+      }
+
+    }
+
+
+    function passwordModalKeydown(event) {
+
+      if (event.key === 'Escape') {
+        cancelPasswordEdit();
+      }
+
+      else if (
+        event.key === 'Enter' &&
+        event.target.tagName === 'INPUT'
+      ) {
+        event.preventDefault();
+        savePasswordItem();
+      }
 
     }
 
@@ -4570,16 +4744,7 @@
       document.getElementById('passwordSaveButton').innerText =
         "Lưu thay đổi";
 
-      document.getElementById('passwordCancelEditButton').style.display =
-        "block";
-
-
-      document.getElementById('passwordAppInput').focus();
-
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+      showPasswordForm();
 
     }
 
