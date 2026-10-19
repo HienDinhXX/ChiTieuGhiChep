@@ -1,7 +1,8 @@
-const CACHE_VERSION = "quan-ly-chi-tieu-v1";
+const CACHE_VERSION = "quan-ly-chi-tieu-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./photo.html",
   "./manifest.json",
   "./IMG_0670.jpeg"
 ];
@@ -49,7 +50,13 @@ self.addEventListener("fetch", (event) => {
             const copy = response.clone();
 
             caches.open(CACHE_VERSION).then((cache) => {
-              cache.put("./index.html", copy);
+              // Lưu theo đúng URL được yêu cầu (vd: photo.html trong iframe).
+              cache.put(request, copy.clone());
+
+              // Trang chính (không phải iframe) thì cập nhật luôn index.html.
+              if (request.destination !== "iframe") {
+                cache.put("./index.html", copy);
+              }
             });
           }
 
