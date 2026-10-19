@@ -1764,7 +1764,7 @@
 
       {
         name: "🏥 Khám chữa bệnh",
-        color: "#ff2d55",
+        color: "#ff3b30",
         isDefault: true
       },
 
@@ -1776,7 +1776,7 @@
 
       {
         name: "🍜 Ăn Uống",
-        color: "#ff9500",
+        color: "#ffcc00",
         isDefault: true
       },
 
@@ -1794,7 +1794,7 @@
 
       {
         name: "🔧 Sửa xe",
-        color: "#ff3b30",
+        color: "#a2845e",
         isDefault: true
       },
 
@@ -1946,6 +1946,178 @@
 
     }
 
+    /* =====================================================
+       CHUẨN HÓA DỮ LIỆU
+       ===================================================== */
+
+    function safeColor(c, fallback = '#8e8e93') {
+
+      return (
+        typeof c === 'string' &&
+        /^#[0-9a-f]{3,8}$/i.test(c.trim())
+      )
+        ? c.trim()
+        : fallback;
+
+    }
+
+
+    function getFallbackCategoryName() {
+
+      const c =
+        categoriesList.find(
+          x => x.name.includes("Chưa phân loại")
+        );
+
+      if (c) return c.name;
+
+      return categoriesList[0]
+        ? categoriesList[0].name
+        : "";
+
+    }
+
+
+    function formatShortMoney(v) {
+
+      if (v >= 999500) {
+        return (v / 1e6).toFixed(1) + 'M';
+      }
+
+      if (v >= 1000) {
+        return Math.round(v / 1e3) + 'k';
+      }
+
+      return String(Math.round(v));
+
+    }
+
+
+    function normalizeCategories(list) {
+
+      const defaultColors = {};
+
+      DEFAULT_CATEGORIES.forEach(
+        c => defaultColors[c.name] = c.color
+      );
+
+      const seen = new Set();
+
+      const result = [];
+
+      (Array.isArray(list) ? list : []).forEach(raw => {
+
+        if (
+          !raw ||
+          typeof raw.name !== 'string' ||
+          !raw.name.trim()
+        ) return;
+
+        if (seen.has(raw.name)) return;
+
+        seen.add(raw.name);
+
+        const isDefault = raw.isDefault === true;
+
+        const color =
+          (isDefault && defaultColors[raw.name])
+            ? defaultColors[raw.name]
+            : safeColor(raw.color);
+
+        result.push({
+          ...raw,
+          name: raw.name,
+          color,
+          isDefault
+        });
+
+      });
+
+      if (!result.length) {
+        return DEFAULT_CATEGORIES.map(c => ({ ...c }));
+      }
+
+      if (!result.some(c => c.name.includes("Chưa phân loại"))) {
+
+        const def =
+          DEFAULT_CATEGORIES.find(
+            c => c.name.includes("Chưa phân loại")
+          );
+
+        result.push({ ...def });
+
+      }
+
+      return result;
+
+    }
+
+
+    function normalizeExpenses(list) {
+
+      if (!Array.isArray(list)) return [];
+
+      const usedIds = new Set();
+
+      let seq = 0;
+
+      const result = [];
+
+      list.forEach(raw => {
+
+        if (!raw || typeof raw !== 'object') return;
+
+        const amount = Number(
+          typeof raw.amount === 'string'
+            ? raw.amount.replace(/[.,\s]/g, '')
+            : raw.amount
+        );
+
+        if (!Number.isFinite(amount) || amount <= 0) return;
+
+        let id = Number(raw.id);
+
+        if (!Number.isFinite(id) || usedIds.has(id)) {
+
+          id = Date.now() + (++seq);
+
+          while (usedIds.has(id)) id++;
+
+        }
+
+        usedIds.add(id);
+
+        let datetime =
+          typeof raw.datetime === 'string'
+            ? raw.datetime
+            : '';
+
+        if (!datetime || isNaN(new Date(datetime).getTime())) {
+          datetime = getNowForInput();
+        }
+
+        result.push({
+          ...raw,
+          id,
+          amount: Math.round(amount),
+          category:
+            typeof raw.category === 'string'
+              ? raw.category
+              : '',
+          note:
+            typeof raw.note === 'string'
+              ? raw.note
+              : '',
+          datetime
+        });
+
+      });
+
+      return result;
+
+    }
+
+
 
     /* =====================================================
        INPUT ĐỊNH DẠNG TIỀN
@@ -1997,25 +2169,42 @@
 
       sortedExpensesCache = null;
 
-      localStorage.setItem(
-        "expenses_data_v5",
-        JSON.stringify(expenses)
-      );
+      try {
 
-      localStorage.setItem(
-        "categories_data_v5",
-        JSON.stringify(categoriesList)
-      );
+        localStorage.setItem(
+          "expenses_data_v5",
+          JSON.stringify(expenses)
+        );
 
-      localStorage.setItem(
-        "monthly_budget_v5",
-        monthlyBudget.toString()
-      );
+        localStorage.setItem(
+          "categories_data_v5",
+          JSON.stringify(categoriesList)
+        );
 
-      localStorage.setItem(
-        "password_data_v1",
-        JSON.stringify(passwordItems)
-      );
+        localStorage.setItem(
+          "monthly_budget_v5",
+          monthlyBudget.toString()
+        );
+
+        localStorage.setItem(
+          "password_data_v1",
+          JSON.stringify(passwordItems)
+        );
+
+        return true;
+
+      } catch (err) {
+
+        console.error("Không lưu được dữ liệu:", err);
+
+        alert(
+          "Không lưu được dữ liệu (bộ nhớ trình duyệt đầy hoặc bị chặn). " +
+          "Hãy xuất file sao lưu ngay để tránh mất dữ liệu!"
+        );
+
+        return false;
+
+      }
 
     }
 
@@ -2086,6 +2275,14 @@
 
 
       categoriesList =
+        normalizeCategories(categoriesList);
+
+
+      expenses =
+        normalizeExpenses(expenses);
+
+
+      categoriesList =
         categoriesList.map(c => {
 
           if (c.name === "📦 Khác") {
@@ -2135,9 +2332,7 @@
       selectEl.innerHTML =
         categoriesList
           .map(c =>
-            `<option value="${c.name}">
-              ${c.name}
-            </option>`
+            `<option value="${escapeHTML(c.name)}">${escapeHTML(c.name)}</option>`
           )
           .join('');
 
@@ -2244,7 +2439,9 @@
 
 
         selectEl.value =
-          item.category;
+          categoriesList.some(c => c.name === item.category)
+            ? item.category
+            : getFallbackCategoryName();
 
 
         document.getElementById(
@@ -2393,7 +2590,7 @@
       const category =
         document.getElementById(
           'expCategory'
-        ).value;
+        ).value || getFallbackCategoryName();
 
 
       const note =
@@ -2733,21 +2930,21 @@
                 <div class="expense-info">
 
                   <div class="title">
-                    ${item.category}
+                    ${escapeHTML(item.category)}
                   </div>
 
                   ${
                     item.note
                       ? `
                         <div class="note">
-                          ${item.note}
+                          ${escapeHTML(item.note)}
                         </div>
                       `
                       : ''
                   }
 
                   <div class="${subClass}">
-                    ${dtInfo.text}
+                    ${escapeHTML(dtInfo.text)}
                   </div>
 
                 </div>
@@ -3218,13 +3415,7 @@
         else {
 
           const fallbackKey =
-            categoriesList.find(
-              c =>
-                c.name.includes(
-                  "Chưa phân loại"
-                )
-            )?.name ||
-            "🔖 Chưa phân loại";
+            getFallbackCategoryName();
 
 
           if (!catTotals[fallbackKey]) {
@@ -3300,7 +3491,7 @@
                   ●
                 </span>
 
-                ${item.cat}
+                ${escapeHTML(item.cat)}
                 (${item.pct.toFixed(1)}%)
 
               </span>
@@ -3364,8 +3555,13 @@
 
 
       const w =
-        canvas.parentElement
-          .clientWidth || 300;
+        Math.round(
+          canvas.getBoundingClientRect().width
+        ) ||
+        Math.max(
+          (canvas.parentElement.clientWidth || 332) - 32,
+          200
+        );
 
 
       const h = 220;
@@ -3752,14 +3948,8 @@
               '9px -apple-system, sans-serif';
 
 
-            let displayVal =
-              val >= 1e6
-                ? (
-                    val / 1e6
-                  ).toFixed(1) + 'M'
-                : (
-                    val / 1e3
-                  ).toFixed(0) + 'k';
+            const displayVal =
+              formatShortMoney(val);
 
 
             ctx.fillText(
@@ -4075,19 +4265,8 @@
 
         if (!categoryExists) {
 
-          const fallbackCategory =
-            categoriesList.find(
-              c =>
-                c.name.includes(
-                  "Chưa phân loại"
-                )
-            );
-
-
           categoryName =
-            fallbackCategory
-              ? fallbackCategory.name
-              : "‼️ Chưa phân loại";
+            getFallbackCategoryName();
 
         }
 
@@ -4194,7 +4373,7 @@
                       ●
                     </span>
 
-                    ${item.category}
+                    ${escapeHTML(item.category)}
 
                   </div>
 
@@ -4819,7 +4998,7 @@
                   ></span>
 
                   <span>
-                    ${c.name}
+                    ${escapeHTML(c.name)}
                   </span>
 
                 </div>
@@ -5042,7 +5221,7 @@
        BACKUP & RESTORE
        ===================================================== */
 
-    function exportData() {
+    async function exportData() {
 
       const backupObj = {
 
@@ -5054,62 +5233,109 @@
         monthlyBudget,
 
         passwords:
-          passwordItems
+          passwordItems,
+
+        exportedAt:
+          new Date().toISOString()
 
       };
 
 
+      const json =
+        JSON.stringify(
+          backupObj,
+          null,
+          2
+        );
+
+
+      const d = new Date();
+
+      const pad =
+        n => String(n).padStart(2, '0');
+
+      const fileName =
+        `ChiTieu_Backup_${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
+
+
+      // Trên điện thoại: mở bảng chia sẻ để lưu vào Tệp / gửi đi (đáng tin cậy hơn tải blob).
+      const isMobile =
+        /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+        (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
+
+      if (isMobile && navigator.canShare) {
+
+        try {
+
+          const file =
+            new File(
+              [json],
+              fileName,
+              { type: "application/json" }
+            );
+
+          if (navigator.canShare({ files: [file] })) {
+
+            await navigator.share({
+              files: [file],
+              title: "Sao lưu chi tiêu"
+            });
+
+            return;
+
+          }
+
+        }
+
+        catch (err) {
+
+          // Người dùng tự hủy bảng chia sẻ thì thôi.
+          if (err && err.name === 'AbortError') return;
+
+        }
+
+      }
+
+
+      // Máy tính / trình duyệt không hỗ trợ chia sẻ: tải file xuống.
       const blob =
         new Blob(
-          [
-            JSON.stringify(
-              backupObj,
-              null,
-              2
-            )
-          ],
-          {
-            type:
-              "application/json"
-          }
+          [json],
+          { type: "application/json" }
         );
-
 
       const url =
-        URL.createObjectURL(
-          blob
-        );
-
+        URL.createObjectURL(blob);
 
       const a =
-        document.createElement(
-          "a"
-        );
+        document.createElement("a");
 
+      a.href = url;
 
-      a.href =
-        url;
+      a.download = fileName;
 
+      a.style.display = "none";
 
-      a.download =
-        `ChiTieu_Backup.json`;
-
+      document.body.appendChild(a);
 
       a.click();
 
+      setTimeout(() => {
 
-      URL.revokeObjectURL(
-        url
-      );
+        a.remove();
+
+        URL.revokeObjectURL(url);
+
+      }, 1500);
 
     }
 
 
     function importData(e) {
 
-      const file =
-        e.target.files[0];
+      const input = e.target;
 
+      const file = input.files[0];
 
       if (!file) return;
 
@@ -5129,73 +5355,126 @@
               );
 
 
+            const isArrayFormat =
+              Array.isArray(data);
+
+
             if (
-              confirm(
-                "Dữ liệu hiện tại sẽ bị ghi đè. Bạn chắc chắn chứ?"
+              !isArrayFormat &&
+              (
+                !data ||
+                typeof data !== 'object' ||
+                !Array.isArray(data.expenses)
               )
             ) {
 
-              if (
-                Array.isArray(data)
-              ) {
-
-                expenses =
-                  data;
-
-                passwordItems = [];
-
-              }
-
-              else {
-
-                expenses =
-                  data.expenses ||
-                  [];
-
-                categoriesList =
-                  data.categories ||
-                  DEFAULT_CATEGORIES;
-
-                monthlyBudget =
-                  data.monthlyBudget ||
-                  14000000;
-
-                passwordItems =
-                  Array.isArray(data.passwords)
-                    ? data.passwords
-                    : [];
-
-              }
-
-
-              saveData();
-
-              updateCategoryDropdown();
-
-              renderRecords();
-
-              renderReport();
-
-              renderPasswordList();
-
-              renderSettings();
-
-              initCustomReportYearSelect();
-
-
-              alert(
-                "Phục hồi dữ liệu thành công!"
-              );
+              throw new Error("Sai cấu trúc file");
 
             }
+
+
+            const rawExpenses =
+              isArrayFormat
+                ? data
+                : data.expenses;
+
+
+            const newExpenses =
+              normalizeExpenses(rawExpenses);
+
+
+            const skipped =
+              rawExpenses.length -
+              newExpenses.length;
+
+
+            const newCategories =
+              (!isArrayFormat && Array.isArray(data.categories))
+                ? normalizeCategories(data.categories)
+                : normalizeCategories(categoriesList);
+
+
+            const msg =
+              `Sẽ nhập ${newExpenses.length} khoản chi` +
+              (
+                skipped > 0
+                  ? ` (bỏ qua ${skipped} mục không hợp lệ)`
+                  : ''
+              ) +
+              `.\nDữ liệu chi tiêu hiện tại sẽ bị ghi đè. Bạn chắc chắn chứ?`;
+
+
+            if (!confirm(msg)) return;
+
+
+            expenses =
+              newExpenses;
+
+            categoriesList =
+              newCategories;
+
+
+            if (!isArrayFormat) {
+
+              const b =
+                Number(data.monthlyBudget);
+
+              if (Number.isFinite(b) && b > 0) {
+
+                monthlyBudget =
+                  Math.round(b);
+
+              }
+
+              if (Array.isArray(data.passwords)) {
+
+                passwordItems =
+                  data.passwords;
+
+              }
+
+            }
+
+
+            recordsVisibleCount =
+              RECORDS_PAGE_SIZE;
+
+
+            saveData();
+
+            updateCategoryDropdown();
+
+            renderRecords();
+
+            renderReport();
+
+            renderPasswordList();
+
+            renderSettings();
+
+            initCustomReportYearSelect();
+
+
+            alert(
+              "Phục hồi dữ liệu thành công!"
+            );
 
           }
 
           catch (err) {
 
+            console.error(err);
+
             alert(
               "File không hợp lệ!"
             );
+
+          }
+
+          finally {
+
+            // Cho phép chọn lại cùng một file lần sau.
+            input.value = "";
 
           }
 
@@ -5207,6 +5486,27 @@
       );
 
     }
+
+
+    /* Vẽ lại báo cáo khi xoay màn hình / đổi kích thước */
+
+    let reportResizeTimer = null;
+
+    window.addEventListener('resize', () => {
+
+      clearTimeout(reportResizeTimer);
+
+      reportResizeTimer = setTimeout(() => {
+
+        const t = document.getElementById('tab-report');
+
+        if (t && t.classList.contains('active')) {
+          renderReport();
+        }
+
+      }, 150);
+
+    });
 
 
     /* =====================================================
